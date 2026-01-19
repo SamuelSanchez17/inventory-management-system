@@ -1,8 +1,14 @@
 use tauri::Manager; 
 use std::fs;
 use std::path::PathBuf;
+use commands::products;
 
 mod database; //para manejo de la base de datos
+mod models;
+mod repos; //repositorios para acceso a datos
+mod services; //lógica de negocio
+mod commands; //comandos expuestos a la interfaz
+
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -27,6 +33,13 @@ pub fn run() {
 
       Ok(())
     })
+    .invoke_handler(tauri::generate_handler![
+      products::list_productos,
+      products::get_producto,
+      products::create_producto,
+      products::update_producto,
+      products::delete_producto,
+    ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
