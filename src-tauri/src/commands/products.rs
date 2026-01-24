@@ -2,12 +2,12 @@ use std::path::PathBuf;
 use tauri::State;
 use crate::database;
 use crate::models::Producto;
-use crate::services::producto_service::ProductoService; // ajusta el path según el rename a snake_case
+use crate::services::producto_service::ProductoService;
 
 #[tauri::command]
 pub fn list_productos(db_path: State<'_, PathBuf>) -> Result<Vec<Producto>, String> 
 {
-    let db_path: &PathBuf = db_path.inner(); // anota el tipo aquí
+    let db_path: &PathBuf = db_path.inner();
     let conn = database::init_db(db_path).map_err(|e| e.to_string())?;
     let service = ProductoService::new(&conn);
     service.list_productos().map_err(|e| e.to_string())

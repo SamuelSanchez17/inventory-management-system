@@ -23,11 +23,9 @@ pub fn init_db<P: AsRef<Path>> (db_path: P) -> Result<Connection> {
 }
 
 // Abre una conexión existente (sin ejecutar el esquema).
-
-/* 
 pub fn open_connection<P: AsRef<Path>>(db_path: P) -> Result<Connection> {
     let conn = Connection::open(db_path.as_ref())?;
     conn.execute_batch("PRAGMA foreign_keys = ON")?;
     Ok(conn)
 }
-*/
+

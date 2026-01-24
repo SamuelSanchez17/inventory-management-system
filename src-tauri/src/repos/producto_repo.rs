@@ -1,9 +1,11 @@
-use rusqlite::{Connection, Result, params};
-use crate::models::{Producto, Categoria, Venta, ProductoVendido};
+use rusqlite::{Connection, params};
+use crate::models::Producto;
 
 pub struct ProductoRepo<'a> {
     pub conn : &'a Connection,
 }
+
+//métodos CRUD (create, update, delete)
 
 impl<'a> ProductoRepo<'a> {
     pub fn list(&self) -> rusqlite::Result<Vec<Producto>> {
@@ -27,9 +29,6 @@ impl<'a> ProductoRepo<'a> {
         }
         Ok(productos)
     }
-
-
-    //métodos CRUD (create, update, delete)
 
     //get
     pub fn get(&self, id: i64) -> rusqlite::Result<Producto> {

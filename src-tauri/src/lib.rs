@@ -2,9 +2,10 @@ use tauri::Manager;
 use std::fs;
 use std::path::PathBuf;
 use commands::products;
+use commands::categories;
 
 mod database; //para manejo de la base de datos
-mod models;
+mod models; //definicion de modelo de datos
 mod repos; //repositorios para acceso a datos
 mod services; //lógica de negocio
 mod commands; //comandos expuestos a la interfaz
@@ -28,7 +29,6 @@ pub fn run() {
       database::init_db(&db_path).map_err(|e| e.to_string())?;
 
       // Guarda la ruta de la base de datos en el estado de la app para que
-      // otros comandos puedan abrir conexiones con `database::open_connection`.
       app.manage::<PathBuf>(db_path.clone());
 
       Ok(())
@@ -39,6 +39,12 @@ pub fn run() {
       products::create_producto,
       products::update_producto,
       products::delete_producto,
+
+      categories::list_categorias,
+      categories::get_categoria,
+      categories::create_categoria,
+      categories::update_categoria,
+      categories::delete_categoria,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
