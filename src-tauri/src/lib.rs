@@ -3,6 +3,7 @@ use std::fs;
 use std::path::PathBuf;
 use commands::products;
 use commands::categories;
+use commands::sales;
 
 mod database; //para manejo de la base de datos
 mod models; //definicion de modelo de datos
@@ -45,6 +46,13 @@ pub fn run() {
       categories::create_categoria,
       categories::update_categoria,
       categories::delete_categoria,
+
+      sales::list_ventas,
+      sales::get_venta,
+      sales::create_venta,
+      sales::update_venta,
+      sales::delete_venta,
+
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
