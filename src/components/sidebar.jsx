@@ -1,4 +1,4 @@
-export default function Sidebar()
+export default function Sidebar({ onNavigate })
 {
     return(
     <div className="min-h-screen flex bg-rose-50">
@@ -11,15 +11,16 @@ export default function Sidebar()
         {/* Perfil */}
         <div className="mb-8 flex flex-col items-center">
           <div className="w-20 h-20 rounded-full bg-rose-200 mb-2" />
-          <div className="font-semibold text-rose-800">Vanessa - Inventario</div>
+          <div className="font-semibold text-rose-800">Mary - Inventario</div>
         </div>
         {/* Navegación */}
         <nav className="flex-1 w-full">
           <ul className="space-y-2 px-6">
-            <li className="flex items-center gap-3 py-2 px-3 rounded-lg bg-rose-200/80 text-rose-800 font-semibold">
+            <li className="flex items-center gap-3 py-2 px-3 rounded-lg bg-rose-200/80 text-rose-800 font-semibold cursor-pointer" onClick={() => onNavigate('dashboard')}>
+
               <span>🏠</span> Dashboard
             </li>
-            <li className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-rose-200/60 cursor-pointer">
+            <li className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-rose-200/60 cursor-pointer" onClick={() => onNavigate('products')}>
               <span>📦</span> Productos
             </li>
             <li className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-rose-200/60 cursor-pointer">
