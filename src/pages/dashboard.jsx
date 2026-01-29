@@ -1,7 +1,7 @@
 import Sidebar from '../components/sidebar';
 import Header from '../components/header';
 
-export default function Dashboard({ onNavigate }) {
+export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar }) {
   // Datos de ejemplo
   const metrics = [
     { label: "Total Productos", value: 421, icon: "📦", color: "bg-rose-100 text-rose-700" },
@@ -30,9 +30,7 @@ export default function Dashboard({ onNavigate }) {
   return (
     <div className="min-h-screen flex bg-rose-50">
       {/* Sidebar */}
-      <aside className="w-64 bg-rose-100/80 border-r border-rose-200 flex flex-col items-center py-8 relative">
-        <Sidebar onNavigate={onNavigate} />
-      </aside>
+      <Sidebar onNavigate={onNavigate} activePage={currentPage} isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} />
 
       {/* Main content */}
       <main className="flex-1 p-10">

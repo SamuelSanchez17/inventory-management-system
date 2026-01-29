@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import '../styles/products.css';
 import Sidebar from '../components/sidebar';
-import Header from '../components/header';
 
-export default function Products({ onNavigate }) {
+export default function Products({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar }) {
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -88,13 +87,10 @@ export default function Products({ onNavigate }) {
   return (
     <div className="min-h-screen flex bg-rose-50">
       {/* Sidebar */}
-      <aside className="w-64 bg-rose-100/80 border-r border-rose-200 flex flex-col items-center py-8 relative">
-        <Sidebar onNavigate={onNavigate} />
-      </aside>
+      <Sidebar onNavigate={onNavigate} activePage={currentPage} isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} />
 
       {/* Main content */}
       <main className="flex-1 p-10">
-        <Header />
 
         <div className="products-container">
           <h1>Agregar Productos</h1>
