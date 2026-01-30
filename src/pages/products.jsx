@@ -1,8 +1,12 @@
 import { useState } from 'react';
 import '../styles/products.css';
 import Sidebar from '../components/sidebar';
+import { useContext } from 'react';
+import { ThemeContext } from '../context/ThemeContext';
 
 export default function Products({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar }) {
+  const { getActiveTheme } = useContext(ThemeContext);
+  const isDark = getActiveTheme() === 'oscuro';
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -85,12 +89,12 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
   };
 
   return (
-    <div className="min-h-screen flex bg-rose-50">
+    <div className={`min-h-screen flex ${isDark ? 'bg-gray-900' : 'bg-rose-50'}`}>
       {/* Sidebar */}
       <Sidebar onNavigate={onNavigate} activePage={currentPage} isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} />
 
       {/* Main content */}
-      <main className="flex-1 p-10">
+      <main className={`flex-1 p-10 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
 
         <div className="products-container">
           <h1>Agregar Productos</h1>

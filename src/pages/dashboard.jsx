@@ -1,7 +1,11 @@
 import Sidebar from '../components/sidebar';
 import Header from '../components/header';
+import { useContext } from 'react';
+import { ThemeContext } from '../context/ThemeContext';
 
 export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar }) {
+  const { getActiveTheme } = useContext(ThemeContext);
+  const isDark = getActiveTheme() === 'oscuro';
   // Datos de ejemplo
   const metrics = [
     { label: "Total Productos", value: 421, icon: "📦", color: "bg-rose-100 text-rose-700" },
@@ -28,12 +32,12 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
 
 
   return (
-    <div className="min-h-screen flex bg-rose-50">
+    <div className={`min-h-screen flex ${isDark ? 'bg-gray-900' : 'bg-rose-50'}`}>
       {/* Sidebar */}
       <Sidebar onNavigate={onNavigate} activePage={currentPage} isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} />
 
       {/* Main content */}
-      <main className="flex-1 p-10">
+      <main className={`flex-1 p-10 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
         {/* Header */}
         <Header onNavigate={onNavigate} />
 
