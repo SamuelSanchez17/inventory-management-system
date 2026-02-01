@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { invoke, isTauri } from '@tauri-apps/api/core';
 import '../styles/products.css';
 import Sidebar from '../components/sidebar';
 import { useContext } from 'react';
@@ -22,10 +23,22 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
   const [products, setProducts] = useState([]);
 
   // Agregar nueva categoría
-  const handleAddCategory = () => {
-    if (newCategory.trim()) {
-      setCategories([...categories, newCategory]);
+  const handleAddCategory = async () => {
+    const nombre = newCategory.trim();
+    if (!nombre) return;
+
+    if (!isTauri()) {
+      alert('El backend Tauri no está disponible. Ejecuta la app con tauri dev.');
+      return;
+    }
+
+    try {
+      await invoke('create_categoria', { nombre });
+      setCategories([...categories, nombre]);
       setNewCategory('');
+    } catch (error) {
+      console.error('Error al crear categoría:', error);
+      alert('No se pudo crear la categoría');
     }
   };
 

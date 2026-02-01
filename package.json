@@ -13,6 +13,7 @@
     "tauri:build": "tauri build"
   },
   "dependencies": {
+    "@tauri-apps/api": "^2.9.1",
     "@tailwindcss/vite": "^4.1.18",
     "autoprefixer": "^10.4.23",
     "class-variance-authority": "^0.7.1",
