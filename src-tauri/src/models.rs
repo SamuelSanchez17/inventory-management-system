@@ -53,3 +53,29 @@ pub struct ProductoVendido
     pub precio_unitario: f64,
     pub subtotal: f64,
 }
+
+// Estructuras para el comando de venta completa
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ItemVenta
+{
+    pub id_producto: i64,
+    pub cantidad: i64,
+    pub precio_unitario: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct VentaCompletaInput
+{
+    pub fecha: String,
+    pub nombre_clienta: String,
+    pub tipo_pago: TipoPago,
+    pub productos: Vec<ItemVenta>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct VentaCompletaOutput
+{
+    pub id_venta: i64,
+    pub total_venta: f64,
+    pub items_insertados: usize,
+}

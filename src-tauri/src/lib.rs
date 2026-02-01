@@ -53,6 +53,7 @@ pub fn run() {
       sales::create_venta,
       sales::update_venta,
       sales::delete_venta,
+      sales::create_venta_completa,
 
       sold_products::list_productos_vendidos,
       sold_products::get_producto_vendido,
