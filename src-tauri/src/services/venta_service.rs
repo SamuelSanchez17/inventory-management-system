@@ -1,5 +1,5 @@
 use rusqlite::{Connection, Result};
-use crate::models::Venta;
+use crate::models::{Venta, TipoPago};
 use crate::repos::venta_repo::VentaRepo;
 
 pub struct VentaService<'a> {
@@ -26,10 +26,10 @@ impl <'a> VentaService<'a> {
         repo.get(id)
     }
 
-    pub fn create_venta(&self, fecha: &str, total_venta: f64, notas: Option<&str>) -> Result<i64> 
+    pub fn create_venta(&self, fecha: &str, nombre_clienta: &str, total_venta: f64, tipo_pago: &TipoPago) -> Result<i64> 
     {
         let repo = VentaRepo { conn: self.conn};
-        repo.create(fecha, total_venta, notas)
+        repo.create(fecha, nombre_clienta, total_venta, tipo_pago)
     }
 
     pub fn update_venta(&self, venta: &Venta) -> Result<()> 

@@ -26,8 +26,9 @@ CREATE INDEX IF NOT EXISTS idx_productos_stock ON productos(stock);
 CREATE TABLE ventas (
   id_venta INTEGER PRIMARY KEY AUTOINCREMENT,
   fecha TEXT DEFAULT (datetime('now','localtime')),
+  nombre_clienta TEXT NOT NULL,
   total_venta REAL NOT NULL,
-  notas TEXT
+  tipo_pago TEXT NOT NULL CHECK (tipo_pago IN ('Abono', 'De Contado')) DEFAULT 'De Contado'
 );
 
 -- Productos vendidos / items de venta

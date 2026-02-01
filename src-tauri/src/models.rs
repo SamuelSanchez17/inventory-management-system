@@ -21,13 +21,25 @@ pub struct Categoria
     pub nombre: String,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub enum TipoPago
+{
+
+    #[serde(rename = "Abono")]
+    Abono,
+    #[serde(rename = "Contado")]
+    Contado,
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Venta
 {
     pub id_venta: i64,
     pub fecha: String,
+    pub nombre_clienta: String,
     pub total_venta: f64,
-    pub notas: Option<String>,
+    pub tipo_pago: TipoPago,
+    
 }
 
 /* 

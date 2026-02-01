@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use tauri::State;
 use crate::database;
-use crate::models::Venta;
+use crate::models::{Venta, TipoPago};
 use crate::services::venta_service::VentaService;
 
 #[tauri::command]
@@ -23,12 +23,12 @@ pub fn get_venta(id: i64, db_path: State<'_, PathBuf>) -> Result<Venta, String>
 }
 
 #[tauri::command]
-pub fn create_venta(fecha: String, total_venta: f64, notas: Option<String>, db_path: State<'_, PathBuf>) -> Result<i64, String> 
+pub fn create_venta(fecha: String, nombre_clienta: String, total_venta: f64, tipo_pago: TipoPago, db_path: State<'_, PathBuf>) -> Result<i64, String> 
 {
     let db_path: &PathBuf = db_path.inner();
     let conn = database::init_db(db_path).map_err(|e| e.to_string())?;
     let service = VentaService::new(&conn);
-    service.create_venta(&fecha, total_venta, notas.as_deref()).map_err(|e| e.to_string())
+    service.create_venta(&fecha, &nombre_clienta, total_venta, &tipo_pago).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
