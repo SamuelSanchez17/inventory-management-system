@@ -4,6 +4,7 @@ use std::path::PathBuf;
 use commands::products;
 use commands::categories;
 use commands::sales;
+use commands::sold_products;
 
 mod database; //para manejo de la base de datos
 mod models; //definicion de modelo de datos
@@ -52,6 +53,14 @@ pub fn run() {
       sales::create_venta,
       sales::update_venta,
       sales::delete_venta,
+
+      sold_products::list_productos_vendidos,
+      sold_products::get_producto_vendido,
+      sold_products::get_productos_by_venta,
+      sold_products::create_producto_vendido,
+      sold_products::update_producto_vendido,
+      sold_products::delete_producto_vendido,
+      sold_products::delete_productos_by_venta,
 
     ])
     .run(tauri::generate_context!())

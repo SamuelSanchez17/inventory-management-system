@@ -42,7 +42,7 @@ pub struct Venta
     
 }
 
-/* 
+ 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ProductoVendido
 {
@@ -53,4 +53,3 @@ pub struct ProductoVendido
     pub precio_unitario: f64,
     pub subtotal: f64,
 }
-*/
