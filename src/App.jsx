@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Toaster } from 'react-hot-toast';
 import Dashboard from './pages/dashboard';
 import Products from './pages/products';
 import Configuration from './pages/configuration';
@@ -15,6 +16,7 @@ function App() {
   return (
     <ThemeProvider>
       <>
+        <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
         {currentPage === 'dashboard' && <Dashboard onNavigate={setCurrentPage} currentPage={currentPage} isSidebarCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} />}
         {currentPage === 'products' && <Products onNavigate={setCurrentPage} currentPage={currentPage} isSidebarCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} />}
         {currentPage === 'sales' && <div className="min-h-screen flex bg-rose-50"><Sidebar onNavigate={setCurrentPage} activePage={currentPage} isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} /><main className="flex-1 p-10"><h1>Ventas</h1></main></div>}

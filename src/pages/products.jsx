@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import '../styles/products.css';
 import Sidebar from '../components/sidebar';
@@ -28,7 +29,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
     if (!nombre) return;
 
     if (!isTauri()) {
-      alert('El backend Tauri no está disponible. Ejecuta la app con tauri dev.');
+      toast.error('Backend Tauri no disponible. Ejecuta tauri dev.');
       return;
     }
 
@@ -36,9 +37,10 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
       await invoke('create_categoria', { nombre });
       setCategories([...categories, nombre]);
       setNewCategory('');
+      toast.success('Categoría creada');
     } catch (error) {
       console.error('Error al crear categoría:', error);
-      alert('No se pudo crear la categoría');
+      toast.error('No se pudo crear la categoría');
     }
   };
 
