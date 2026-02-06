@@ -27,6 +27,11 @@ pub fn run() {
 
       println!("Ruta de la base de datos: {}", db_path.display());
 
+      // Crea la carpeta para las imágenes del proyecto si no existe
+      let images_dir = app_dir.join("images");
+      std::fs::create_dir_all(&images_dir).map_err(|e| e.to_string())?;
+      println!("Ruta de la carpeta de imágenes: {}", images_dir.display());
+
       // Inicializa la base de datos (genera el archivo y aplica el esquema si es nuevo)
       database::init_db(&db_path).map_err(|e| e.to_string())?;
 
