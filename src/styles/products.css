@@ -122,6 +122,10 @@
 }
 
 .categoria-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   padding: 10px 12px;
   background: #f9f9f9;
   border: 1px solid #e0e0e0;
@@ -143,6 +147,84 @@
   color: white;
   border-color: #1a1a1a;
   font-weight: 600;
+}
+
+.categoria-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.categoria-name {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.categoria-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.categoria-edit-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  color: #1a1a1a;
+  background: white;
+}
+
+.btn-cat-edit,
+.btn-cat-delete,
+.btn-cat-save,
+.btn-cat-cancel {
+  border: none;
+  border-radius: 10px;
+  padding: 6px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  white-space: nowrap;
+}
+
+.btn-cat-edit {
+  background: #e8f4f8;
+  color: #0080a0;
+}
+
+.btn-cat-edit:hover {
+  background: #d0e8f0;
+}
+
+.btn-cat-delete {
+  background: #ffe8e8;
+  color: #d32f2f;
+}
+
+.btn-cat-delete:hover {
+  background: #ffcccc;
+}
+
+.btn-cat-save {
+  background: #e7f6ee;
+  color: #1b7f4d;
+}
+
+.btn-cat-save:hover {
+  background: #d5f0e1;
+}
+
+.btn-cat-cancel {
+  background: #f1f1f1;
+  color: #666;
+}
+
+.btn-cat-cancel:hover {
+  background: #e3e3e3;
 }
 
 /* Sección de productos (derecha) */

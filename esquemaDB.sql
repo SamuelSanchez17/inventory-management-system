@@ -77,4 +77,4 @@ BEGIN
   WHERE id_producto = NEW.id_producto;
 END;
 
-ALTER TABLE productos ADD COLUMN minuatura_base64 TEXT;
+ALTER TABLE productos ADD COLUMN miniatura_base64 TEXT;

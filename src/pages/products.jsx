@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import '../styles/products.css';
@@ -12,6 +12,10 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [imageFile, setImageFile] = useState(null);
+  const [miniaturaBase64, setMiniaturaBase64] = useState(null);
+  const [editingCategoryId, setEditingCategoryId] = useState(null);
+  const [editingCategoryName, setEditingCategoryName] = useState('');
   
   const [formData, setFormData] = useState({
     nombre_producto: '',
@@ -22,6 +26,48 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
   });
 
   const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      if (!isTauri()) {
+        return;
+      }
+
+      try {
+        const data = await invoke('list_categorias');
+        setCategories(data);
+      } catch (error) {
+        console.error('Error al cargar categorias:', error);
+        toast.error('No se pudieron cargar las categorias');
+      }
+    };
+
+    loadCategories();
+  }, []);
+
+  const makeThumbnail = (file, maxSize = 200) =>
+    new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = (event) => {
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const scale = Math.min(maxSize / img.width, maxSize / img.height);
+          canvas.width = Math.round(img.width * scale);
+          canvas.height = Math.round(img.height * scale);
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const base64 = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
+          resolve(base64);
+        };
+        img.onerror = reject;
+        img.src = event.target.result;
+      };
+
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
 
   // Agregar nueva categoría
   const handleAddCategory = async () => {
@@ -34,13 +80,90 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
     }
 
     try {
-      await invoke('create_categoria', { nombre });
-      setCategories([...categories, nombre]);
+      const idCategoria = await invoke('create_categoria', { nombre });
+      setCategories([...categories, { id_categoria: idCategoria, nombre }]);
       setNewCategory('');
       toast.success('Categoría creada');
     } catch (error) {
       console.error('Error al crear categoría:', error);
       toast.error('No se pudo crear la categoría');
+    }
+  };
+
+  const handleStartEditCategory = (cat) => {
+    setEditingCategoryId(cat.id_categoria);
+    setEditingCategoryName(cat.nombre);
+  };
+
+  const handleCancelEditCategory = () => {
+    setEditingCategoryId(null);
+    setEditingCategoryName('');
+  };
+
+  const handleSaveEditCategory = async (cat) => {
+    const nombre = editingCategoryName.trim();
+    if (!nombre) {
+      toast.error('El nombre no puede estar vacio');
+      return;
+    }
+
+    if (!isTauri()) {
+      toast.error('Backend Tauri no disponible. Ejecuta tauri dev.');
+      return;
+    }
+
+    try {
+      await invoke('update_categoria', {
+        categoria: { id_categoria: cat.id_categoria, nombre }
+      });
+
+      setCategories(  
+        categories.map((c) =>
+          c.id_categoria === cat.id_categoria ? { ...c, nombre } : c
+        )
+      );
+
+      if (selectedCategory === cat.nombre) {
+        setSelectedCategory(nombre);
+      }
+
+      handleCancelEditCategory();
+      toast.success('Categoria actualizada');
+    } catch (error) {
+      console.error('Error al actualizar categoria:', error);
+      toast.error('No se pudo actualizar la categoria');
+    }
+  };
+
+  const handleDeleteCategory = async (cat) => {
+    if (!window.confirm('Eliminar categoria? Los productos quedaran sin categoria.')) {
+      return;
+    }
+
+    if (!isTauri()) {
+      toast.error('Backend Tauri no disponible. Ejecuta tauri dev.');
+      return;
+    }
+
+    try {
+      await invoke('delete_categoria', { id: cat.id_categoria });
+      setCategories(categories.filter((c) => c.id_categoria !== cat.id_categoria));
+
+      if (selectedCategory === cat.nombre) {
+        setSelectedCategory('');
+      }
+
+      if (Number(formData.id_categoria) === cat.id_categoria) {
+        setFormData({
+          ...formData,
+          id_categoria: ''
+        });
+      }
+
+      toast.success('Categoria eliminada');
+    } catch (error) {
+      console.error('Error al eliminar categoria:', error);
+      toast.error('No se pudo eliminar la categoria');
     }
   };
 
@@ -57,6 +180,10 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setImageFile(file);
+      makeThumbnail(file)
+        .then((base64) => setMiniaturaBase64(base64))
+        .catch(() => setMiniaturaBase64(null));
       const reader = new FileReader();
       reader.onload = (event) => {
         setFormData({
@@ -69,31 +196,71 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
   };
 
   // Enviar formulario
-  const handleSubmitProduct = (e) => {
+  const handleSubmitProduct = async (e) => {
     e.preventDefault();
     
     if (!formData.nombre_producto || !formData.id_categoria || !formData.stock || !formData.precio) {
-      alert('Por favor completa los campos obligatorios');
+      toast.error('Por favor completa los campos obligatorios');
       return;
     }
 
-    const newProduct = {
-      id_producto: Date.now(),
-      ...formData
-    };
+    if (!isTauri()) {
+      toast.error('Backend Tauri no disponible. Ejecuta tauri dev.');
+      return;
+    }
 
-    setProducts([...products, newProduct]);
+    const idCategoria = formData.id_categoria ? Number(formData.id_categoria) : null;
+    const stock = Number(formData.stock);
+    const precio = Number(formData.precio);
+
+    let imageBytes = null;
+    let imageExt = null;
+
+    if (imageFile) {
+      const arrayBuffer = await imageFile.arrayBuffer();
+      imageBytes = Array.from(new Uint8Array(arrayBuffer));
+      imageExt = imageFile.name.split('.').pop();
+    }
+
+    try {
+      const idProducto = await invoke('create_producto', {
+        nombreProducto: formData.nombre_producto,
+        idCategoria: idCategoria,
+        imageBytes: imageBytes,
+        imageExt: imageExt,
+        miniaturaBase64: miniaturaBase64,
+        stock,
+        precio
+      });
+
+      const newProduct = {
+        id_producto: idProducto,
+        nombre_producto: formData.nombre_producto,
+        id_categoria: idCategoria,
+        ruta_imagen: formData.ruta_imagen,
+        miniatura_base64: miniaturaBase64,
+        stock,
+        precio
+      };
+
+      setProducts([...products, newProduct]);
     
-    // Resetear formulario
-    setFormData({
-      nombre_producto: '',
-      id_categoria: '',
-      stock: '',
-      precio: '',
-      ruta_imagen: null
-    });
+      // Resetear formulario
+      setFormData({
+        nombre_producto: '',
+        id_categoria: '',
+        stock: '',
+        precio: '',
+        ruta_imagen: null
+      });
+      setImageFile(null);
+      setMiniaturaBase64(null);
 
-    alert('Producto registrado exitosamente');
+      toast.success('Producto registrado exitosamente');
+    } catch (error) {
+      console.error('Error al crear producto:', error);
+      toast.error('No se pudo guardar el producto');
+    }
   };
 
   // Eliminar producto
@@ -142,13 +309,61 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
 
           {/* Lista de categorías */}
           <div className="lista-categorias">
-            {categories.map((cat, index) => (
+            {categories.map((cat) => (
               <div
-                key={index}
-                className={`categoria-item ${selectedCategory === cat ? 'active' : ''}`}
-                onClick={() => setSelectedCategory(cat)}
+                key={cat.id_categoria}
+                className={`categoria-item ${selectedCategory === cat.nombre ? 'active' : ''}`}
+                onClick={() => setSelectedCategory(cat.nombre)}
               >
-                {cat}
+                <div className="categoria-info">
+                  {editingCategoryId === cat.id_categoria ? (
+                    <input
+                      className="categoria-edit-input"
+                      value={editingCategoryName}
+                      onChange={(e) => setEditingCategoryName(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  ) : (
+                    <span className="categoria-name">{cat.nombre}</span>
+                  )}
+                </div>
+                <div className="categoria-actions" onClick={(e) => e.stopPropagation()}>
+                  {editingCategoryId === cat.id_categoria ? (
+                    <>
+                      <button
+                        type="button"
+                        className="btn-cat-save"
+                        onClick={() => handleSaveEditCategory(cat)}
+                      >
+                        Guardar
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-cat-cancel"
+                        onClick={handleCancelEditCategory}
+                      >
+                        Cancelar
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        className="btn-cat-edit"
+                        onClick={() => handleStartEditCategory(cat)}
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        className="btn-cat-delete"
+                        onClick={() => handleDeleteCategory(cat)}
+                      >
+                        Eliminar
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -212,9 +427,9 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
                     required
                   >
                     <option value="">Seleccionar categoría</option>
-                    {categories.map((cat, index) => (
-                      <option key={index} value={cat}>
-                        {cat}
+                    {categories.map((cat) => (
+                      <option key={cat.id_categoria} value={cat.id_categoria}>
+                        {cat.nombre}
                       </option>
                     ))}
                   </select>

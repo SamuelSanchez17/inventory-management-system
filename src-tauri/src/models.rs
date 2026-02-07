@@ -8,6 +8,7 @@ pub struct Producto
     pub nombre_producto: String,
     pub id_categoria: Option<i64>,
     pub ruta_imagen: Option<String>,
+    pub miniatura_base64: Option<String>,
     pub stock: i64,
     pub precio: f64,
     pub creado_at: Option<String>,

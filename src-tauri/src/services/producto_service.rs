@@ -25,10 +25,10 @@ impl <'a> ProductoService<'a>
     repo.get(id)
    }
 
-   pub fn create_producto(&self, nombre_producto: &str, id_categoria: Option<i64>, ruta_imagen: Option<&str>, stock: i64, precio: f64) -> Result<i64> 
+   pub fn create_producto(&self, nombre_producto: &str, id_categoria: Option<i64>, ruta_imagen: Option<&str>, miniatura_base64: Option<&str>,stock: i64, precio: f64) -> Result<i64> 
    {
     let repo = ProductoRepo {conn: self.conn};
-    repo.create(nombre_producto, id_categoria, ruta_imagen, stock, precio)
+    repo.create(nombre_producto, id_categoria, ruta_imagen, miniatura_base64, stock, precio)
    }
 
    pub fn update_producto(&self, producto: &Producto) -> Result<()> 

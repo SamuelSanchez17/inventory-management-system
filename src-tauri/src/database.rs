@@ -44,9 +44,9 @@ fn ensure_column_exists(conn: &rusqlite::Connection, table: &str, column: &str) 
 
 fn migrate_add_miniatura(conn: &rusqlite::Connection) -> rusqlite::Result<()> 
 {
-    if !ensure_column_exists(conn, "productos", "minuatura_base64")? 
+    if !ensure_column_exists(conn, "productos", "miniatura_base64")? 
     {
-        conn.execute("ALTER TABLE productos ADD COLUMN minuatura_base64 TEXT", [])?;
+        conn.execute("ALTER TABLE productos ADD COLUMN miniatura_base64 TEXT", [])?;
     }
     Ok(())
 }
