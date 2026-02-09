@@ -1,25 +1,82 @@
 import Sidebar from '../components/sidebar';
 import Header from '../components/header';
-import { useContext } from 'react';
+import { useContext, useState, useMemo, useEffect } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
+import { invoke, isTauri, convertFileSrc} from '@tauri-apps/api/core';
 
 export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar }) {
   const { getActiveTheme } = useContext(ThemeContext);
   const isDark = getActiveTheme() === 'oscuro';
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [pageIndex, setPageIndex] = useState(1);
+
+  // Carga de datos desde el backend para productos y categorías
+  useEffect(() => {
+    const loadData = async () => {
+      if(!isTauri()) return;
+      const[productsData, categoriesData] = await Promise.all
+      ([
+        invoke('list_productos'),
+        invoke('list_categorias')
+      ]);
+      setProducts(productsData);
+      setCategories(categoriesData);
+    };
+    loadData();
+  }, []);
+
+  //mapeo de categorias para convertir su id a nombre en la tabla de productos
+  const categoryMap = useMemo(() => {
+    const map = new Map();
+    categories.forEach((cat) => {
+      map.set(cat.id_categoria, cat.nombre);
+    });
+    return map;
+  }, [categories]);
+
+  const totalItems = products.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
+  const safePageIndex = Math.min(pageIndex, totalPages);
+  const startIndex = (safePageIndex - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+  const pagedProducts = useMemo(
+    () => products.slice(startIndex, endIndex),
+    [products, startIndex, endIndex]
+  );
+
+  const totalStock = useMemo(
+    () => products.reduce((sum, product) => sum + (Number(product.stock) || 0), 0),
+    [products]
+  );
+
+  const lowStockLimit = 10;
+  const lowStockCount = useMemo(
+    () => products.filter((product) => Number(product.stock) <= lowStockLimit).length,
+    [products, lowStockLimit]
+  );
+
+  const lowStockProducts = useMemo(
+    () => 
+      products
+    .filter((product) => Number(product.stock) <= lowStockLimit)
+    .slice(0, 4),
+    [products, lowStockLimit]
+  );
+
+  useEffect(() => {
+    if (pageIndex !== safePageIndex) {
+      setPageIndex(safePageIndex);
+    }
+  }, [pageIndex, safePageIndex]);
+
   // Datos de ejemplo
   const metrics = [
-    { label: "Total Productos", value: 421, icon: "📦", color: "bg-rose-100 text-rose-700" },
-    { label: "Productos con Stock Bajo", value: 8, icon: "⚠️", color: "bg-yellow-100 text-yellow-700" },
+    { label: "Total Productos", value: totalStock, icon: "📦", color: "bg-rose-100 text-rose-700" },
+    { label: "Productos con Stock Bajo", value: lowStockCount, icon: "⚠️", color: "bg-yellow-100 text-yellow-700" },
     { label: "Ventas Hoy", value: "$3,780", icon: "💵", color: "bg-green-100 text-green-700" },
     { label: "Ventas Semana", value: "$22,450", icon: "📈", color: "bg-sky-100 text-sky-700" },
-  ];
-
-  const products = [
-    { img: "/assets/base-liquida.jpg", name: "Base Líquida Mate TimeWise", category: "Maquillaje", stock: 15, price: 310 },
-    { img: "/assets/alma-equil.jpg", name: "Alma Equídada Razza", category: "Maquillaje", stock: 67, price: 340 },
-    { img: "/assets/immun2.jpg", name: "Immun 2 Powder Radines", category: "Meducero", stock: 22, price: 310 },
-    { img: "/assets/basio.jpg", name: "Basio de Maten La Junta", category: "Maquillaje", stock: 26, price: 224 },
-    { img: "/assets/eau.jpg", name: "Eau de Miefarran Climente", category: "Meducero", stock: 31, price: 225 },
   ];
 
   const lowStock = [
@@ -59,39 +116,84 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
           {/* Tabla productos */}
           <div className="col-span-2 bg-white rounded-xl shadow p-6">
             <div className="mb-4 font-semibold text-rose-800">Productos</div>
+
             <table className="w-full text-left">
               <thead>
                 <tr className="text-rose-400 text-xs uppercase border-b">
-                  <th className="py-2">Producto</th>
+                  <th className="py-2">Nombre del Producto</th>
                   <th>Categoría</th>
                   <th>Stock</th>
-                  <th>Precio Venta</th>
+                  <th>Precio Por Unidad</th>
                 </tr>
               </thead>
               <tbody>
-                {products.map((p) => (
-                  <tr key={p.name} className="border-b last:border-b-0 hover:bg-rose-50">
+                {pagedProducts.map((p) => {
+                  const categoryName = categoryMap.get(p.id_categoria) || 'Sin Categoría';
+                  const imageSrc = p.miniatura_base64
+                    ? `data:image/jpeg;base64,${p.miniatura_base64}`
+                    : p.ruta_imagen
+                    ? convertFileSrc(p.ruta_imagen)
+                    : null;
+                  return (
+                  <tr key={p.id_producto ?? p.nombre_producto} className="last:border-b-0 hover:bg-rose-50">
                     <td className="py-2 flex items-center gap-3">
-                      <img src={p.img} alt="" className="w-10 h-10 rounded-lg object-cover border border-rose-100" />
+                      {imageSrc ? (
+                        <img src={imageSrc} alt="" className="w-10 h-10 rounded-lg object-cover border border-rose-100" />
+                      ) : (
+                        <div className="" />
+                      )}
                       <span>
-                        <div className="font-semibold">{p.name}</div>
-                        <div className="text-xs text-rose-400">{p.category}</div>
+                        <div className="font-semibold">{p.nombre_producto}</div>
+                        <div className="text-xs text-rose-400">{categoryName}</div>
                       </span>
                     </td>
-                    <td>{p.category}</td>
+                    <td>{categoryName}</td>
                     <td>{p.stock}</td>
-                    <td>${p.price}</td>
+                    <td>${p.precio}</td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
+
             {/* Paginación */}
-            <div className="mt-4 text-xs text-rose-400 flex justify-between">
-              <span>1 – 5 de 5</span>
-              <span className="space-x-2">
-                <button className="px-2 py-1 rounded bg-rose-100 text-rose-400">{"<"}</button>
-                <button className="px-2 py-1 rounded bg-rose-100 text-rose-400">{">"}</button>
+            <div className="mt-4 text-xs text-rose-400 flex flex-wrap items-center justify-between gap-3">
+              <span>
+                {totalItems === 0 ? '0 – 0 de 0' : `${startIndex + 1} – ${endIndex} de ${totalItems}`}
               </span>
+              <div className="flex items-center gap-3">
+                <label className="flex items-center gap-2">
+                  <span>Mostrar</span>
+                  <select
+                    className="rounded bg-rose-100 text-rose-600 px-2 py-1"
+                    value={itemsPerPage}
+                    onChange={(event) => {
+                      setItemsPerPage(Number(event.target.value));
+                      setPageIndex(1);
+                    }}
+                  >
+                    {[10, 20, 30].map((size) => (
+                      <option key={size} value={size}>{size}</option>
+                    ))}
+                  </select>
+                </label>
+                <span className="space-x-2">
+                  <button
+                    className="px-2 py-1 rounded bg-rose-100 text-rose-400 disabled:opacity-50"
+                    onClick={() => setPageIndex((prev) => Math.max(1, prev - 1))}
+                    disabled={safePageIndex === 1}
+                  >
+                    {"<"}
+                  </button>
+                  <button
+                    className="px-2 py-1 rounded bg-rose-100 text-rose-400 disabled:opacity-50"
+                    onClick={() => setPageIndex((prev) => Math.min(totalPages, prev + 1))}
+                    disabled={safePageIndex === totalPages}
+                  >
+                    {">"}
+                  </button>
+                </span>
+              </div>
             </div>
           </div>
 
@@ -101,16 +203,18 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
             <div className="bg-white rounded-xl shadow p-4">
               <div className="font-semibold text-rose-800 mb-2">Productos con Stock Bajo</div>
               <ul>
-                {lowStock.map((item) => (
-                  <li key={item.name} className="flex items-center gap-3 py-2 border-b last:border-b-0">
-                    <img src={item.img} alt="" className="w-8 h-8 rounded object-cover border border-rose-100" />
-                    <div className="flex-1">
-                      <div className="text-sm">{item.name}</div>
-                      <div className="text-xs text-rose-400">{item.category}</div>
-                    </div>
-                    <span className="text-rose-600 font-bold">{item.stock}</span>
-                  </li>
-                ))}
+                {lowStockProducts.map((item) => {
+                  const categoryName = categoryMap.get(item.id_categoria) || 'Sin Categoría';
+                  return (
+                    <li key={item.id_producto ?? item.nombre_producto} className="flex items-center gap-3 py-2 last:border-b-0">
+                      <div className='flex-1'>
+                        <div className='text-sm'>{item.nombre_producto}</div>
+                        <div className='text-xs text-rose-400'>{categoryName}</div>
+                      </div>
+                      <span className='text-rose-600 font-bold'>{item.stock}</span>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
             {/* Gráfica de ventas (placeholder) */}

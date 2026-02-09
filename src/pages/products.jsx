@@ -195,7 +195,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
     }
   };
 
-  // Enviar formulario
+  // Envio de formulario
   const handleSubmitProduct = async (e) => {
     e.preventDefault();
     
