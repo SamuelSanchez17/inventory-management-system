@@ -18,8 +18,14 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
   const [searchTerm, setSearchTerm] = useState('');
   const [cartItems, setCartItems] = useState([]);
   const [clienteName, setClienteName] = useState('');
+  const [saleDate, setSaleDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  });
   const [tipoPago, setTipoPago] = useState('Contado');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const maxDate = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -123,7 +129,7 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
     }
 
     const input = {
-      fecha: new Date().toISOString(),
+      fecha: new Date(saleDate).toISOString(),
       nombre_clienta: clienteName.trim(),
       tipo_pago: tipoPago,
       productos: cartItems.map((item) => ({
@@ -139,6 +145,10 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
       toast.success(`Venta registrada (#${result.id_venta})`);
       setCartItems([]);
       setClienteName('');
+      setSaleDate(() => {
+        const today = new Date();
+        return today.toISOString().split('T')[0];
+      });
       setTipoPago('Contado');
     } catch (error) {
       console.error('Error al registrar venta:', error);
@@ -309,6 +319,15 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
                   placeholder="Ej. Maria Lopez"
                   value={clienteName}
                   onChange={(event) => setClienteName(event.target.value)}
+                />
+              </label>
+              <label>
+                Fecha de la venta
+                <input
+                  type="date"
+                  value={saleDate}
+                  max={maxDate}
+                  onChange={(event) => setSaleDate(event.target.value)}
                 />
               </label>
               <label>

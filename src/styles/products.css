@@ -1,8 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap');
+
 /* Contenedor principal */
 .products-container {
-  padding: 30px;
-  background: #f8f9fa;
+  flex: 1;
+  padding: 32px 36px 48px;
+  background: radial-gradient(circle at top left, #eef3ff 0%, #f7f8fb 50%, #fefefe 100%);
   min-height: 100vh;
+  font-family: 'Manrope', 'Segoe UI', sans-serif;
+  color: var(--products-text);
+}
+
+.products-dark {
+  background: radial-gradient(circle at top left, #0f172a 0%, #111827 45%, #0b1020 100%);
 }
 
 .products-container h1 {
@@ -10,13 +19,14 @@
   margin-bottom: 30px;
   font-size: 28px;
   font-weight: 600;
+  font-family: 'Space Grotesk', 'Manrope', sans-serif;
 }
 
 /* Layout de dos columnas */
 .products-layout {
   display: grid;
   grid-template-columns: 280px 1fr;
-  gap: 30px;
+  gap: 28px;
   margin-bottom: 40px;
 }
 
@@ -625,4 +635,176 @@ table tbody tr:hover {
 
 .lista-categorias::-webkit-scrollbar-thumb:hover {
   background: #999;
+}
+
+/* Sales-aligned theme overrides for products */
+:root {
+  --products-bg: radial-gradient(circle at top left, #eef3ff 0%, #f7f8fb 50%, #fefefe 100%);
+  --products-card: #ffffff;
+  --products-text: #111827;
+  --products-muted: #94a3b8;
+  --products-border: rgba(148, 163, 184, 0.25);
+  --products-accent: #38bdf8;
+  --products-accent-strong: #0ea5e9;
+  --products-accent-soft: rgba(56, 189, 248, 0.12);
+  --products-danger: #f87171;
+  --products-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+}
+
+[data-theme='light'] {
+  --products-bg: radial-gradient(circle at top left, #eef3ff 0%, #f7f8fb 50%, #fefefe 100%);
+  --products-card: #ffffff;
+  --products-text: #111827;
+  --products-muted: #64748b;
+  --products-border: #e2e8f0;
+  --products-accent: #0f4c81;
+  --products-accent-strong: #0b3a62;
+  --products-accent-soft: #e6f0fb;
+  --products-danger: #e53e3e;
+  --products-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+}
+
+[data-theme='dark'] {
+  --products-bg: radial-gradient(circle at top left, #0f172a 0%, #111827 45%, #0b1020 100%);
+  --products-card: #111827;
+  --products-text: #f8fafc;
+  --products-muted: #94a3b8;
+  --products-border: rgba(148, 163, 184, 0.25);
+  --products-accent: #38bdf8;
+  --products-accent-strong: #0ea5e9;
+  --products-accent-soft: rgba(56, 189, 248, 0.12);
+  --products-danger: #f87171;
+  --products-shadow: 0 24px 50px rgba(0, 0, 0, 0.45);
+}
+
+.products-container {
+  color: var(--products-text);
+}
+
+.products-container h1,
+.form-container h2,
+.form-section h4,
+.crear-categoria h3,
+.productos-registrados h3,
+.form-group label {
+  color: var(--products-text) !important;
+  font-family: 'Space Grotesk', 'Manrope', sans-serif;
+}
+
+.section-categoria,
+.section-productos,
+.productos-registrados {
+  background: var(--products-card) !important;
+  border: 1px solid var(--products-border);
+  box-shadow: var(--products-shadow) !important;
+}
+
+.input-group input,
+.categoria-edit-input,
+.form-group input,
+.form-group select,
+.form-group textarea {
+  background: transparent !important;
+  color: var(--products-text) !important;
+  border-color: var(--products-border) !important;
+  -webkit-text-fill-color: var(--products-text) !important;
+}
+
+.input-group input::placeholder,
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: var(--products-muted) !important;
+  -webkit-text-fill-color: var(--products-muted) !important;
+}
+
+.btn-add,
+.btn-submit {
+  background: var(--products-accent) !important;
+}
+
+.btn-add:hover,
+.btn-submit:hover {
+  background: var(--products-accent-strong) !important;
+}
+
+.categoria-seleccionada {
+  background: var(--products-accent-soft) !important;
+  border-left: 3px solid var(--products-accent) !important;
+}
+
+.categoria-item {
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.9), rgba(237, 244, 255, 0.9)) !important;
+  border-color: var(--products-border) !important;
+  color: var(--products-muted) !important;
+}
+
+[data-theme='dark'] .categoria-item {
+  background: linear-gradient(150deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95)) !important;
+}
+
+.categoria-item:hover {
+  border-color: var(--products-accent) !important;
+}
+
+.categoria-item.active {
+  background: var(--products-accent) !important;
+  border-color: var(--products-accent) !important;
+  color: #fff !important;
+}
+
+.btn-cat-edit,
+.btn-edit {
+  background: rgba(56, 189, 248, 0.12) !important;
+  color: var(--products-accent) !important;
+}
+
+.btn-cat-edit:hover,
+.btn-edit:hover {
+  background: rgba(56, 189, 248, 0.2) !important;
+}
+
+.btn-cat-delete,
+.btn-delete {
+  background: rgba(229, 62, 62, 0.12) !important;
+  color: var(--products-danger) !important;
+}
+
+.btn-cat-delete:hover,
+.btn-delete:hover {
+  background: rgba(229, 62, 62, 0.2) !important;
+}
+
+.btn-cat-save {
+  background: rgba(15, 118, 110, 0.12) !important;
+  color: var(--products-text) !important;
+}
+
+.btn-cat-save:hover {
+  background: rgba(15, 118, 110, 0.2) !important;
+}
+
+table thead {
+  background: transparent !important;
+}
+
+table th {
+  color: var(--products-text) !important;
+  border-bottom: 2px solid var(--products-border) !important;
+}
+
+table td {
+  color: var(--products-muted) !important;
+  border-bottom: 1px solid var(--products-border) !important;
+}
+
+table tbody tr:hover {
+  background: rgba(56, 189, 248, 0.08) !important;
+}
+
+.lista-categorias::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.lista-categorias::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.6) !important;
 }

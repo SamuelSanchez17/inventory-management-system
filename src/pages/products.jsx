@@ -276,9 +276,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
       <Sidebar onNavigate={onNavigate} activePage={currentPage} isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} />
 
       {/* Main content */}
-      <main className={`flex-1 p-10 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
-
-        <div className="products-container">
+      <main className={`products-container ${isDark ? 'products-dark' : ''}`}>
           <h1>Agregar Productos</h1>
           
           <div className="products-layout">
@@ -516,7 +514,6 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
           </div>
         </div>
       )}
-      </div>
       </main>
     </div>
   );
