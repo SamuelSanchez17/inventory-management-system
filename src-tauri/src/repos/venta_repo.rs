@@ -17,7 +17,7 @@ impl<'a> VentaRepo<'a>
             let tipo_pago_str: String = row.get(4)?;
             let tipo_pago = match tipo_pago_str.as_str() {
                 "Abono" => TipoPago::Abono,
-                "Contado" => TipoPago::Contado,
+                "De Contado" => TipoPago::Contado,
                 _ => TipoPago::Contado,
             };
             Ok(Venta {
@@ -47,7 +47,7 @@ impl<'a> VentaRepo<'a>
                 let tipo_pago_str: String = row.get(4)?;
                 let tipo_pago = match tipo_pago_str.as_str() {
                     "Abono" => TipoPago::Abono,
-                    "Contado" => TipoPago::Contado,
+                    "De Contado" => TipoPago::Contado,
                     _ => TipoPago::Contado,
                 };
                 Ok(Venta {
@@ -66,7 +66,7 @@ impl<'a> VentaRepo<'a>
     {
         let tipo_pago_str = match tipo_pago {
             TipoPago::Abono => "Abono",
-            TipoPago::Contado => "Contado",
+            TipoPago::Contado => "De Contado",
         };
         self.conn.execute(
             "INSERT INTO ventas (fecha, nombre_clienta, total_venta, tipo_pago) VALUES (?1, ?2, ?3, ?4)",
@@ -80,7 +80,7 @@ impl<'a> VentaRepo<'a>
     {
         let tipo_pago_str = match &venta.tipo_pago {
             TipoPago::Abono => "Abono",
-            TipoPago::Contado => "Contado",
+            TipoPago::Contado => "De Contado",
         };
         self.conn.execute(
             "UPDATE ventas SET fecha = ?1, nombre_clienta = ?2, total_venta = ?3, tipo_pago = ?4 WHERE id_venta = ?5",
