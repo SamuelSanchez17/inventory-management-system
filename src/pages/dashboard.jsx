@@ -9,6 +9,8 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
   const isDark = getActiveTheme() === 'oscuro';
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [salesToday, setSalesToday] = useState(0);
+  const [salesMonth, setSalesMonth] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [pageIndex, setPageIndex] = useState(1);
 
@@ -16,13 +18,17 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
   useEffect(() => {
     const loadData = async () => {
       if(!isTauri()) return;
-      const[productsData, categoriesData] = await Promise.all
+      const[productsData, categoriesData, salesTodayData, salesMonthData] = await Promise.all
       ([
         invoke('list_productos'),
-        invoke('list_categorias')
+        invoke('list_categorias'),
+        invoke('get_sales_today'),
+        invoke('get_sales_month')
       ]);
       setProducts(productsData);
       setCategories(categoriesData);
+      setSalesToday(salesTodayData);
+      setSalesMonth(salesMonthData);
     };
     loadData();
   }, []);
@@ -75,8 +81,8 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
   const metrics = [
     { label: "Total Productos", value: totalStock, icon: "📦", color: "bg-rose-100 text-rose-700" },
     { label: "Productos con Stock Bajo", value: lowStockCount, icon: "⚠️", color: "bg-yellow-100 text-yellow-700" },
-    { label: "Ventas Hoy", value: "$3,780", icon: "💵", color: "bg-green-100 text-green-700" },
-    { label: "Ventas Semana", value: "$22,450", icon: "📈", color: "bg-sky-100 text-sky-700" },
+    { label: "Ventas Hoy", value: `$${salesToday.toFixed(2)}`, icon: "💵", color: "bg-green-100 text-green-700" },
+    { label: "Ventas Mes", value: `$${salesMonth.toFixed(2)}`, icon: "📈", color: "bg-sky-100 text-sky-700" },
   ];
 
   const lowStock = [

@@ -121,3 +121,29 @@ pub fn create_venta_completa(
         items_insertados,
     })
 }
+
+//Comando tauri para obtener el total de ventas a la fecha actual
+#[tauri::command]
+pub fn get_sales_today(db_path: State<'_, PathBuf>) -> Result<f64, String> {
+    let db_path: &PathBuf = db_path.inner();
+    let conn = database::init_db(db_path).map_err(|e| e.to_string())?;
+    
+    conn.query_row(
+        "SELECT COALESCE(SUM(total_venta), 0.0) FROM ventas WHERE DATE(fecha) = DATE('now')",
+        [],
+        |row| row.get(0)
+    ).map_err(|e| e.to_string())
+}
+
+//Comando tauri para obtener el total de ventas en los últimos 30 días
+#[tauri::command]
+pub fn get_sales_month(db_path: State<'_, PathBuf>) -> Result<f64, String> {
+    let db_path: &PathBuf = db_path.inner();
+    let conn = database::init_db(db_path).map_err(|e| e.to_string())?;
+    
+    conn.query_row(
+        "SELECT COALESCE(SUM(total_venta), 0.0) FROM ventas WHERE DATE(fecha) BETWEEN DATE('now', '-30 days') AND DATE('now')",
+        [],
+        |row| row.get(0)
+    ).map_err(|e| e.to_string())
+}
