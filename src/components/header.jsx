@@ -1,11 +1,16 @@
-export default function Header()
+export default function Header({ searchTerm, onSearchChange })
 {
     return(
 
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-rose-900">Menu Principal</h1>
-          <div className="flex items-center gap-2">
-            <input className="ml-4 px-3 py-2 rounded-lg border border-rose-200 bg-white placeholder:text-rose-300 focus:outline-none" placeholder="Buscar producto..." />
+        <div className="dashboard-header">
+          <h1 className="dashboard-title">Menu Principal</h1>
+          <div className="dashboard-search">
+            <input
+              className="dashboard-search-input"
+              placeholder="Buscar producto..."
+              value={searchTerm}
+              onChange={(event) => onSearchChange(event.target.value)}
+            />
           </div>
         </div>
 

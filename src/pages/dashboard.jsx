@@ -15,6 +15,7 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
   const [salesMonth, setSalesMonth] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [pageIndex, setPageIndex] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -47,7 +48,7 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
     loadData();
   }, []);
 
-  //mapeo de categorias para convertir su id a nombre en la tabla de productos
+  //mapeo de categorias para convertir el id a nombre de categoria en la tabla de productos
   const categoryMap = useMemo(() => {
     const map = new Map();
     categories.forEach((cat) => {
@@ -56,14 +57,124 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
     return map;
   }, [categories]);
 
-  const totalItems = products.length;
+  //Funcion de busqueda que aplica normalizacion de texto aplicando el algoritmo de Levenshtein 
+  const toSingular = (word) => {
+    if (word.length <= 3) {
+      return word;
+    }
+
+    if (word.endsWith('ces')) {
+      return `${word.slice(0, -3)}z`;
+    }
+
+    if (word.endsWith('es')) {
+      return word.slice(0, -2);
+    }
+
+    if (word.endsWith('s')) {
+      return word.slice(0, -1);
+    }
+
+    return word;
+  };
+
+  const normalizeText = (text) => {
+    if (!text) {
+      return '';
+    }
+
+    return text
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .split(' ')
+      .map(toSingular)
+      .join(' ');
+  };
+
+  const levenshteinDistance = (source, target) => {
+    if (source === target) {
+      return 0;
+    }
+
+    if (!source) {
+      return target.length;
+    }
+
+    if (!target) {
+      return source.length;
+    }
+
+    const sourceLength = source.length;
+    const targetLength = target.length;
+    let prev = Array.from({ length: targetLength + 1 }, (_, idx) => idx);
+
+    for (let i = 1; i <= sourceLength; i += 1) {
+      const current = [i];
+      for (let j = 1; j <= targetLength; j += 1) {
+        const cost = source[i - 1] === target[j - 1] ? 0 : 1;
+        current[j] = Math.min(
+          prev[j] + 1,
+          current[j - 1] + 1,
+          prev[j - 1] + cost
+        );
+      }
+      prev = current;
+    }
+
+    return prev[targetLength];
+  };
+
+  const normalizedQuery = useMemo(() => normalizeText(searchTerm), [searchTerm]);
+
+  const filteredProducts = useMemo(() => {
+    if (!normalizedQuery) {
+      return products;
+    }
+
+    const scored = products.map((product) => {
+      const name = normalizeText(product.nombre_producto || '');
+      const distance = name.includes(normalizedQuery)
+        ? 0
+        : levenshteinDistance(normalizedQuery, name);
+      return { product, name, distance };
+    });
+
+    const threshold = Math.max(1, Math.floor(normalizedQuery.length * 0.4));
+    const matches = scored.filter(
+      (item) => item.name.includes(normalizedQuery) || item.distance <= threshold
+    );
+
+    const sorted = (matches.length ? matches : scored)
+      .slice()
+      .sort((a, b) => {
+        if (a.distance !== b.distance) {
+          return a.distance - b.distance;
+        }
+        return (a.product.nombre_producto || '').localeCompare(
+          b.product.nombre_producto || ''
+        );
+      });
+
+    const finalResults = matches.length ? sorted : sorted.slice(0, 3);
+    return finalResults.map((item) => item.product);
+  }, [products, normalizedQuery]);
+
+  useEffect(() => {
+    setPageIndex(1);
+  }, [normalizedQuery]);
+
+  const totalItems = filteredProducts.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
   const safePageIndex = Math.min(pageIndex, totalPages);
   const startIndex = (safePageIndex - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const pagedProducts = useMemo(
-    () => products.slice(startIndex, endIndex),
-    [products, startIndex, endIndex]
+    () => filteredProducts.slice(startIndex, endIndex),
+    [filteredProducts, startIndex, endIndex]
   );
 
   const totalStock = useMemo(
@@ -277,7 +388,11 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
       {/* Main content */}
       <main className="dashboard-page">
         {/* Header */}
-        <Header onNavigate={onNavigate} />
+        <Header
+          onNavigate={onNavigate}
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+        />
 
         {/* Métricas */}
         <div className="dashboard-metrics">

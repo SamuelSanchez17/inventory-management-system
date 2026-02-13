@@ -43,6 +43,48 @@
   background: radial-gradient(circle at top left, #0f172a 0%, #111827 45%, #0b1020 100%);
 }
 
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.dashboard-title {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--dashboard-text);
+  font-family: 'Space Grotesk', 'Manrope', sans-serif;
+}
+
+.dashboard-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dashboard-search-input {
+  width: min(320px, 50vw);
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--dashboard-border);
+  background: var(--dashboard-card);
+  color: var(--dashboard-text);
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-search-input::placeholder {
+  color: var(--dashboard-muted);
+}
+
+.dashboard-search-input:focus {
+  outline: none;
+  border-color: var(--dashboard-accent);
+  box-shadow: 0 0 0 3px var(--dashboard-accent-soft);
+}
+
 /* Métricas */
 .dashboard-metrics {
   display: grid;
