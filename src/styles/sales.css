@@ -415,6 +415,11 @@
   font-family: 'Manrope', 'Segoe UI', sans-serif;
 }
 
+.sales-dark .sales-checkout select option {
+  background: #f8fafc;
+  color: #111827;
+}
+
 .sales-checkout input[type="date"] {
   cursor: pointer;
   position: relative;
