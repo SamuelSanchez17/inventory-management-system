@@ -35,6 +35,7 @@ pub fn get_productos_by_venta(id_venta: i64, db_path: State<'_, PathBuf>) -> Res
 pub fn create_producto_vendido(
     id_venta: i64,
     id_producto: i64,
+    nombre_producto_snapshot: String,
     cantidad: i64,
     precio_unitario: f64,
     subtotal: f64,
@@ -44,7 +45,7 @@ pub fn create_producto_vendido(
     let conn = database::init_db(db_path).map_err(|e| e.to_string())?;
     let service = ProductoVendidoService::new(&conn);
     service
-        .create_producto_vendido(id_venta, id_producto, cantidad, precio_unitario, subtotal)
+        .create_producto_vendido(id_venta, id_producto, &nombre_producto_snapshot, cantidad, precio_unitario, subtotal)
         .map_err(|e| e.to_string())
 }
 

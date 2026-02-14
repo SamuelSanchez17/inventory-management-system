@@ -104,7 +104,7 @@ pub fn create_venta_completa(
         let subtotal = item.cantidad as f64 * item.precio_unitario;
 
         producto_vendido_service
-            .create_producto_vendido(id_venta, item.id_producto, item.cantidad, item.precio_unitario, subtotal)
+            .create_producto_vendido(id_venta, item.id_producto, &item.nombre_producto, item.cantidad, item.precio_unitario, subtotal)
             .map_err(|e| format!("Error al insertar producto con ID {}: {}", item.id_producto, e))?;
 
         items_insertados += 1;

@@ -134,6 +134,7 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
       tipo_pago: tipoPago,
       productos: cartItems.map((item) => ({
         id_producto: item.id_producto,
+        nombre_producto: item.nombre_producto,
         cantidad: item.cantidad,
         precio_unitario: item.precio_unitario,
       })),

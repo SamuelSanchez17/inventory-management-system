@@ -50,6 +50,7 @@ pub struct ProductoVendido
     pub id_producto_vendido: i64,
     pub id_venta: i64,
     pub id_producto: i64,
+    pub nombre_producto_snapshot: String,
     pub cantidad: i64,
     pub precio_unitario: f64,
     pub subtotal: f64,
@@ -60,6 +61,7 @@ pub struct ProductoVendido
 pub struct ItemVenta
 {
     pub id_producto: i64,
+    pub nombre_producto: String,
     pub cantidad: i64,
     pub precio_unitario: f64,
 }

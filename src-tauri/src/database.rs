@@ -19,6 +19,7 @@ pub fn init_db<P: AsRef<Path>> (db_path: P) -> Result<Connection> {
     }
 
     migrate_add_miniatura(&conn)?;
+    migrate_add_nombre_producto_snapshot(&conn)?;
 
     Ok(conn)
 
@@ -47,6 +48,20 @@ fn migrate_add_miniatura(conn: &rusqlite::Connection) -> rusqlite::Result<()>
     if !ensure_column_exists(conn, "productos", "miniatura_base64")? 
     {
         conn.execute("ALTER TABLE productos ADD COLUMN miniatura_base64 TEXT", [])?;
+    }
+    Ok(())
+}
+
+fn migrate_add_nombre_producto_snapshot(conn: &rusqlite::Connection) -> rusqlite::Result<()> 
+{
+    if !ensure_column_exists(conn, "productos_vendidos", "nombre_producto_snapshot")? 
+    {
+        conn.execute("ALTER TABLE productos_vendidos ADD COLUMN nombre_producto_snapshot TEXT NOT NULL DEFAULT ''", [])?;
+        // Rellenar registros existentes con el nombre actual del producto
+        conn.execute(
+            "UPDATE productos_vendidos SET nombre_producto_snapshot = (SELECT nombre_producto FROM productos WHERE productos.id_producto = productos_vendidos.id_producto) WHERE nombre_producto_snapshot = ''",
+            [],
+        )?;
     }
     Ok(())
 }

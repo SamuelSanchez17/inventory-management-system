@@ -36,6 +36,7 @@ CREATE TABLE productos_vendidos (
   id_producto_vendido INTEGER PRIMARY KEY AUTOINCREMENT,
   id_venta INTEGER NOT NULL REFERENCES ventas(id_venta) ON DELETE CASCADE,
   id_producto INTEGER NOT NULL REFERENCES productos(id_producto),
+  nombre_producto_snapshot TEXT NOT NULL DEFAULT '',
   cantidad INTEGER NOT NULL CHECK (cantidad > 0),
   precio_unitario REAL NOT NULL CHECK (precio_unitario >= 0),
   subtotal REAL NOT NULL,
