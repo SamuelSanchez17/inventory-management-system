@@ -1,0 +1,211 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Space+Grotesk:wght@500;700&display=swap');
+
+:root {
+	--reports-bg: #f4f7fb;
+	--reports-card: #ffffff;
+	--reports-text: #111827;
+	--reports-muted: #6b7280;
+	--reports-border: #e5e7eb;
+	--reports-accent: #0f766e;
+	--reports-accent-soft: rgba(15, 118, 110, 0.12);
+	--reports-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
+}
+
+.reports-dark {
+	--reports-bg: #0b1120;
+	--reports-card: #111827;
+	--reports-text: #f9fafb;
+	--reports-muted: #9ca3af;
+	--reports-border: rgba(148, 163, 184, 0.2);
+	--reports-accent: #22d3ee;
+	--reports-accent-soft: rgba(34, 211, 238, 0.15);
+	--reports-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+}
+
+.reports-page {
+	flex: 1;
+	padding: 32px 36px 48px;
+	background: radial-gradient(circle at top left, #ecfdf3 0%, #f4f7fb 45%, #ffffff 100%);
+	min-height: 100vh;
+	font-family: 'Manrope', 'Segoe UI', sans-serif;
+	color: var(--reports-text);
+}
+
+.reports-dark .reports-page {
+	background: radial-gradient(circle at top left, #0b1120 0%, #101827 45%, #070b16 100%);
+}
+
+.reports-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 20px;
+	margin-bottom: 28px;
+}
+
+.reports-header h1 {
+	font-size: 2rem;
+	font-weight: 700;
+	font-family: 'Space Grotesk', 'Manrope', sans-serif;
+	margin: 0 0 6px;
+}
+
+.reports-header p {
+	margin: 0;
+	color: var(--reports-muted);
+}
+
+.reports-summary {
+	display: flex;
+	gap: 12px;
+}
+
+.reports-chip {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+	padding: 10px 16px;
+	border-radius: 14px;
+	background: var(--reports-card);
+	border: 1px solid var(--reports-border);
+	box-shadow: var(--reports-shadow);
+	min-width: 80px;
+}
+
+.reports-chip .chip-label {
+	font-size: 0.75rem;
+	color: var(--reports-muted);
+}
+
+.reports-chip .chip-value {
+	font-size: 1.2rem;
+	font-weight: 700;
+	color: var(--reports-accent);
+}
+
+.reports-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+	gap: 24px;
+}
+
+.reports-card {
+	background: var(--reports-card);
+	border-radius: 18px;
+	padding: 22px;
+	border: 1px solid var(--reports-border);
+	box-shadow: var(--reports-shadow);
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.reports-card-header h2 {
+	margin: 0;
+	font-size: 1.1rem;
+	font-weight: 600;
+	font-family: 'Space Grotesk', 'Manrope', sans-serif;
+}
+
+.reports-table-wrapper {
+	overflow-x: auto;
+}
+
+.reports-table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.92rem;
+}
+
+.reports-table th,
+.reports-table td {
+	padding: 12px 10px;
+	text-align: left;
+	border-bottom: 1px solid var(--reports-border);
+}
+
+.reports-table th {
+	font-weight: 600;
+	color: var(--reports-muted);
+	font-size: 0.82rem;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.reports-table tbody tr:hover {
+	background: var(--reports-accent-soft);
+}
+
+.reports-id-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 4px 10px;
+	border-radius: 999px;
+	border: 1px solid var(--reports-border);
+	background: rgba(15, 118, 110, 0.08);
+	color: var(--reports-text);
+	font-weight: 600;
+	font-size: 0.85rem;
+}
+
+.reports-empty {
+	text-align: center;
+	color: var(--reports-muted);
+	padding: 20px 0;
+}
+
+.reports-pagination {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	color: var(--reports-muted);
+	font-size: 0.85rem;
+}
+
+.reports-pagination-controls {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+
+.reports-items-per-page {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.reports-items-per-page select {
+	border: 1px solid var(--reports-border);
+	border-radius: 10px;
+	padding: 4px 8px;
+	background: var(--reports-card);
+	color: var(--reports-text);
+}
+
+.reports-pagination-buttons button {
+	border: 1px solid var(--reports-border);
+	background: var(--reports-card);
+	color: var(--reports-text);
+	padding: 4px 10px;
+	border-radius: 10px;
+	cursor: pointer;
+}
+
+.reports-pagination-buttons button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+	.reports-header {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.reports-summary {
+		width: 100%;
+	}
+}
