@@ -3,10 +3,12 @@ import toast from 'react-hot-toast';
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import Sidebar from '../components/sidebar';
 import { ThemeContext } from '../context/ThemeContext';
+import { LanguageContext } from '../context/LanguageContext';
 import '../styles/reports.css';
 
 export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar }) {
     const { getActiveTheme } = useContext(ThemeContext);
+    const { t, language } = useContext(LanguageContext);
     const isDark = getActiveTheme() === 'oscuro';
     const [sales, setSales] = useState([]);
     const [soldProducts, setSoldProducts] = useState([]);
@@ -30,7 +32,7 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                 setSoldProducts(Array.isArray(soldData) ? soldData : []);
             } catch (error) {
                 console.error('Error al cargar reportes:', error);
-                toast.error('No se pudieron cargar los reportes');
+                toast.error(t('toast_reports_load_error'));
             }
         };
 
@@ -54,7 +56,7 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
         if (Number.isNaN(date.getTime())) {
             return value;
         }
-        return date.toLocaleDateString('es-ES');
+        return date.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES');
     };
 
     const formatMoney = (value) => {
@@ -115,16 +117,16 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
             <main className="reports-page">
                 <header className="reports-header">
                     <div>
-                        <h1>Reportes</h1>
-                        <p>Ventas realizadas y detalle de productos vendidos.</p>
+                        <h1>{t('reports_title')}</h1>
+                        <p>{t('reports_subtitle')}</p>
                     </div>
                     <div className="reports-summary">
                         <div className="reports-chip">
-                            <span className="chip-label">Ventas</span>
+                            <span className="chip-label">{t('reports_chip_sales')}</span>
                             <span className="chip-value">{totalItems}</span>
                         </div>
                         <div className="reports-chip">
-                            <span className="chip-label">Productos vendidos</span>
+                            <span className="chip-label">{t('reports_chip_products')}</span>
                             <span className="chip-value">{totalProductos}</span>
                         </div>
                     </div>
@@ -133,21 +135,21 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                 <section className="reports-section">
                     <div className="reports-card reports-card-full">
                         <div className="reports-card-header">
-                            <h2>Detalle de ventas</h2>
+                            <h2>{t('reports_detail_title')}</h2>
                             <div className="reports-expand-controls">
                                 <button type="button" className="reports-expand-btn" onClick={expandAll} title="Expandir todas">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <polyline points="7 13 12 18 17 13" />
                                         <polyline points="7 6 12 11 17 6" />
                                     </svg>
-                                    Expandir Información
+                                    {t('reports_expand')}
                                 </button>
                                 <button type="button" className="reports-expand-btn" onClick={collapseAll} title="Minimizar todas">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <polyline points="17 11 12 6 7 11" />
                                         <polyline points="17 18 12 13 7 18" />
                                     </svg>
-                                    Minimizar Información
+                                    {t('reports_collapse')}
                                 </button>
                             </div>
                         </div>
@@ -157,18 +159,18 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                                 <thead>
                                     <tr>
                                         <th className="col-expand"></th>
-                                        <th>Venta</th>
-                                        <th>Fecha</th>
-                                        <th>Cliente</th>
-                                        <th>Productos</th>
-                                        <th>Tipo de pago</th>
-                                        <th className="col-total">Total</th>
+                                        <th>{t('reports_col_sale')}</th>
+                                        <th>{t('reports_col_date')}</th>
+                                        <th>{t('reports_col_client')}</th>
+                                        <th>{t('reports_col_products')}</th>
+                                        <th>{t('reports_col_payment')}</th>
+                                        <th className="col-total">{t('reports_col_total')}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {pagedSales.length === 0 ? (
                                         <tr>
-                                            <td colSpan={7} className="reports-empty">No hay ventas registradas.</td>
+                                            <td colSpan={7} className="reports-empty">{t('reports_no_sales')}</td>
                                         </tr>
                                     ) : (
                                         pagedSales.map((venta) => {
@@ -184,6 +186,7 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                                                     onToggle={toggleExpanded}
                                                     formatDate={formatDate}
                                                     formatMoney={formatMoney}
+                                                    t={t}
                                                 />
                                             );
                                         })
@@ -195,12 +198,12 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                         <div className="reports-pagination">
                             <span>
                                 {totalItems === 0
-                                    ? '0 - 0 de 0'
-                                    : `${startIndex + 1} - ${endIndex} de ${totalItems}`}
+                                    ? `0 - 0 ${t('reports_of')} 0`
+                                    : `${startIndex + 1} - ${endIndex} ${t('reports_of')} ${totalItems}`}
                             </span>
                             <div className="reports-pagination-controls">
                                 <label className="reports-items-per-page">
-                                    <span>Mostrar</span>
+                                    <span>{t('reports_show')}</span>
                                     <select
                                         value={itemsPerPage}
                                         onChange={(event) => {
@@ -238,7 +241,7 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
     );
 }
 
-function SaleRow({ venta, saleProducts, isExpanded, onToggle, formatDate, formatMoney }) {
+function SaleRow({ venta, saleProducts, isExpanded, onToggle, formatDate, formatMoney, t }) {
     const saleId = venta.id_venta;
     const totalQty = saleProducts.reduce((sum, p) => sum + p.cantidad, 0);
 
@@ -270,7 +273,7 @@ function SaleRow({ venta, saleProducts, isExpanded, onToggle, formatDate, format
                 <td>{venta.nombre_clienta}</td>
                 <td>
                     <span className="reports-product-count">
-                        {saleProducts.length} {saleProducts.length === 1 ? 'producto' : 'productos'}
+                        {saleProducts.length} {saleProducts.length === 1 ? t('reports_product_singular') : t('reports_product_plural')}
                     </span>
                 </td>
                 <td>
@@ -291,7 +294,7 @@ function SaleRow({ venta, saleProducts, isExpanded, onToggle, formatDate, format
                                         <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
                                         <line x1="1" y1="10" x2="23" y2="10" />
                                     </svg>
-                                    <span>Desglose de productos</span>
+                                    <span>{t('reports_detail_breakdown')}</span>
                                 </div>
                                 <div className="reports-detail-meta">
                                     <span className="detail-meta-item">
@@ -317,16 +320,16 @@ function SaleRow({ venta, saleProducts, isExpanded, onToggle, formatDate, format
                                 <thead>
                                     <tr>
                                         <th className="dt-col-num">#</th>
-                                        <th className="dt-col-product">Producto</th>
-                                        <th className="dt-col-qty">Cantidad</th>
-                                        <th className="dt-col-price">Precio unit.</th>
-                                        <th className="dt-col-subtotal">Subtotal</th>
+                                        <th className="dt-col-product">{t('reports_detail_product')}</th>
+                                        <th className="dt-col-qty">{t('reports_detail_qty')}</th>
+                                        <th className="dt-col-price">{t('reports_detail_unit_price')}</th>
+                                        <th className="dt-col-subtotal">{t('reports_detail_subtotal')}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {saleProducts.length === 0 ? (
                                         <tr>
-                                            <td colSpan={5} className="reports-empty">Sin productos registrados.</td>
+                                            <td colSpan={5} className="reports-empty">{t('reports_detail_no_products')}</td>
                                         </tr>
                                     ) : (
                                         saleProducts.map((item, idx) => {
@@ -350,7 +353,7 @@ function SaleRow({ venta, saleProducts, isExpanded, onToggle, formatDate, format
                                 {saleProducts.length > 0 && (
                                     <tfoot>
                                         <tr className="reports-detail-footer">
-                                            <td colSpan={2} className="dt-footer-label">Total de la venta</td>
+                                            <td colSpan={2} className="dt-footer-label">{t('reports_detail_sale_total')}</td>
                                             <td className="dt-col-qty">
                                                 <span className="detail-qty-badge total">{totalQty}</span>
                                             </td>

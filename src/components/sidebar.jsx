@@ -1,10 +1,12 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
+import { LanguageContext } from '../context/LanguageContext';
 
 export default function Sidebar({ onNavigate, activePage, isCollapsed, toggleSidebar })
 {
     const { getActiveTheme } = useContext(ThemeContext);
+    const { t } = useContext(LanguageContext);
     const isDark = getActiveTheme() === 'oscuro';
 
     return(
@@ -19,12 +21,12 @@ export default function Sidebar({ onNavigate, activePage, isCollapsed, toggleSid
         </button>
         {/* Logo y nombre */}
         <div className="mb-8 text-center">
-          <div className={`text-2xl font-bold tracking-wide transition-opacity duration-300 ${isCollapsed ? 'opacity-0' : 'opacity-100'} ${isDark ? 'text-pink-400' : 'text-rose-700'}`}>Inventario</div>
+          <div className={`text-2xl font-bold tracking-wide transition-opacity duration-300 ${isCollapsed ? 'opacity-0' : 'opacity-100'} ${isDark ? 'text-pink-400' : 'text-rose-700'}`}>{t('sidebar_title')}</div>
         </div>
         {/* Perfil */}
         <div className={`mb-8 flex flex-col items-center transition-opacity duration-300 ${isCollapsed ? 'opacity-0' : 'opacity-100'}`}>
           <div className={`w-20 h-20 rounded-full mb-2 ${isDark ? 'bg-gray-700' : 'bg-rose-200'}`} />
-          <div className={`font-semibold ${isDark ? 'text-gray-300' : 'text-rose-800'}`}>Mary - Inventario</div>
+          <div className={`font-semibold ${isDark ? 'text-gray-300' : 'text-rose-800'}`}>{t('sidebar_profile')}</div>
         </div>
         {/* Navegación */}
         <nav className="flex-1 w-full">
@@ -35,7 +37,7 @@ export default function Sidebar({ onNavigate, activePage, isCollapsed, toggleSid
                 : isDark ? 'hover:bg-gray-700 text-gray-300 cursor-pointer' : 'hover:bg-rose-200/60 cursor-pointer'
             }`} onClick={() => onNavigate('dashboard')}>
               <span>🏠</span>
-              {!isCollapsed && <span>Dashboard</span>}
+              {!isCollapsed && <span>{t('sidebar_dashboard')}</span>}
             </li>
             <li className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} py-2 px-3 rounded-lg transition-all duration-300 ${
               activePage === 'products' 
@@ -43,7 +45,7 @@ export default function Sidebar({ onNavigate, activePage, isCollapsed, toggleSid
                 : isDark ? 'hover:bg-gray-700 text-gray-300 cursor-pointer' : 'hover:bg-rose-200/60 cursor-pointer'
             }`} onClick={() => onNavigate('products')}>
               <span>📦</span>
-              {!isCollapsed && <span>Productos</span>}
+              {!isCollapsed && <span>{t('sidebar_products')}</span>}
             </li>
             <li className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} py-2 px-3 rounded-lg transition-all duration-300 ${
               activePage === 'sales' 
@@ -51,7 +53,7 @@ export default function Sidebar({ onNavigate, activePage, isCollapsed, toggleSid
                 : isDark ? 'hover:bg-gray-700 text-gray-300 cursor-pointer' : 'hover:bg-rose-200/60 cursor-pointer'
             }`} onClick={() => onNavigate('sales')}>
               <span>💰</span>
-              {!isCollapsed && <span>Ventas</span>}
+              {!isCollapsed && <span>{t('sidebar_sales')}</span>}
             </li>
             <li className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} py-2 px-3 rounded-lg transition-all duration-300 ${
               activePage === 'reports' 
@@ -59,7 +61,7 @@ export default function Sidebar({ onNavigate, activePage, isCollapsed, toggleSid
                 : isDark ? 'hover:bg-gray-700 text-gray-300 cursor-pointer' : 'hover:bg-rose-200/60 cursor-pointer'
             }`} onClick={() => onNavigate('reports')}>
               <span>📄</span>
-              {!isCollapsed && <span>Reportes</span>}
+              {!isCollapsed && <span>{t('sidebar_reports')}</span>}
             </li>
             <li className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} py-2 px-3 rounded-lg transition-all duration-300 ${
               activePage === 'settings' 
@@ -67,7 +69,7 @@ export default function Sidebar({ onNavigate, activePage, isCollapsed, toggleSid
                 : isDark ? 'hover:bg-gray-700 text-gray-300 cursor-pointer' : 'hover:bg-rose-200/60 cursor-pointer'
             }`} onClick={() => onNavigate('settings')}>
               <span>⚙️</span>
-              {!isCollapsed && <span>Configuración</span>}
+              {!isCollapsed && <span>{t('sidebar_settings')}</span>}
             </li>
           </ul>
         </nav>

@@ -4,15 +4,12 @@ import { invoke, isTauri, convertFileSrc } from '@tauri-apps/api/core';
 import { Search, Plus, Minus, Trash2, ShoppingCart } from 'lucide-react';
 import Sidebar from '../components/sidebar';
 import { ThemeContext } from '../context/ThemeContext';
+import { LanguageContext } from '../context/LanguageContext';
 import '../styles/sales.css';
-
-const paymentOptions = [
-  { value: 'Abono', label: 'Abono' },
-  { value: 'Contado', label: 'De Contado' },
-];
 
 export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar }) {
   const { getActiveTheme } = useContext(ThemeContext);
+  const { t } = useContext(LanguageContext);
   const isDark = getActiveTheme() === 'oscuro';
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -38,7 +35,7 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
         setProducts(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Error al cargar productos:', error);
-        toast.error('No se pudieron cargar los productos');
+        toast.error(t('toast_products_load_error'));
       }
     };
 
@@ -62,7 +59,7 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
 
   const handleAddToCart = (product) => {
     if (Number(product.stock) <= 0) {
-      toast.error('Producto sin stock');
+      toast.error(t('sales_no_stock'));
       return;
     }
 
@@ -114,12 +111,12 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
 
   const handleSubmitSale = async () => {
     if (!clienteName.trim()) {
-      toast.error('Ingresa el nombre de la clienta');
+      toast.error(t('toast_client_required'));
       return;
     }
 
     if (cartItems.length === 0) {
-      toast.error('Agrega al menos un producto');
+      toast.error(t('toast_cart_empty'));
       return;
     }
 
@@ -143,7 +140,7 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
     try {
       setIsSubmitting(true);
       const result = await invoke('create_venta_completa', { input });
-      toast.success(`Venta registrada (#${result.id_venta})`);
+      toast.success(`${t('toast_sale_registered')} (#${result.id_venta})`);
       setCartItems([]);
       setClienteName('');
       setSaleDate(() => {
@@ -153,7 +150,7 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
       setTipoPago('Contado');
     } catch (error) {
       console.error('Error al registrar venta:', error);
-      toast.error('No se pudo registrar la venta');
+      toast.error(t('toast_sale_error'));
     } finally {
       setIsSubmitting(false);
     }
@@ -171,13 +168,13 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
       <main className={`sales-page ${isDark ? 'sales-dark' : ''}`}>
         <header className="sales-header">
           <div>
-            <h1>Registrar Venta</h1>
-            <span className="sales-subtitle">Busca productos, ajusta cantidades y confirma el pago.</span>
+            <h1>{t('sales_title')}</h1>
+            <span className="sales-subtitle">{t('sales_subtitle')}</span>
           </div>
           <div className="sales-header-meta">
             <div className="sales-chip">
               <ShoppingCart size={16} />
-              <span>{cartItems.length} items</span>
+              <span>{cartItems.length} {t('sales_items')}</span>
             </div>
           </div>
         </header>
@@ -185,13 +182,13 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
         <section className="sales-layout">
           <div className="sales-panel">
             <div className="sales-search">
-              <label htmlFor="sales-search-input">Buscar</label>
+              <label htmlFor="sales-search-input">{t('sales_search_label')}</label>
               <div className="sales-search-bar">
                 <Search size={18} />
                 <input
                   id="sales-search-input"
                   type="text"
-                  placeholder="Buscar por nombre de producto"
+                  placeholder={t('sales_search_placeholder')}
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
                   onKeyDown={(event) => {
@@ -208,8 +205,8 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
 
             <div className="sales-catalog">
               <div className="sales-catalog-head">
-                <span>Productos disponibles</span>
-                <span className="sales-catalog-count">{filteredProducts.length} resultados</span>
+                <span>{t('sales_available')}</span>
+                <span className="sales-catalog-count">{filteredProducts.length} {t('sales_results')}</span>
               </div>
               <div className="sales-catalog-grid">
                 {filteredProducts.map((product) => {
@@ -232,16 +229,16 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
                       <div className="sales-product-info">
                         <div>
                           <h3>{product.nombre_producto}</h3>
-                          <p>Codigo #{product.id_producto}</p>
+                          <p>{t('sales_code')} #{product.id_producto}</p>
                         </div>
                         <div className="sales-product-meta">
                           <span className="sales-price">${Number(product.precio).toFixed(2)}</span>
                           <span className={`sales-stock ${Number(product.stock) <= 3 ? 'low' : ''}`}>
-                            Stock: {product.stock}
+                            {t('sales_stock')}: {product.stock}
                           </span>
                         </div>
                       </div>
-                      <span className="sales-add">Agregar</span>
+                      <span className="sales-add">{t('sales_add')}</span>
                     </button>
                   );
                 })}
@@ -252,16 +249,16 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
           <aside className="sales-cart">
             <div className="sales-cart-card">
               <div className="sales-cart-head">
-                <h2>Carrito</h2>
+                <h2>{t('sales_cart')}</h2>
                 <button type="button" className="sales-clear" onClick={handleClearCart}>
-                  Limpiar
+                  {t('sales_clear')}
                 </button>
               </div>
 
               {cartItems.length === 0 ? (
                 <div className="sales-empty">
                   <div className="sales-empty-icon">🧺</div>
-                  <p>Agrega productos para iniciar la venta.</p>
+                  <p>{t('sales_empty_cart')}</p>
                 </div>
               ) : (
                 <ul className="sales-cart-list">
@@ -301,29 +298,29 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
 
               <div className="sales-summary">
                 <div>
-                  <span>Subtotal</span>
+                  <span>{t('sales_subtotal')}</span>
                   <strong>${subtotal.toFixed(2)}</strong>
                 </div>
                 <div>
-                  <span>Total</span>
+                  <span>{t('sales_total')}</span>
                   <strong className="total">${subtotal.toFixed(2)}</strong>
                 </div>
               </div>
             </div>
 
             <div className="sales-checkout">
-              <h3>Datos de la venta</h3>
+              <h3>{t('sales_checkout_title')}</h3>
               <label>
-                Nombre de la clienta
+                {t('sales_client_label')}
                 <input
                   type="text"
-                  placeholder="Ej. Maria Lopez"
+                  placeholder={t('sales_client_placeholder')}
                   value={clienteName}
                   onChange={(event) => setClienteName(event.target.value)}
                 />
               </label>
               <label>
-                Fecha de la venta
+                {t('sales_date_label')}
                 <input
                   type="date"
                   value={saleDate}
@@ -332,9 +329,12 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
                 />
               </label>
               <label>
-                Tipo de pago
+                {t('sales_payment_label')}
                 <select value={tipoPago} onChange={(event) => setTipoPago(event.target.value)}>
-                  {paymentOptions.map((option) => (
+                  {[
+                    { value: 'Abono', label: t('sales_payment_abono') },
+                    { value: 'Contado', label: t('sales_payment_contado') },
+                  ].map((option) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
@@ -347,7 +347,7 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
                 onClick={handleSubmitSale}
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Registrando...' : 'Pagar'}
+                {isSubmitting ? t('sales_btn_paying') : t('sales_btn_pay')}
               </button>
             </div>
           </aside>

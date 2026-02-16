@@ -1,9 +1,11 @@
 import { useContext, useState } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
+import { LanguageContext } from '../context/LanguageContext';
 import Sidebar from '../components/sidebar';
 
 export default function Configuration({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar }) {
-  const { theme, setTheme, accentColor, setAccentColor, textSize, setTextSize, savePreferences, isSaved, getActiveTheme } = useContext(ThemeContext);
+  const { theme, setTheme, textSize, setTextSize, savePreferences, isSaved, getActiveTheme } = useContext(ThemeContext);
+  const { language, setLanguage, t } = useContext(LanguageContext);
   const [showSaved, setShowSaved] = useState(false);
   const isDark = getActiveTheme() === 'oscuro';
 
@@ -21,7 +23,7 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
       {/* Main content */}
       <main className={`flex-1 p-10 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
         <div className="max-w-2xl">
-          <h1 className={`text-4xl font-bold mb-10 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>Configuración</h1>
+          <h1 className={`text-4xl font-bold mb-10 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>{t('config_title')}</h1>
 
           {/* Secciones de configuración */}
           <div className="space-y-8">
@@ -30,16 +32,16 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
               <div className="flex items-start gap-4 mb-6">
                 <span className="text-3xl">🌙</span>
                 <div>
-                  <h2 className={`text-2xl font-bold mb-1 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>Modo</h2>
-                  <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>Elige el modo visual de la aplicación</p>
+                  <h2 className={`text-2xl font-bold mb-1 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>{t('config_theme_title')}</h2>
+                  <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{t('config_theme_desc')}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                 {[
-                  { value: 'claro', label: '☀️ Claro', description: 'Interfaz clara' },
-                  { value: 'oscuro', label: '🌙 Oscuro', description: 'Interfaz oscura' },
-                  { value: 'sistema', label: '⚙️ Sistema', description: 'Seguir del sistema' },
+                  { value: 'claro', label: t('config_theme_light'), description: t('config_theme_light_desc') },
+                  { value: 'oscuro', label: t('config_theme_dark'), description: t('config_theme_dark_desc') },
+                  { value: 'sistema', label: t('config_theme_system'), description: t('config_theme_system_desc') },
                 ].map((option) => (
                   <button
                     key={option.value}
@@ -57,34 +59,32 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
               </div>
             </div>
 
-            {/* Sección de Color de Acento */}
+            {/* Sección de Idioma */}
             <div className={`rounded-2xl shadow-lg p-8 border ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-rose-100'}`}>
               <div className="flex items-start gap-4 mb-6">
-                <span className="text-3xl">🎨</span>
+                <span className="text-3xl">🌐</span>
                 <div>
-                  <h2 className={`text-2xl font-bold mb-1 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>Color de Acento</h2>
-                  <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>Personaliza el color principal de la aplicación</p>
+                  <h2 className={`text-2xl font-bold mb-1 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>{t('config_language_title')}</h2>
+                  <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{t('config_language_desc')}</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 {[
-                  { value: 'rose', label: 'Rosa', color: 'bg-rose-500' },
-                  { value: 'pink', label: 'Rosado', color: 'bg-pink-500' },
-                  { value: 'fuchsia', label: 'Fucsia', color: 'bg-fuchsia-500' },
-                  { value: 'purple', label: 'Púrpura', color: 'bg-purple-500' },
+                  { value: 'es', label: t('config_language_es'), description: t('config_language_es_desc') },
+                  { value: 'en', label: t('config_language_en'), description: t('config_language_en_desc') },
                 ].map((option) => (
                   <button
                     key={option.value}
-                    onClick={() => setAccentColor(option.value)}
-                    className={`p-4 rounded-xl border-3 transition-all duration-200 flex flex-col items-center gap-2 ${
-                      accentColor === option.value
-                        ? 'border-gray-800 shadow-lg scale-105'
-                        : 'border-gray-300 hover:border-gray-400'
+                    onClick={() => setLanguage(option.value)}
+                    className={`p-4 rounded-xl border-2 transition-all duration-200 text-center ${
+                      language === option.value
+                        ? isDark ? 'border-pink-400 bg-gray-700 shadow-md' : 'border-rose-400 bg-rose-50 shadow-md'
+                        : isDark ? 'border-gray-600 bg-gray-800 hover:border-gray-500' : 'border-gray-200 bg-white hover:border-rose-200'
                     }`}
                   >
-                    <div className={`w-12 h-12 rounded-full ${option.color} shadow-md`} />
-                    <div className={`font-semibold text-sm ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>{option.label}</div>
+                    <div className={`font-semibold mb-1 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>{option.label}</div>
+                    <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{option.description}</div>
                   </button>
                 ))}
               </div>
@@ -95,15 +95,15 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
               <div className="flex items-start gap-4 mb-6">
                 <span className="text-3xl">📝</span>
                 <div>
-                  <h2 className={`text-2xl font-bold mb-1 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>Tamaño de Texto</h2>
-                  <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>Ajusta el tamaño del texto para mayor comodidad</p>
+                  <h2 className={`text-2xl font-bold mb-1 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>{t('config_text_size_title')}</h2>
+                  <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{t('config_text_size_desc')}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { value: 'normal', label: 'Normal', size: 'text-base' },
-                  { value: 'grande', label: 'Grande', size: 'text-lg' },
+                  { value: 'normal', label: t('config_text_normal'), size: 'text-base' },
+                  { value: 'grande', label: t('config_text_large'), size: 'text-lg' },
                 ].map((option) => (
                   <button
                     key={option.value}
@@ -118,7 +118,7 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
                       {option.label}
                     </div>
                     <div className={`${option.size} ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                      El texto se verá así
+                      {t('config_text_preview')}
                     </div>
                   </button>
                 ))}
@@ -138,7 +138,7 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
                 }`}
                 disabled={isSaved}
               >
-                {showSaved ? '✓ ¡Guardado!' : isSaved ? 'Guardado' : 'Guardar'}
+                {showSaved ? t('config_btn_saved_success') : isSaved ? t('config_btn_saved') : t('config_btn_save')}
               </button>
             </div>
           </div>

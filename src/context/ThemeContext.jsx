@@ -8,11 +8,6 @@ export function ThemeProvider({ children }) {
     return saved;
   });
 
-  const [accentColor, setAccentColorState] = useState(() => {
-    const saved = localStorage.getItem('app-accentColor') || 'rose';
-    return saved;
-  });
-
   const [textSize, setTextSizeState] = useState(() => {
     const saved = localStorage.getItem('app-textSize') || 'normal';
     return saved;
@@ -73,31 +68,14 @@ export function ThemeProvider({ children }) {
     }
   }, [textSize]);
 
-  // Aplicar color de acento como variable CSS
-  useEffect(() => {
-    const colorMap = {
-      rose: 'rgb(244, 114, 182)',
-      pink: 'rgb(236, 64, 122)',
-      fuchsia: 'rgb(217, 70, 239)',
-      purple: 'rgb(168, 85, 247)',
-    };
-    document.documentElement.style.setProperty('--accent-color', colorMap[accentColor]);
-  }, [accentColor]);
-
   const savePreferences = () => {
     localStorage.setItem('app-theme', theme);
-    localStorage.setItem('app-accentColor', accentColor);
     localStorage.setItem('app-textSize', textSize);
     setIsSaved(true);
   };
 
   const setTheme = (newTheme) => {
     setThemeState(newTheme);
-    setIsSaved(false);
-  };
-
-  const setAccentColor = (newColor) => {
-    setAccentColorState(newColor);
     setIsSaved(false);
   };
 
@@ -110,8 +88,6 @@ export function ThemeProvider({ children }) {
     <ThemeContext.Provider value={{
       theme,
       setTheme,
-      accentColor,
-      setAccentColor,
       textSize,
       setTextSize,
       getActiveTheme,

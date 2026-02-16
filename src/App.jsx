@@ -7,6 +7,7 @@ import Reports from './pages/reports';
 import Configuration from './pages/configuration';
 import Sidebar from './components/sidebar';
 import { ThemeProvider } from './context/ThemeContext';
+import { LanguageProvider } from './context/LanguageContext';
 import './app.css';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
   const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed);
 
   return (
+    <LanguageProvider>
     <ThemeProvider>
       <>
         <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
@@ -26,6 +28,7 @@ function App() {
         {currentPage === 'settings' && <Configuration onNavigate={setCurrentPage} currentPage={currentPage} isSidebarCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} />}
       </>
     </ThemeProvider>
+    </LanguageProvider>
   );
 }
 

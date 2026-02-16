@@ -5,9 +5,11 @@ import '../styles/products.css';
 import Sidebar from '../components/sidebar';
 import { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
+import { LanguageContext } from '../context/LanguageContext';
 
 export default function Products({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar }) {
   const { getActiveTheme } = useContext(ThemeContext);
+  const { t } = useContext(LanguageContext);
   const isDark = getActiveTheme() === 'oscuro';
   const [categories, setCategories] = useState([]);
   const [newCategory, setNewCategory] = useState('');
@@ -83,10 +85,10 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
       const idCategoria = await invoke('create_categoria', { nombre });
       setCategories([...categories, { id_categoria: idCategoria, nombre }]);
       setNewCategory('');
-      toast.success('Categoría creada');
+      toast.success(t('toast_category_created'));
     } catch (error) {
       console.error('Error al crear categoría:', error);
-      toast.error('No se pudo crear la categoría');
+      toast.error(t('toast_category_create_error'));
     }
   };
 
@@ -103,7 +105,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
   const handleSaveEditCategory = async (cat) => {
     const nombre = editingCategoryName.trim();
     if (!nombre) {
-      toast.error('El nombre no puede estar vacio');
+      toast.error(t('toast_category_name_empty'));
       return;
     }
 
@@ -128,15 +130,15 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
       }
 
       handleCancelEditCategory();
-      toast.success('Categoria actualizada');
+      toast.success(t('toast_category_updated'));
     } catch (error) {
       console.error('Error al actualizar categoria:', error);
-      toast.error('No se pudo actualizar la categoria');
+      toast.error(t('toast_category_update_error'));
     }
   };
 
   const handleDeleteCategory = async (cat) => {
-    if (!window.confirm('Eliminar categoria? Los productos quedaran sin categoria.')) {
+    if (!window.confirm(t('products_delete_category_confirm'))) {
       return;
     }
 
@@ -160,10 +162,10 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
         });
       }
 
-      toast.success('Categoria eliminada');
+      toast.success(t('toast_category_deleted'));
     } catch (error) {
       console.error('Error al eliminar categoria:', error);
-      toast.error('No se pudo eliminar la categoria');
+      toast.error(t('toast_category_delete_error'));
     }
   };
 
@@ -200,7 +202,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
     e.preventDefault();
     
     if (!formData.nombre_producto || !formData.id_categoria || !formData.stock || !formData.precio) {
-      toast.error('Por favor completa los campos obligatorios');
+      toast.error(t('products_fields_required'));
       return;
     }
 
@@ -256,10 +258,10 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
       setImageFile(null);
       setMiniaturaBase64(null);
 
-      toast.success('Producto registrado exitosamente');
+      toast.success(t('toast_product_registered'));
     } catch (error) {
       console.error('Error al crear producto:', error);
-      toast.error('No se pudo guardar el producto');
+      toast.error(t('toast_product_save_error'));
     }
   };
 
@@ -277,23 +279,23 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
 
       {/* Main content */}
       <main className={`products-container ${isDark ? 'products-dark' : ''}`}>
-          <h1>Agregar Productos</h1>
+          <h1>{t('products_title')}</h1>
           
           <div className="products-layout">
         {/* Sección izquierda - Crear categoría */}
         <div className="section-categoria">
           <div className="crear-categoria">
-            <h3>Nueva Categoría</h3>
+            <h3>{t('products_new_category')}</h3>
             <div className="input-group">
               <input
                 type="text"
-                placeholder="Ej. Calzado"
+                placeholder={t('products_category_placeholder')}
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
               />
               <button onClick={handleAddCategory} className="btn-add">
-                Añadir
+                {t('products_btn_add')}
               </button>
             </div>
           </div>
@@ -333,14 +335,14 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
                         className="btn-cat-save"
                         onClick={() => handleSaveEditCategory(cat)}
                       >
-                        Guardar
+                        {t('products_btn_save_cat')}
                       </button>
                       <button
                         type="button"
                         className="btn-cat-cancel"
                         onClick={handleCancelEditCategory}
                       >
-                        Cancelar
+                        {t('products_btn_cancel_cat')}
                       </button>
                     </>
                   ) : (
@@ -350,14 +352,14 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
                         className="btn-cat-edit"
                         onClick={() => handleStartEditCategory(cat)}
                       >
-                        Editar
+                        {t('products_btn_edit_cat')}
                       </button>
                       <button
                         type="button"
                         className="btn-cat-delete"
                         onClick={() => handleDeleteCategory(cat)}
                       >
-                        Eliminar
+                        {t('products_btn_delete_cat')}
                       </button>
                     </>
                   )}
@@ -370,12 +372,12 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
         {/* Sección derecha - Registrar producto */}
         <div className="section-productos">
           <div className="form-container">
-            <h2>Registrar Nuevo Producto</h2>
+            <h2>{t('products_register_title')}</h2>
 
             <form onSubmit={handleSubmitProduct}>
               {/* Sección Multimedia */}
               <div className="form-section">
-                <h4>Imagen del Producto</h4>
+                <h4>{t('products_image_section')}</h4>
                 <div className="imagen-single-container">
                   <div className="multimedia-slot-single">
                     {formData.ruta_imagen ? (
@@ -383,7 +385,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
                     ) : (
                       <div className="placeholder">
                         <span style={{ fontSize: '48px' }}>🖼️</span>
-                        <span>Cargar imagen</span>
+                        <span>{t('products_image_load')}</span>
                       </div>
                     )}
                     <input
@@ -394,7 +396,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
                       id="product-image"
                     />
                     <label htmlFor="product-image" className="upload-label">
-                      {formData.ruta_imagen ? 'Cambiar' : 'Cargar'}
+                      {formData.ruta_imagen ? t('products_image_change') : t('products_image_upload')}
                     </label>
                   </div>
                 </div>
@@ -403,13 +405,13 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
               {/* Información básica */}
               <div className="form-row">
                 <div className="form-group">
-                  <label>Nombre del Producto *</label>
+                  <label>{t('products_name_label')}</label>
                   <input
                     type="text"
                     name="nombre_producto"
                     value={formData.nombre_producto}
                     onChange={handleInputChange}
-                    placeholder="Base Líquida Mate TimeWise"
+                    placeholder={t('products_name_placeholder')}
                     required
                   />
                 </div>
@@ -417,14 +419,14 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Categoría *</label>
+                  <label>{t('products_category_label')}</label>
                   <select
                     name="id_categoria"
                     value={formData.id_categoria}
                     onChange={handleInputChange}
                     required
                   >
-                    <option value="">Seleccionar categoría</option>
+                    <option value="">{t('products_select_category')}</option>
                     {categories.map((cat) => (
                       <option key={cat.id_categoria} value={cat.id_categoria}>
                         {cat.nombre}
@@ -433,25 +435,25 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>Stock *</label>
+                  <label>{t('products_stock_label')}</label>
                   <input
                     type="number"
                     name="stock"
                     value={formData.stock}
                     onChange={handleInputChange}
-                    placeholder="30"
+                    placeholder={t('products_stock_placeholder')}
                     min="0"
                     required
                   />
                 </div>
                 <div className="form-group">
-                  <label>Precio *</label>
+                  <label>{t('products_price_label')}</label>
                   <input
                     type="number"
                     name="precio"
                     value={formData.precio}
                     onChange={handleInputChange}
-                    placeholder="310.00"
+                    placeholder={t('products_price_placeholder')}
                     step="0.01"
                     min="0"
                     required
@@ -461,7 +463,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
 
               {/* Botón submit */}
               <button type="submit" className="btn-submit">
-                Guardar Producto
+                {t('products_btn_save')}
               </button>
             </form>
           </div>
@@ -471,17 +473,17 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
       {/* Tabla de productos registrados */}
       {products.length > 0 && (
         <div className="productos-registrados">
-          <h3>Productos Registrados</h3>
+          <h3>{t('products_registered_title')}</h3>
           <div className="tabla-scroll">
             <table>
               <thead>
                 <tr>
-                  <th>Imagen</th>
-                  <th>Nombre</th>
-                  <th>Categoría</th>
-                  <th>Stock</th>
-                  <th>Precio</th>
-                  <th>Acciones</th>
+                  <th>{t('products_col_image')}</th>
+                  <th>{t('products_col_name')}</th>
+                  <th>{t('products_col_category')}</th>
+                  <th>{t('products_col_stock')}</th>
+                  <th>{t('products_col_price')}</th>
+                  <th>{t('products_col_actions')}</th>
                 </tr>
               </thead>
               <tbody>

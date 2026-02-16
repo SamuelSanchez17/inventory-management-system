@@ -3,11 +3,13 @@ import Header from '../components/header';
 import { useContext, useState, useMemo, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { ThemeContext } from '../context/ThemeContext';
+import { LanguageContext } from '../context/LanguageContext';
 import { invoke, isTauri, convertFileSrc } from '@tauri-apps/api/core';
 import '../styles/dashboard.css';
 
 export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar }) {
   const { getActiveTheme } = useContext(ThemeContext);
+  const { t } = useContext(LanguageContext);
   const isDark = getActiveTheme() === 'oscuro';
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -297,12 +299,12 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
 
     const nombre_producto = editForm.nombre_producto.trim();
     if (!nombre_producto) {
-      toast.error('El nombre del producto es obligatorio.');
+      toast.error(t('toast_name_required'));
       return;
     }
 
     if (!isTauri()) {
-      toast.error('Backend Tauri no disponible. Ejecuta tauri dev.');
+      toast.error(t('toast_tauri_unavailable'));
       return;
     }
 
@@ -342,10 +344,10 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
         )
       );
       closeEditModal();
-      toast.success('Producto actualizado.');
+      toast.success(t('toast_product_updated'));
     } catch (error) {
       console.error('Error al actualizar producto:', error);
-      toast.error('No se pudo actualizar el producto.');
+      toast.error(t('toast_product_update_error'));
     }
   };
 
@@ -355,7 +357,7 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
     }
 
     if (!isTauri()) {
-      toast.error('Backend Tauri no disponible. Ejecuta tauri dev.');
+      toast.error(t('toast_tauri_unavailable'));
       return;
     }
 
@@ -365,19 +367,19 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
         prev.filter((product) => product.id_producto !== selectedProduct.id_producto)
       );
       closeDeleteModal();
-      toast.success('Producto eliminado.');
+      toast.success(t('toast_product_deleted'));
     } catch (error) {
       console.error('Error al eliminar producto:', error);
-      toast.error('No se pudo eliminar el producto.');
+      toast.error(t('toast_product_delete_error'));
     }
   };
 
   //Métricas del dashboard
   const metrics = [
-    { label: "Total Productos", value: totalStock, icon: "📦", color: "bg-rose-100 text-rose-700" },
-    { label: "Productos con Stock Bajo", value: lowStockCount, icon: "⚠️", color: "bg-yellow-100 text-yellow-700" },
-    { label: "Ventas Hoy", value: `$${salesToday.toFixed(2)}`, icon: "💵", color: "bg-green-100 text-green-700" },
-    { label: "Ventas Mes", value: `$${salesMonth.toFixed(2)}`, icon: "📈", color: "bg-sky-100 text-sky-700" },
+    { label: t('dashboard_metric_total'), value: totalStock, icon: "📦", color: "bg-rose-100 text-rose-700" },
+    { label: t('dashboard_metric_low_stock'), value: lowStockCount, icon: "⚠️", color: "bg-yellow-100 text-yellow-700" },
+    { label: t('dashboard_metric_sales_today'), value: `$${salesToday.toFixed(2)}`, icon: "💵", color: "bg-green-100 text-green-700" },
+    { label: t('dashboard_metric_sales_month'), value: `$${salesMonth.toFixed(2)}`, icon: "📈", color: "bg-sky-100 text-sky-700" },
   ];
 
   return (
@@ -411,21 +413,21 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
         <div className="dashboard-layout">
           {/* Tabla productos */}
           <div className="dashboard-table-container">
-            <h2 className="dashboard-section-title">Productos</h2>
+            <h2 className="dashboard-section-title">{t('dashboard_section_products')}</h2>
 
             <table className="dashboard-table">
               <thead>
                 <tr>
-                  <th>Nombre del Producto</th>
-                  <th>Categoría</th>
-                  <th>Stock</th>
-                  <th>Precio Por Unidad</th>
-                  <th>Acciones</th>
+                  <th>{t('dashboard_col_name')}</th>
+                  <th>{t('dashboard_col_category')}</th>
+                  <th>{t('dashboard_col_stock')}</th>
+                  <th>{t('dashboard_col_price')}</th>
+                  <th>{t('dashboard_col_actions')}</th>
                 </tr>
               </thead>
               <tbody>
                 {pagedProducts.map((p) => {
-                  const categoryName = categoryMap.get(p.id_categoria) || 'Sin Categoría';
+                  const categoryName = categoryMap.get(p.id_categoria) || t('dashboard_no_category');
                   const imageSrc = p.miniatura_base64
                     ? `data:image/jpeg;base64,${p.miniatura_base64}`
                     : p.ruta_imagen
@@ -453,14 +455,14 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
                           className="dashboard-action-button dashboard-action-edit"
                           onClick={() => openEditModal(p)}
                         >
-                          Editar
+                          {t('dashboard_btn_edit')}
                         </button>
                         <button
                           type="button"
                           className="dashboard-action-button dashboard-action-delete"
                           onClick={() => openDeleteModal(p)}
                         >
-                          Eliminar
+                          {t('dashboard_btn_delete')}
                         </button>
                       </div>
                     </td>
@@ -473,11 +475,11 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
             {/* Paginación */}
             <div className="dashboard-pagination">
               <span>
-                {totalItems === 0 ? '0 – 0 de 0' : `${startIndex + 1} – ${endIndex} de ${totalItems}`}
+                {totalItems === 0 ? `0 – 0 ${t('dashboard_of')} 0` : `${startIndex + 1} – ${endIndex} ${t('dashboard_of')} ${totalItems}`}
               </span>
               <div className="pagination-controls">
                 <label className="items-per-page">
-                  <span>Mostrar</span>
+                  <span>{t('dashboard_pagination_show')}</span>
                   <select
                     value={itemsPerPage}
                     onChange={(event) => {
@@ -512,10 +514,10 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
           <div className="dashboard-sidebar">
             {/* Productos con stock bajo */}
             <div className="dashboard-card">
-              <h2 className="dashboard-card-title">Productos con Stock Bajo</h2>
+              <h2 className="dashboard-card-title">{t('dashboard_low_stock_title')}</h2>
               <ul className="low-stock-list">
                 {lowStockProducts.map((item) => {
-                  const categoryName = categoryMap.get(item.id_categoria) || 'Sin Categoría';
+                  const categoryName = categoryMap.get(item.id_categoria) || t('dashboard_no_category');
                   return (
                     <li key={item.id_producto ?? item.nombre_producto} className="low-stock-item">
                       <div className='low-stock-info'>
@@ -530,7 +532,7 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
             </div>
             {/* Gráfica de ventas (placeholder) */}
             <div className="dashboard-card">
-              <h2 className="dashboard-card-title">Ventas de la Semana</h2>
+              <h2 className="dashboard-card-title">{t('dashboard_weekly_sales')}</h2>
               <div className="sales-chart">
                 {/* Simulación de barras */}
                 {[60, 80, 100, 70, 90, 110, 95].map((h, i) => (
@@ -538,7 +540,7 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
                 ))}
               </div>
               <div className="chart-labels">
-                <span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span><span>Dom</span>
+                <span>{t('dashboard_days')[0]}</span><span>{t('dashboard_days')[1]}</span><span>{t('dashboard_days')[2]}</span><span>{t('dashboard_days')[3]}</span><span>{t('dashboard_days')[4]}</span><span>{t('dashboard_days')[5]}</span><span>{t('dashboard_days')[6]}</span>
               </div>
             </div>
           </div>
@@ -548,7 +550,7 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
           <div className="dashboard-modal-overlay" role="dialog" aria-modal="true">
             <div className="dashboard-modal">
               <div className="dashboard-modal-header">
-                <h3>Editar producto</h3>
+                <h3>{t('dashboard_edit_title')}</h3>
                 <p>{selectedProduct.nombre_producto}</p>
               </div>
               <div className="dashboard-modal-body">
@@ -557,7 +559,7 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
                     {editImagePreview ? (
                       <img src={editImagePreview} alt="Vista previa" />
                     ) : (
-                      <div className="dashboard-image-placeholder">Sin imagen</div>
+                      <div className="dashboard-image-placeholder">{t('dashboard_edit_no_image')}</div>
                     )}
                   </div>
                   <label className="dashboard-image-upload">
@@ -566,11 +568,11 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
                       accept="image/*"
                       onChange={handleEditImageChange}
                     />
-                    {editImagePreview ? 'Cambiar imagen' : 'Agregar imagen'}
+                    {editImagePreview ? t('dashboard_edit_change_image') : t('dashboard_edit_add_image')}
                   </label>
                 </div>
                 <label className="dashboard-modal-field">
-                  <span>Nombre</span>
+                  <span>{t('dashboard_edit_name')}</span>
                   <input
                     name="nombre_producto"
                     value={editForm.nombre_producto}
@@ -579,13 +581,13 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
                   />
                 </label>
                 <label className="dashboard-modal-field">
-                  <span>Categoría</span>
+                  <span>{t('dashboard_edit_category')}</span>
                   <select
                     name="id_categoria"
                     value={editForm.id_categoria}
                     onChange={handleEditInputChange}
                   >
-                    <option value="">Sin categoría</option>
+                    <option value="">{t('dashboard_edit_no_category')}</option>
                     {categories.map((cat) => (
                       <option key={cat.id_categoria} value={cat.id_categoria}>
                         {cat.nombre}
@@ -594,7 +596,7 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
                   </select>
                 </label>
                 <label className="dashboard-modal-field">
-                  <span>Stock</span>
+                  <span>{t('dashboard_edit_stock')}</span>
                   <input
                     name="stock"
                     value={editForm.stock}
@@ -604,7 +606,7 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
                   />
                 </label>
                 <label className="dashboard-modal-field">
-                  <span>Precio</span>
+                  <span>{t('dashboard_edit_price')}</span>
                   <input
                     name="precio"
                     value={editForm.precio}
@@ -621,14 +623,14 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
                   className="dashboard-modal-button dashboard-modal-secondary"
                   onClick={closeEditModal}
                 >
-                  Cancelar
+                  {t('dashboard_edit_cancel')}
                 </button>
                 <button
                   type="button"
                   className="dashboard-modal-button dashboard-modal-primary"
                   onClick={handleConfirmUpdate}
                 >
-                  Guardar cambios
+                  {t('dashboard_edit_save')}
                 </button>
               </div>
             </div>
@@ -639,12 +641,12 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
           <div className="dashboard-modal-overlay" role="dialog" aria-modal="true">
             <div className="dashboard-modal dashboard-modal-compact">
               <div className="dashboard-modal-header">
-                <h3>Eliminar producto</h3>
-                <p>Esta accion no se puede deshacer.</p>
+                <h3>{t('dashboard_delete_title')}</h3>
+                <p>{t('dashboard_delete_warning')}</p>
               </div>
               <div className="dashboard-modal-body">
                 <p className="dashboard-modal-text">
-                  ¿Deseas eliminar <strong>{selectedProduct.nombre_producto}</strong>?
+                  {t('dashboard_delete_confirm')} <strong>{selectedProduct.nombre_producto}</strong>?
                 </p>
               </div>
               <div className="dashboard-modal-actions">
@@ -653,14 +655,14 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
                   className="dashboard-modal-button dashboard-modal-secondary"
                   onClick={closeDeleteModal}
                 >
-                  Cancelar
+                  {t('dashboard_delete_cancel')}
                 </button>
                 <button
                   type="button"
                   className="dashboard-modal-button dashboard-modal-danger"
                   onClick={handleConfirmDelete}
                 >
-                  Eliminar
+                  {t('dashboard_delete_btn')}
                 </button>
               </div>
             </div>
