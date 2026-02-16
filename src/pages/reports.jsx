@@ -1,6 +1,7 @@
 import { useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { invoke, isTauri } from '@tauri-apps/api/core';
+import { save } from '@tauri-apps/plugin-dialog';
 import Sidebar from '../components/sidebar';
 import { ThemeContext } from '../context/ThemeContext';
 import { LanguageContext } from '../context/LanguageContext';
@@ -86,6 +87,61 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
     const collapseAll = useCallback(() => {
         setExpandedSales(new Set());
     }, []);
+
+    const [isExporting, setIsExporting] = useState(false);
+    const [isBackingUp, setIsBackingUp] = useState(false);
+
+    const handleExportCSV = async () => {
+        if (!isTauri()) return;
+
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            const filePath = await save({
+                defaultPath: `inventario_${today}.csv`,
+                filters: [{ name: 'CSV', extensions: ['csv'] }],
+            });
+
+            if (!filePath) {
+                toast(t('toast_export_csv_cancelled'), { icon: 'ℹ️' });
+                return;
+            }
+
+            setIsExporting(true);
+            await invoke('export_all_csv', { rutaDestino: filePath });
+            toast.success(t('toast_export_csv_success'));
+        } catch (error) {
+            console.error('Error exporting CSV:', error);
+            toast.error(t('toast_export_csv_error'));
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
+    const handleBackupDB = async () => {
+        if (!isTauri()) return;
+
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            const filePath = await save({
+                defaultPath: `respaldo_inventario_${today}.db`,
+                filters: [{ name: 'Database', extensions: ['db'] }],
+            });
+
+            if (!filePath) {
+                toast(t('toast_backup_cancelled'), { icon: 'ℹ️' });
+                return;
+            }
+
+            setIsBackingUp(true);
+            await invoke('backup_database', { rutaDestino: filePath });
+            toast.success(t('toast_backup_success'));
+        } catch (error) {
+            console.error('Error backing up DB:', error);
+            toast.error(t('toast_backup_error'));
+        } finally {
+            setIsBackingUp(false);
+        }
+    };
 
     const totalItems = sales.length;
     const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
@@ -233,6 +289,47 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                                     </button>
                                 </span>
                             </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Sección de Exportación y Respaldo */}
+                <section className="reports-section">
+                    <div className="reports-card reports-card-full reports-export-card">
+                        <div className="reports-export-header">
+                            <div className="reports-export-icon">🗂️</div>
+                            <div>
+                                <h2>{t('reports_export_title')}</h2>
+                                <p>{t('reports_export_desc')}</p>
+                            </div>
+                        </div>
+
+                        <div className="reports-export-actions">
+                            <button
+                                type="button"
+                                className="reports-export-btn reports-export-csv"
+                                onClick={handleExportCSV}
+                                disabled={isExporting}
+                            >
+                                <span className="export-btn-icon">📊</span>
+                                <div className="export-btn-text">
+                                    <strong>{isExporting ? '...' : t('reports_export_csv_btn')}</strong>
+                                    <span>{t('reports_export_csv_desc')}</span>
+                                </div>
+                            </button>
+
+                            <button
+                                type="button"
+                                className="reports-export-btn reports-export-backup"
+                                onClick={handleBackupDB}
+                                disabled={isBackingUp}
+                            >
+                                <span className="export-btn-icon">💾</span>
+                                <div className="export-btn-text">
+                                    <strong>{isBackingUp ? '...' : t('reports_backup_btn')}</strong>
+                                    <span>{t('reports_backup_desc')}</span>
+                                </div>
+                            </button>
                         </div>
                     </div>
                 </section>

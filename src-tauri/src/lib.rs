@@ -5,6 +5,7 @@ use commands::products;
 use commands::categories;
 use commands::sales;
 use commands::sold_products;
+use commands::export;
 
 mod database; //para manejo de la base de datos
 mod models; //definicion de modelo de datos
@@ -16,6 +17,7 @@ mod commands; //comandos expuestos a la interfaz
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
+    .plugin(tauri_plugin_dialog::init())
     .setup(|app| {
       let app_dir = app
         .path()
@@ -70,6 +72,9 @@ pub fn run() {
       sold_products::delete_producto_vendido,
       sold_products::delete_productos_by_venta,
 
+      export::export_all_csv,
+      export::backup_database,
+      export::import_database,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

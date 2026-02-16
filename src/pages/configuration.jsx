@@ -1,18 +1,88 @@
 import { useContext, useState } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import { LanguageContext } from '../context/LanguageContext';
+import { invoke, isTauri } from '@tauri-apps/api/core';
+import { open } from '@tauri-apps/plugin-dialog';
+import toast from 'react-hot-toast';
 import Sidebar from '../components/sidebar';
 
 export default function Configuration({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar }) {
   const { theme, setTheme, textSize, setTextSize, savePreferences, isSaved, getActiveTheme } = useContext(ThemeContext);
   const { language, setLanguage, t } = useContext(LanguageContext);
   const [showSaved, setShowSaved] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingFilePath, setPendingFilePath] = useState(null);
   const isDark = getActiveTheme() === 'oscuro';
 
   const handleSave = () => {
     savePreferences();
     setShowSaved(true);
     setTimeout(() => setShowSaved(false), 2000);
+  };
+
+  const handleImportDB = async () => {
+    if (!isTauri()) return;
+
+    try {
+      const filePath = await open({
+        multiple: false,
+        filters: [{ name: 'Database', extensions: ['db'] }],
+      });
+
+      if (!filePath) {
+        toast(t('toast_import_cancelled'), { icon: 'ℹ️' });
+        return;
+      }
+
+      // Guardar ruta y mostrar modal de confirmación
+      setPendingFilePath(filePath);
+      setShowConfirmModal(true);
+    } catch (error) {
+      console.error('Error opening file dialog:', error);
+      toast.error(t('toast_import_error'));
+    }
+  };
+
+  const confirmImport = async () => {
+    if (!pendingFilePath) return;
+
+    setShowConfirmModal(false);
+    setIsImporting(true);
+
+    try {
+      const result = await invoke('import_database', { rutaOrigen: pendingFilePath });
+
+      if (result === 'OK') {
+        toast.success(t('toast_import_success'));
+        setTimeout(() => window.location.reload(), 1500);
+      }
+    } catch (error) {
+      console.error('Error importing DB:', error);
+      const errorStr = String(error);
+
+      if (errorStr.includes('FILE_NOT_FOUND')) {
+        toast.error(t('toast_import_file_not_found'));
+      } else if (errorStr.includes('INVALID_EXTENSION')) {
+        toast.error(t('toast_import_invalid_ext'));
+      } else if (errorStr.includes('NOT_SQLITE')) {
+        toast.error(t('toast_import_not_sqlite'));
+      } else if (errorStr.includes('CORRUPT_DB')) {
+        toast.error(t('toast_import_corrupt'));
+      } else if (errorStr.includes('MISSING_TABLE')) {
+        toast.error(t('toast_import_missing_table'));
+      } else {
+        toast.error(t('toast_import_error'));
+      }
+    } finally {
+      setIsImporting(false);
+      setPendingFilePath(null);
+    }
+  };
+
+  const cancelImport = () => {
+    setShowConfirmModal(false);
+    setPendingFilePath(null);
   };
 
   return (
@@ -125,6 +195,34 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
               </div>
             </div>
 
+            {/* Sección de Restaurar Datos */}
+            <div className={`rounded-2xl shadow-lg p-8 border ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-rose-100'}`}>
+              <div className="flex items-start gap-4 mb-4">
+                <span className="text-3xl">📂</span>
+                <div>
+                  <h2 className={`text-2xl font-bold mb-1 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>{t('config_import_title')}</h2>
+                  <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{t('config_import_desc')}</p>
+                </div>
+              </div>
+
+              <div className={`rounded-xl p-4 mb-4 text-sm ${isDark ? 'bg-amber-900/30 text-amber-300 border border-amber-700' : 'bg-amber-50 text-amber-800 border border-amber-200'}`}>
+                {t('config_import_warning')}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleImportDB}
+                disabled={isImporting}
+                className={`w-full p-4 rounded-xl border-2 transition-all duration-200 text-center font-semibold ${
+                  isDark
+                    ? 'border-gray-600 bg-gray-700 text-gray-200 hover:border-pink-400 hover:bg-gray-600'
+                    : 'border-gray-200 bg-white text-gray-700 hover:border-rose-300 hover:bg-rose-50'
+                } ${isImporting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+              >
+                {isImporting ? '...' : t('config_import_btn')}
+              </button>
+            </div>
+
             {/* Botón Guardar */}
             <div className="flex justify-end">
               <button
@@ -144,6 +242,87 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
           </div>
         </div>
       </main>
+
+      {/* ── Modal de confirmación de restauración ── */}
+      {showConfirmModal && (
+        <div
+          className="confirm-modal-overlay"
+          onClick={cancelImport}
+        >
+          <div
+            className={`confirm-modal-content ${
+              isDark ? 'confirm-modal-dark' : 'confirm-modal-light'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Icono de advertencia */}
+            <div className={`confirm-modal-icon-wrapper ${
+              isDark ? 'confirm-modal-icon-dark' : 'confirm-modal-icon-light'
+            }`}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                <line x1="12" y1="9" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </div>
+
+            {/* Título */}
+            <h3 className={`confirm-modal-title ${
+              isDark ? 'text-gray-100' : 'text-gray-900'
+            }`}>
+              {t('confirm_modal_title')}
+            </h3>
+
+            {/* Cuerpo */}
+            <p className={`confirm-modal-body ${
+              isDark ? 'text-gray-400' : 'text-gray-600'
+            }`}>
+              {t('confirm_modal_body')}
+            </p>
+
+            {/* Detalle archivo */}
+            <div className={`confirm-modal-file ${
+              isDark ? 'bg-gray-700/50 text-gray-300' : 'bg-gray-100 text-gray-700'
+            }`}>
+              <span className="confirm-modal-file-icon">📄</span>
+              <span className="confirm-modal-file-name">
+                {pendingFilePath?.split(/[\\/]/).pop()}
+              </span>
+            </div>
+
+            {/* Nota de seguridad */}
+            <div className={`confirm-modal-note ${
+              isDark
+                ? 'bg-emerald-900/30 text-emerald-300 border-emerald-700'
+                : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+            }`}>
+              🛡️ {t('confirm_modal_safety_note')}
+            </div>
+
+            {/* Botones */}
+            <div className="confirm-modal-actions">
+              <button
+                type="button"
+                onClick={cancelImport}
+                className={`confirm-modal-btn confirm-modal-btn-cancel ${
+                  isDark
+                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {t('confirm_modal_cancel')}
+              </button>
+              <button
+                type="button"
+                onClick={confirmImport}
+                className="confirm-modal-btn confirm-modal-btn-confirm"
+              >
+                {t('confirm_modal_confirm')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

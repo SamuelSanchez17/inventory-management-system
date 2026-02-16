@@ -581,3 +581,96 @@
 		padding: 8px 10px;
 	}
 }
+
+/* ─── Export & Backup Section ─── */
+.reports-export-card {
+	margin-top: 8px;
+}
+
+.reports-export-header {
+	display: flex;
+	align-items: flex-start;
+	gap: 16px;
+	margin-bottom: 24px;
+}
+
+.reports-export-icon {
+	font-size: 2.2rem;
+	line-height: 1;
+	flex-shrink: 0;
+}
+
+.reports-export-header h2 {
+	font-family: 'Space Grotesk', sans-serif;
+	font-size: 1.25rem;
+	font-weight: 700;
+	color: var(--reports-text);
+	margin: 0 0 4px;
+}
+
+.reports-export-header p {
+	font-size: 0.88rem;
+	color: var(--reports-muted);
+	margin: 0;
+}
+
+.reports-export-actions {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16px;
+}
+
+.reports-export-btn {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	padding: 20px 24px;
+	border-radius: 14px;
+	border: 2px solid var(--reports-border);
+	background: var(--reports-card);
+	cursor: pointer;
+	transition: all 0.25s ease;
+	text-align: left;
+}
+
+.reports-export-btn:hover:not(:disabled) {
+	border-color: var(--reports-accent);
+	background: var(--reports-accent-soft);
+	transform: translateY(-1px);
+	box-shadow: 0 6px 20px rgba(15, 118, 110, 0.12);
+}
+
+.reports-export-btn:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+.export-btn-icon {
+	font-size: 2rem;
+	flex-shrink: 0;
+}
+
+.export-btn-text {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.export-btn-text strong {
+	font-family: 'Space Grotesk', sans-serif;
+	font-weight: 700;
+	font-size: 0.95rem;
+	color: var(--reports-text);
+}
+
+.export-btn-text span {
+	font-size: 0.82rem;
+	color: var(--reports-muted);
+	line-height: 1.3;
+}
+
+@media (max-width: 640px) {
+	.reports-export-actions {
+		grid-template-columns: 1fr;
+	}
+}

@@ -163,6 +163,40 @@ const translations = {
     // ── Toasts (Reports) ──
     toast_reports_load_error: 'No se pudieron cargar los reportes',
 
+    // ── Export / Backup ──
+    reports_export_title: 'Exportar y Respaldar',
+    reports_export_desc: 'Descarga una copia de tus datos para tenerlos seguros.',
+    reports_export_csv_btn: '📊 Descargar Datos (CSV)',
+    reports_export_csv_desc: 'Descarga todos tus datos en un archivo que puedes abrir en Excel.',
+    reports_backup_btn: '💾 Crear Respaldo',
+    reports_backup_desc: 'Guarda una copia de seguridad completa de la aplicación.',
+    toast_export_csv_success: 'Archivo CSV guardado correctamente',
+    toast_export_csv_error: 'No se pudo exportar el archivo CSV',
+    toast_export_csv_cancelled: 'Exportación cancelada',
+    toast_backup_success: 'Respaldo creado correctamente',
+    toast_backup_error: 'No se pudo crear el respaldo',
+    toast_backup_cancelled: 'Respaldo cancelado',
+
+    // ── Import DB (Configuration) ──
+    config_import_title: 'Restaurar Datos',
+    config_import_desc: 'Recupera tus datos desde un respaldo anterior (.db).',
+    config_import_btn: '📂 Restaurar desde Respaldo',
+    config_import_warning: '⚠️ Esto reemplazará todos los datos actuales. Se creará un respaldo automático antes de restaurar.',
+    config_import_confirm: '¿Estás segura? Se reemplazarán todos los datos actuales con los del respaldo seleccionado.',
+    confirm_modal_title: '¿Restaurar datos?',
+    confirm_modal_body: 'Esta acción reemplazará todos los datos actuales de la aplicación con los del archivo de respaldo seleccionado. Este proceso no se puede deshacer manualmente.',
+    confirm_modal_safety_note: 'Se creará un respaldo automático de tus datos actuales antes de restaurar.',
+    confirm_modal_cancel: 'Cancelar',
+    confirm_modal_confirm: 'Sí, restaurar datos',
+    toast_import_success: 'Datos restaurados correctamente. La aplicación se recargará.',
+    toast_import_error: 'No se pudo restaurar los datos.',
+    toast_import_cancelled: 'Restauración cancelada',
+    toast_import_invalid_ext: 'El archivo seleccionado no es válido. Solo se aceptan archivos .db',
+    toast_import_not_sqlite: 'El archivo no es una base de datos válida.',
+    toast_import_corrupt: 'El archivo está dañado o no es compatible.',
+    toast_import_missing_table: 'Al archivo le faltan datos necesarios',
+    toast_import_file_not_found: 'No se encontró el archivo seleccionado.',
+
     // ── Configuration page ──
     config_title: 'Configuración',
     config_theme_title: 'Modo',
@@ -352,6 +386,40 @@ const translations = {
 
     // ── Toasts (Reports) ──
     toast_reports_load_error: 'Could not load reports',
+
+    // ── Export / Backup ──
+    reports_export_title: 'Export & Backup',
+    reports_export_desc: 'Download a copy of your data to keep it safe.',
+    reports_export_csv_btn: '📊 Download Data (CSV)',
+    reports_export_csv_desc: 'Download all your data in a file you can open in Excel.',
+    reports_backup_btn: '💾 Create Backup',
+    reports_backup_desc: 'Save a complete backup copy of the application.',
+    toast_export_csv_success: 'CSV file saved successfully',
+    toast_export_csv_error: 'Could not export the CSV file',
+    toast_export_csv_cancelled: 'Export cancelled',
+    toast_backup_success: 'Backup created successfully',
+    toast_backup_error: 'Could not create the backup',
+    toast_backup_cancelled: 'Backup cancelled',
+
+    // ── Import DB (Configuration) ──
+    config_import_title: 'Restore Data',
+    config_import_desc: 'Recover your data from a previous backup (.db).',
+    config_import_btn: '📂 Restore from Backup',
+    config_import_warning: '⚠️ This will replace all current data. An automatic backup will be created before restoring.',
+    config_import_confirm: 'Are you sure? All current data will be replaced with the selected backup.',
+    confirm_modal_title: 'Restore data?',
+    confirm_modal_body: 'This action will replace all current application data with the selected backup file. This process cannot be manually undone.',
+    confirm_modal_safety_note: 'An automatic backup of your current data will be created before restoring.',
+    confirm_modal_cancel: 'Cancel',
+    confirm_modal_confirm: 'Yes, restore data',
+    toast_import_success: 'Data restored successfully. The app will reload.',
+    toast_import_error: 'Could not restore the data.',
+    toast_import_cancelled: 'Restore cancelled',
+    toast_import_invalid_ext: 'The selected file is not valid. Only .db files are accepted.',
+    toast_import_not_sqlite: 'The file is not a valid database.',
+    toast_import_corrupt: 'The file is damaged or incompatible.',
+    toast_import_missing_table: 'The file is missing required data.',
+    toast_import_file_not_found: 'The selected file was not found.',
 
     // ── Configuration page ──
     config_title: 'Settings',
