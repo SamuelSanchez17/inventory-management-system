@@ -1,6 +1,7 @@
 import { useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { invoke, isTauri } from '@tauri-apps/api/core';
+import { Archive, CaretLeft, CaretRight, ChartBar, FloppyDisk } from 'phosphor-react';
 import { save } from '@tauri-apps/plugin-dialog';
 import Sidebar from '../components/sidebar';
 import { ThemeContext } from '../context/ThemeContext';
@@ -565,14 +566,14 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                                         onClick={() => setPageIndex((prev) => Math.max(1, prev - 1))}
                                         disabled={safePageIndex === 1}
                                     >
-                                        {'<'}
+                                        <CaretLeft size={16} weight="duotone" />
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setPageIndex((prev) => Math.min(totalPages, prev + 1))}
                                         disabled={safePageIndex === totalPages}
                                     >
-                                        {'>'}
+                                        <CaretRight size={16} weight="duotone" />
                                     </button>
                                 </span>
                             </div>
@@ -584,7 +585,9 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                 <section className="reports-section">
                     <div className="reports-card reports-card-full reports-export-card">
                         <div className="reports-export-header">
-                            <div className="reports-export-icon">🗂️</div>
+                            <div className="reports-export-icon">
+                                <Archive size={22} weight="duotone" />
+                            </div>
                             <div>
                                 <h2>{t('reports_export_title')}</h2>
                                 <p>{t('reports_export_desc')}</p>
@@ -598,7 +601,9 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                                 onClick={handleExportXLSX}
                                 disabled={isExporting}
                             >
-                                <span className="export-btn-icon">📊</span>
+                                <span className="export-btn-icon">
+                                    <ChartBar size={26} weight="duotone" />
+                                </span>
                                 <div className="export-btn-text">
                                     <strong>{isExporting ? '...' : t('reports_export_csv_btn')}</strong>
                                     <span>{t('reports_export_csv_desc')}</span>
@@ -611,7 +616,9 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                                 onClick={handleBackupDB}
                                 disabled={isBackingUp}
                             >
-                                <span className="export-btn-icon">💾</span>
+                                <span className="export-btn-icon">
+                                    <FloppyDisk size={26} weight="duotone" />
+                                </span>
                                 <div className="export-btn-text">
                                     <strong>{isBackingUp ? '...' : t('reports_backup_btn')}</strong>
                                     <span>{t('reports_backup_desc')}</span>

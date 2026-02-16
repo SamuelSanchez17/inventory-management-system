@@ -4,13 +4,12 @@ import {
   CurrencyDollar,
   FileText,
   GearSix,
-  HouseSimple,
+  House,
   Package,
 } from 'phosphor-react';
 import { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import { LanguageContext } from '../context/LanguageContext';
-import { House } from 'lucide-react';
 
 export default function Sidebar({ onNavigate, activePage, isCollapsed, toggleSidebar })
 {
@@ -25,11 +24,11 @@ export default function Sidebar({ onNavigate, activePage, isCollapsed, toggleSid
           : 'bg-rose-100/80 border-rose-200'
       } border-r flex flex-col items-center py-8 relative`}>
         {/* Botón toggle */}
-        <button onClick={toggleSidebar} className={`absolute top-4 right-4 p-1 rounded-lg transition-colors ${isDark ? 'hover:bg-gray-700' : 'hover:bg-rose-200/60'}`}>
+        <button onClick={toggleSidebar} className={`absolute top-3 right-3 p-1.5 rounded-lg shadow-sm transition-colors ${isDark ? 'bg-white/5 ring-1 ring-white/10 hover:bg-white/10' : 'bg-black/5 ring-1 ring-black/5 hover:bg-rose-200/60'}`}>
           {isCollapsed ? (
-            <CaretRight size={20} weight="duotone" className={isDark ? 'text-gray-300' : ''} />
+            <CaretRight size={22} weight="duotone" className={isDark ? 'text-gray-300' : ''} />
           ) : (
-            <CaretLeft size={20} weight="duotone" className={isDark ? 'text-gray-300' : ''} />
+            <CaretLeft size={22} weight="duotone" className={isDark ? 'text-gray-300' : ''} />
           )}
         </button>
         {/* Logo y nombre */}

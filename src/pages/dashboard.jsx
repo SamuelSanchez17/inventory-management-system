@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { ThemeContext } from '../context/ThemeContext';
 import { LanguageContext } from '../context/LanguageContext';
 import { invoke, isTauri, convertFileSrc } from '@tauri-apps/api/core';
+import { CurrencyDollar, Package, TrendUp, Warning } from 'phosphor-react';
 import '../styles/dashboard.css';
 
 export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar }) {
@@ -376,10 +377,30 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
 
   //Métricas del dashboard
   const metrics = [
-    { label: t('dashboard_metric_total'), value: totalStock, icon: "📦", color: "bg-rose-100 text-rose-700" },
-    { label: t('dashboard_metric_low_stock'), value: lowStockCount, icon: "⚠️", color: "bg-yellow-100 text-yellow-700" },
-    { label: t('dashboard_metric_sales_today'), value: `$${salesToday.toFixed(2)}`, icon: "💵", color: "bg-green-100 text-green-700" },
-    { label: t('dashboard_metric_sales_month'), value: `$${salesMonth.toFixed(2)}`, icon: "📈", color: "bg-sky-100 text-sky-700" },
+    {
+      label: t('dashboard_metric_total'),
+      value: totalStock,
+      icon: <Package size={28} weight="duotone" />,
+      color: "bg-rose-100 text-rose-700",
+    },
+    {
+      label: t('dashboard_metric_low_stock'),
+      value: lowStockCount,
+      icon: <Warning size={28} weight="duotone" />,
+      color: "bg-yellow-100 text-yellow-700",
+    },
+    {
+      label: t('dashboard_metric_sales_today'),
+      value: `$${salesToday.toFixed(2)}`,
+      icon: <CurrencyDollar size={28} weight="duotone" />,
+      color: "bg-green-100 text-green-700",
+    },
+    {
+      label: t('dashboard_metric_sales_month'),
+      value: `$${salesMonth.toFixed(2)}`,
+      icon: <TrendUp size={28} weight="duotone" />,
+      color: "bg-sky-100 text-sky-700",
+    },
   ];
 
   return (

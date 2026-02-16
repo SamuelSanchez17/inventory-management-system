@@ -5,6 +5,7 @@ import { invoke, isTauri } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
 import toast from 'react-hot-toast';
 import Sidebar from '../components/sidebar';
+import { FileText, FolderOpen, Globe, Moon, ShieldCheck, TextAa, Warning } from 'phosphor-react';
 
 export default function Configuration({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar }) {
   const { theme, setTheme, textSize, setTextSize, savePreferences, isSaved, getActiveTheme } = useContext(ThemeContext);
@@ -100,7 +101,9 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
             {/* Sección de Tema */}
             <div className={`rounded-2xl shadow-lg p-8 border ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-rose-100'}`}>
               <div className="flex items-start gap-4 mb-6">
-                <span className="text-3xl">🌙</span>
+                <span className="text-3xl">
+                  <Moon size={28} weight="duotone" />
+                </span>
                 <div>
                   <h2 className={`text-2xl font-bold mb-1 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>{t('config_theme_title')}</h2>
                   <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{t('config_theme_desc')}</p>
@@ -132,7 +135,9 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
             {/* Sección de Idioma */}
             <div className={`rounded-2xl shadow-lg p-8 border ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-rose-100'}`}>
               <div className="flex items-start gap-4 mb-6">
-                <span className="text-3xl">🌐</span>
+                <span className="text-3xl">
+                  <Globe size={28} weight="duotone" />
+                </span>
                 <div>
                   <h2 className={`text-2xl font-bold mb-1 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>{t('config_language_title')}</h2>
                   <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{t('config_language_desc')}</p>
@@ -163,7 +168,9 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
             {/* Sección de Tamaño de Texto */}
             <div className={`rounded-2xl shadow-lg p-8 border ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-rose-100'}`}>
               <div className="flex items-start gap-4 mb-6">
-                <span className="text-3xl">📝</span>
+                <span className="text-3xl">
+                  <TextAa size={28} weight="duotone" />
+                </span>
                 <div>
                   <h2 className={`text-2xl font-bold mb-1 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>{t('config_text_size_title')}</h2>
                   <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{t('config_text_size_desc')}</p>
@@ -198,7 +205,9 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
             {/* Sección de Restaurar Datos */}
             <div className={`rounded-2xl shadow-lg p-8 border ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-rose-100'}`}>
               <div className="flex items-start gap-4 mb-4">
-                <span className="text-3xl">📂</span>
+                <span className="text-3xl">
+                  <FolderOpen size={28} weight="duotone" />
+                </span>
                 <div>
                   <h2 className={`text-2xl font-bold mb-1 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>{t('config_import_title')}</h2>
                   <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{t('config_import_desc')}</p>
@@ -259,11 +268,7 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
             <div className={`confirm-modal-icon-wrapper ${
               isDark ? 'confirm-modal-icon-dark' : 'confirm-modal-icon-light'
             }`}>
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                <line x1="12" y1="9" x2="12" y2="13" />
-                <line x1="12" y1="17" x2="12.01" y2="17" />
-              </svg>
+              <Warning size={32} weight="duotone" />
             </div>
 
             {/* Título */}
@@ -284,7 +289,9 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
             <div className={`confirm-modal-file ${
               isDark ? 'bg-gray-700/50 text-gray-300' : 'bg-gray-100 text-gray-700'
             }`}>
-              <span className="confirm-modal-file-icon">📄</span>
+              <span className="confirm-modal-file-icon">
+                <FileText size={16} weight="duotone" />
+              </span>
               <span className="confirm-modal-file-name">
                 {pendingFilePath?.split(/[\\/]/).pop()}
               </span>
@@ -296,7 +303,7 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
                 ? 'bg-emerald-900/30 text-emerald-300 border-emerald-700'
                 : 'bg-emerald-50 text-emerald-700 border-emerald-200'
             }`}>
-              🛡️ {t('confirm_modal_safety_note')}
+              <ShieldCheck size={16} weight="duotone" /> {t('confirm_modal_safety_note')}
             </div>
 
             {/* Botones */}

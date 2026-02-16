@@ -1,7 +1,15 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { invoke, isTauri, convertFileSrc } from '@tauri-apps/api/core';
-import { Search, Plus, Minus, Trash2, ShoppingCart } from 'lucide-react';
+import {
+  MagnifyingGlass,
+  Minus,
+  Plus,
+  Receipt,
+  ShoppingCart,
+  ShoppingCartSimple,
+  Trash,
+} from 'phosphor-react';
 import Sidebar from '../components/sidebar';
 import { ThemeContext } from '../context/ThemeContext';
 import { LanguageContext } from '../context/LanguageContext';
@@ -173,7 +181,7 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
           </div>
           <div className="sales-header-meta">
             <div className="sales-chip">
-              <ShoppingCart size={16} />
+              <ShoppingCart size={16} weight="duotone" />
               <span>{cartItems.length} {t('sales_items')}</span>
             </div>
           </div>
@@ -184,7 +192,7 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
             <div className="sales-search">
               <label htmlFor="sales-search-input">{t('sales_search_label')}</label>
               <div className="sales-search-bar">
-                <Search size={18} />
+                <MagnifyingGlass size={18} weight="duotone" />
                 <input
                   id="sales-search-input"
                   type="text"
@@ -198,7 +206,7 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
                   }}
                 />
                 <button type="button" className="sales-search-btn" aria-label="Buscar producto" onClick={handleSearchNow}>
-                  <Search size={18} />
+                  <MagnifyingGlass size={18} weight="duotone" />
                 </button>
               </div>
             </div>
@@ -224,7 +232,7 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
                       disabled={Number(product.stock) <= 0}
                     >
                       <div className="sales-product-image">
-                        {imageSrc ? <img src={imageSrc} alt="" /> : <span>🧾</span>}
+                        {imageSrc ? <img src={imageSrc} alt="" /> : <Receipt size={20} weight="duotone" />}
                       </div>
                       <div className="sales-product-info">
                         <div>
@@ -257,7 +265,9 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
 
               {cartItems.length === 0 ? (
                 <div className="sales-empty">
-                  <div className="sales-empty-icon">🧺</div>
+                  <div className="sales-empty-icon">
+                    <ShoppingCartSimple size={28} weight="duotone" />
+                  </div>
                   <p>{t('sales_empty_cart')}</p>
                 </div>
               ) : (
@@ -275,7 +285,7 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
                             onClick={() => handleUpdateQuantity(item.id_producto, item.cantidad - 1)}
                             disabled={item.cantidad <= 1}
                           >
-                            <Minus size={14} />
+                            <Minus size={14} weight="duotone" />
                           </button>
                           <span>{item.cantidad}</span>
                           <button
@@ -283,10 +293,10 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
                             onClick={() => handleUpdateQuantity(item.id_producto, item.cantidad + 1)}
                             disabled={item.cantidad >= item.stock}
                           >
-                            <Plus size={14} />
+                            <Plus size={14} weight="duotone" />
                           </button>
                           <button type="button" className="danger" onClick={() => handleRemoveItem(item.id_producto)}>
-                            <Trash2 size={14} />
+                            <Trash size={14} weight="duotone" />
                           </button>
                         </div>
                       </div>

@@ -6,6 +6,7 @@ import Sidebar from '../components/sidebar';
 import { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import { LanguageContext } from '../context/LanguageContext';
+import { Image, Tag, Trash, Warning } from 'phosphor-react';
 
 export default function Products({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar }) {
   const { getActiveTheme } = useContext(ThemeContext);
@@ -399,7 +400,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
                       <img src={formData.ruta_imagen} alt="Producto" />
                     ) : (
                       <div className="placeholder">
-                        <span style={{ fontSize: '48px' }}>🖼️</span>
+                        <Image size={48} weight="duotone" />
                         <span>{t('products_image_load')}</span>
                       </div>
                     )}
@@ -521,7 +522,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
                         className="btn-delete"
                         onClick={() => handleDeleteProduct(product.id_producto)}
                       >
-                        🗑️
+                        <Trash size={16} weight="duotone" />
                       </button>
                     </td>
                   </tr>
@@ -549,13 +550,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
             <div className={`confirm-modal-icon-wrapper ${
               isDark ? 'confirm-modal-icon-dark' : 'confirm-modal-icon-light'
             }`}>
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 6h18" />
-                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                <line x1="10" y1="11" x2="10" y2="17" />
-                <line x1="14" y1="11" x2="14" y2="17" />
-              </svg>
+              <Warning size={32} weight="duotone" />
             </div>
 
             {/* Título */}
@@ -576,7 +571,9 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
             <div className={`confirm-modal-file ${
               isDark ? 'bg-gray-700/50 text-gray-300' : 'bg-gray-100 text-gray-700'
             }`}>
-              <span className="confirm-modal-file-icon">🏷️</span>
+              <span className="confirm-modal-file-icon">
+                <Tag size={16} weight="duotone" />
+              </span>
               <span className="confirm-modal-file-name">
                 {pendingDeleteCat?.nombre}
               </span>
@@ -588,7 +585,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
                 ? 'bg-amber-900/30 text-amber-300 border-amber-700'
                 : 'bg-amber-50 text-amber-800 border-amber-200'
             }`}>
-              ⚠️ {t('delete_cat_modal_warning')}
+              <Warning size={16} weight="duotone" /> {t('delete_cat_modal_warning')}
             </div>
 
             {/* Botones */}
