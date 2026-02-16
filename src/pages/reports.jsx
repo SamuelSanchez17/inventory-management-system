@@ -140,14 +140,14 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                                         <polyline points="7 13 12 18 17 13" />
                                         <polyline points="7 6 12 11 17 6" />
                                     </svg>
-                                    Expandir
+                                    Expandir Información
                                 </button>
-                                <button type="button" className="reports-expand-btn" onClick={collapseAll} title="Colapsar todas">
+                                <button type="button" className="reports-expand-btn" onClick={collapseAll} title="Minimizar todas">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                         <polyline points="17 11 12 6 7 11" />
                                         <polyline points="17 18 12 13 7 18" />
                                     </svg>
-                                    Colapsar
+                                    Minimizar Información
                                 </button>
                             </div>
                         </div>
@@ -240,6 +240,7 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
 
 function SaleRow({ venta, saleProducts, isExpanded, onToggle, formatDate, formatMoney }) {
     const saleId = venta.id_venta;
+    const totalQty = saleProducts.reduce((sum, p) => sum + p.cantidad, 0);
 
     return (
         <>
@@ -251,14 +252,18 @@ function SaleRow({ venta, saleProducts, isExpanded, onToggle, formatDate, format
             >
                 <td className="col-expand">
                     <span className={`reports-chevron ${isExpanded ? 'open' : ''}`}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="9 18 15 12 9 6" />
                         </svg>
                     </span>
                 </td>
                 <td>
                     <span className="reports-id-badge" title={`ID: ${saleId}`}>
-                        Venta #{saleId}
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+                            <line x1="3" y1="6" x2="21" y2="6" />
+                        </svg>
+                        #{saleId}
                     </span>
                 </td>
                 <td>{formatDate(venta.fecha)}</td>
@@ -268,7 +273,11 @@ function SaleRow({ venta, saleProducts, isExpanded, onToggle, formatDate, format
                         {saleProducts.length} {saleProducts.length === 1 ? 'producto' : 'productos'}
                     </span>
                 </td>
-                <td>{venta.tipo_pago}</td>
+                <td>
+                    <span className={`reports-pago-badge ${venta.tipo_pago === 'Abono' ? 'pago-abono' : 'pago-contado'}`}>
+                        {venta.tipo_pago}
+                    </span>
+                </td>
                 <td className="col-total">{formatMoney(venta.total_venta)}</td>
             </tr>
 
@@ -276,34 +285,80 @@ function SaleRow({ venta, saleProducts, isExpanded, onToggle, formatDate, format
                 <tr className="reports-detail-row">
                     <td colSpan={7}>
                         <div className="reports-detail-container">
+                            <div className="reports-detail-header">
+                                <div className="reports-detail-title">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                                        <line x1="1" y1="10" x2="23" y2="10" />
+                                    </svg>
+                                    <span>Desglose de productos</span>
+                                </div>
+                                <div className="reports-detail-meta">
+                                    <span className="detail-meta-item">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                                            <line x1="16" y1="2" x2="16" y2="6" />
+                                            <line x1="8" y1="2" x2="8" y2="6" />
+                                            <line x1="3" y1="10" x2="21" y2="10" />
+                                        </svg>
+                                        {formatDate(venta.fecha)}
+                                    </span>
+                                    <span className="detail-meta-item">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                                            <circle cx="12" cy="7" r="4" />
+                                        </svg>
+                                        {venta.nombre_clienta}
+                                    </span>
+                                </div>
+                            </div>
+
                             <table className="reports-detail-table">
                                 <thead>
                                     <tr>
-                                        <th>Producto</th>
-                                        <th>Cantidad</th>
-                                        <th>Precio unitario</th>
-                                        <th>Subtotal</th>
+                                        <th className="dt-col-num">#</th>
+                                        <th className="dt-col-product">Producto</th>
+                                        <th className="dt-col-qty">Cantidad</th>
+                                        <th className="dt-col-price">Precio unit.</th>
+                                        <th className="dt-col-subtotal">Subtotal</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {saleProducts.length === 0 ? (
                                         <tr>
-                                            <td colSpan={4} className="reports-empty">Sin productos registrados.</td>
+                                            <td colSpan={5} className="reports-empty">Sin productos registrados.</td>
                                         </tr>
                                     ) : (
-                                        saleProducts.map((item) => {
+                                        saleProducts.map((item, idx) => {
                                             const name = item.nombre_producto_snapshot || `ID ${item.id_producto}`;
                                             return (
                                                 <tr key={item.id_producto_vendido ?? `${item.id_venta}-${item.id_producto}`}>
-                                                    <td>{name}</td>
-                                                    <td>{item.cantidad}</td>
-                                                    <td>{formatMoney(item.precio_unitario)}</td>
-                                                    <td>{formatMoney(item.subtotal)}</td>
+                                                    <td className="dt-col-num">{idx + 1}</td>
+                                                    <td className="dt-col-product">
+                                                        <span className="detail-product-name">{name}</span>
+                                                    </td>
+                                                    <td className="dt-col-qty">
+                                                        <span className="detail-qty-badge">{item.cantidad}</span>
+                                                    </td>
+                                                    <td className="dt-col-price">{formatMoney(item.precio_unitario)}</td>
+                                                    <td className="dt-col-subtotal">{formatMoney(item.subtotal)}</td>
                                                 </tr>
                                             );
                                         })
                                     )}
                                 </tbody>
+                                {saleProducts.length > 0 && (
+                                    <tfoot>
+                                        <tr className="reports-detail-footer">
+                                            <td colSpan={2} className="dt-footer-label">Total de la venta</td>
+                                            <td className="dt-col-qty">
+                                                <span className="detail-qty-badge total">{totalQty}</span>
+                                            </td>
+                                            <td></td>
+                                            <td className="dt-col-subtotal dt-footer-total">{formatMoney(venta.total_venta)}</td>
+                                        </tr>
+                                    </tfoot>
+                                )}
                             </table>
                         </div>
                     </td>
