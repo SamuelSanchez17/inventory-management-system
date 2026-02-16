@@ -25,7 +25,7 @@ pub fn export_all_xlsx(
     const CAT_COLS: u16 = 2;
     const PROD_COLS: u16 = 7;
     const VENT_COLS: u16 = 5;
-    const PV_COLS: u16 = 7;
+    const PV_COLS: u16 = 6;
 
     // Columnas de inicio de cada tabla (con 1 columna gap entre cada una)
     const CAT_START: u16 = 0;                                          // A
@@ -55,17 +55,20 @@ pub fn export_all_xlsx(
         }
     }
 
-    // Productos
+    // Productos (JOIN con categorias para mostrar nombre en vez de id)
     let prod_headers = [
-        "id_producto", "nombre_producto", "id_categoria",
+        "id_producto", "nombre_producto", "categoria",
         "stock", "precio", "creado_at", "actualizado_at",
     ];
     let mut prod_rows: Vec<Vec<String>> = Vec::new();
     {
         let mut stmt = conn
             .prepare(
-                "SELECT id_producto, nombre_producto, id_categoria, stock, precio, creado_at, actualizado_at \
-                 FROM productos ORDER BY id_producto",
+                "SELECT p.id_producto, p.nombre_producto, COALESCE(c.nombre, '') as categoria, \
+                        p.stock, p.precio, p.creado_at, p.actualizado_at \
+                 FROM productos p \
+                 LEFT JOIN categorias c ON p.id_categoria = c.id_categoria \
+                 ORDER BY p.id_producto",
             )
             .map_err(|e| e.to_string())?;
         let rows = stmt
@@ -74,7 +77,7 @@ pub fn export_all_xlsx(
                 Ok(vec![
                     row.get::<_, i64>(0)?.to_string(),
                     row.get::<_, String>(1)?,
-                    row.get::<_, Option<i64>>(2)?.map_or(String::new(), |v| v.to_string()),
+                    row.get::<_, String>(2)?,
                     row.get::<_, i64>(3)?.to_string(),
                     if precio.fract() == 0.0 { format!("{}", precio as i64) } else { format!("{}", precio) },
                     row.get::<_, Option<String>>(5)?.unwrap_or_default(),
@@ -102,9 +105,10 @@ pub fn export_all_xlsx(
         let rows = stmt
             .query_map([], |row| {
                 let total: f64 = row.get(3)?;
+                let fecha_raw: String = row.get(1)?;
                 Ok(vec![
                     row.get::<_, i64>(0)?.to_string(),
-                    row.get::<_, String>(1)?,
+                    normalize_fecha(&fecha_raw),
                     row.get::<_, String>(2)?,
                     if total.fract() == 0.0 { format!("{}", total as i64) } else { format!("{}", total) },
                     row.get::<_, String>(4)?,
@@ -116,30 +120,30 @@ pub fn export_all_xlsx(
         }
     }
 
-    // Productos vendidos
+    // Productos vendidos (nombres legibles en vez de IDs)
     let pv_headers = [
-        "id_producto_vendido", "id_venta", "id_producto",
-        "nombre_producto_snapshot", "cantidad", "precio_unitario", "subtotal",
+        "nro", "nro_venta", "producto",
+        "cantidad", "precio_unitario", "subtotal",
     ];
     let mut pv_rows: Vec<Vec<String>> = Vec::new();
     {
         let mut stmt = conn
             .prepare(
-                "SELECT id_producto_vendido, id_venta, id_producto, nombre_producto_snapshot, \
-                        cantidad, precio_unitario, subtotal \
-                 FROM productos_vendidos ORDER BY id_venta, id_producto_vendido",
+                "SELECT pv.id_producto_vendido, pv.id_venta, pv.nombre_producto_snapshot, \
+                        pv.cantidad, pv.precio_unitario, pv.subtotal \
+                 FROM productos_vendidos pv \
+                 ORDER BY pv.id_venta, pv.id_producto_vendido",
             )
             .map_err(|e| e.to_string())?;
         let rows = stmt
             .query_map([], |row| {
-                let pu: f64 = row.get(5)?;
-                let sub: f64 = row.get(6)?;
+                let pu: f64 = row.get(4)?;
+                let sub: f64 = row.get(5)?;
                 Ok(vec![
                     row.get::<_, i64>(0)?.to_string(),
                     row.get::<_, i64>(1)?.to_string(),
-                    row.get::<_, i64>(2)?.to_string(),
-                    row.get::<_, String>(3)?,
-                    row.get::<_, i64>(4)?.to_string(),
+                    row.get::<_, String>(2)?,
+                    row.get::<_, i64>(3)?.to_string(),
                     if pu.fract() == 0.0 { format!("{}", pu as i64) } else { format!("{:.2}", pu) },
                     if sub.fract() == 0.0 { format!("{}", sub as i64) } else { format!("{:.2}", sub) },
                 ])
@@ -277,6 +281,27 @@ pub fn export_all_xlsx(
     workbook.save(&ruta_destino).map_err(|e| format!("No se pudo escribir el archivo: {e}"))?;
 
     Ok(ruta_destino)
+}
+
+fn normalize_fecha(value: &str) -> String {
+    // Expected output: "YYYY-MM-DD HH:MM:SS"
+    if let Some((date_part, time_part)) = value.split_once('T') {
+        let mut time = time_part.trim_end_matches('Z');
+        if let Some((t, _ms)) = time.split_once('.') {
+            time = t;
+        }
+        return format!("{} {}", date_part, time);
+    }
+
+    if let Some((date_part, time_part)) = value.split_once(' ') {
+        let mut time = time_part;
+        if let Some((t, _ms)) = time.split_once('.') {
+            time = t;
+        }
+        return format!("{} {}", date_part, time);
+    }
+
+    value.to_string()
 }
 
 /// ─── Respaldar la base de datos (copia .db) ───
