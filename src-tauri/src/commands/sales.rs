@@ -61,18 +61,18 @@ pub fn create_venta_completa(
     let db_path: &PathBuf = db_path.inner();
     let mut conn = database::init_db(db_path).map_err(|e| e.to_string())?;
 
-    // 1. Validacion que exista al menos 1 producto a la venta
+    // Validacion que exista al menos 1 producto a la venta
     if input.productos.is_empty() {
         return Err("Debe agregar al menos un producto a la venta".to_string());
     }
 
-    // 2. Calcula el total de la venta
+    // Calcula el total de la venta
     let mut total_venta = 0.0;
     for item in &input.productos {
         total_venta += item.cantidad as f64 * item.precio_unitario;
     }
 
-    // 3. Validar stock ANTES de iniciar la transacción
+    // Validar stock ANTES de iniciar la transacción
     let producto_service = ProductoService::new(&conn);
     for item in &input.productos {
         let producto = producto_service
@@ -87,16 +87,16 @@ pub fn create_venta_completa(
         }
     }
 
-    // 4. INICIAR TRANSACCIÓN
+    // INICIAR TRANSACCIÓN
     let tx = conn.transaction().map_err(|e| e.to_string())?;
 
-    // 5. Insertar la venta en la tabla de ventas
+    // Inserta la venta en la tabla de ventas
     let venta_service = VentaService::new(&tx);
     let id_venta = venta_service
         .create_venta(&input.fecha, &input.nombre_clienta, total_venta, &input.tipo_pago)
         .map_err(|e| format!("Error al crear venta: {}", e))?;
 
-    // 6. Inserta cada producto(item) vendido
+    // Inserta cada producto(item) vendido
     let producto_vendido_service = ProductoVendidoService::new(&tx);
     let mut items_insertados = 0;
 
@@ -110,11 +110,11 @@ pub fn create_venta_completa(
         items_insertados += 1;
     }
 
-    // 7. COMMIT (confirmar todo)
+    // COMMIT (confirmacion de todo)
     // Si ocurrió un error en 5 o 6, la transacción se revierte automáticamente, se confirma la transacción
     tx.commit().map_err(|e| format!("Error al confirmar la transacción: {}", e))?;
 
-    // 8. Retorna el resultado
+    // Retorna el resultado
     Ok(VentaCompletaOutput {
         id_venta,
         total_venta,

@@ -13,32 +13,35 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
     const isDark = getActiveTheme() === 'oscuro';
     const [sales, setSales] = useState([]);
     const [soldProducts, setSoldProducts] = useState([]);
+    const [products, setProducts] = useState([]);
     const [itemsPerPage, setItemsPerPage] = useState(8);
     const [pageIndex, setPageIndex] = useState(1);
     const [expandedSales, setExpandedSales] = useState(new Set());
 
+    const loadReportsData = useCallback(async () => {
+        if (!isTauri()) {
+            return;
+        }
+
+        try {
+            const [salesData, soldData, productsData] = await Promise.all([
+                invoke('list_ventas'),
+                invoke('list_productos_vendidos'),
+                invoke('list_productos'),
+            ]);
+
+            setSales(Array.isArray(salesData) ? salesData : []);
+            setSoldProducts(Array.isArray(soldData) ? soldData : []);
+            setProducts(Array.isArray(productsData) ? productsData : []);
+        } catch (error) {
+            console.error('Error al cargar reportes:', error);
+            toast.error(t('toast_reports_load_error'));
+        }
+    }, [t]);
+
     useEffect(() => {
-        const loadReportsData = async () => {
-            if (!isTauri()) {
-                return;
-            }
-
-            try {
-                const [salesData, soldData] = await Promise.all([
-                    invoke('list_ventas'),
-                    invoke('list_productos_vendidos'),
-                ]);
-
-                setSales(Array.isArray(salesData) ? salesData : []);
-                setSoldProducts(Array.isArray(soldData) ? soldData : []);
-            } catch (error) {
-                console.error('Error al cargar reportes:', error);
-                toast.error(t('toast_reports_load_error'));
-            }
-        };
-
         loadReportsData();
-    }, []);
+    }, [loadReportsData]);
 
     const productsBySaleId = useMemo(() => {
         const map = new Map();
@@ -50,6 +53,11 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
         });
         return map;
     }, [soldProducts]);
+
+    const productsById = useMemo(
+        () => new Map(products.map((product) => [product.id_producto, product])),
+        [products]
+    );
 
     const formatDate = (value) => {
         if (!value) return '';
@@ -66,6 +74,26 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
             return '$0.00';
         }
         return `$${numberValue.toFixed(2)}`;
+    };
+
+    const toInputDateTime = (value) => {
+        if (!value) return '';
+        if (value.includes('T')) {
+            return value.slice(0, 16);
+        }
+        if (value.includes(' ')) {
+            return value.replace(' ', 'T').slice(0, 16);
+        }
+        return value;
+    };
+
+    const fromInputDateTime = (value) => {
+        if (!value) return '';
+        if (value.includes('T')) {
+            const [datePart, timePart] = value.split('T');
+            return `${datePart} ${timePart}:00`;
+        }
+        return value;
     };
 
     const toggleExpanded = useCallback((saleId) => {
@@ -90,6 +118,21 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
 
     const [isExporting, setIsExporting] = useState(false);
     const [isBackingUp, setIsBackingUp] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isUpdatingSale, setIsUpdatingSale] = useState(false);
+    const [isDeletingSale, setIsDeletingSale] = useState(false);
+    const [isItemsModalOpen, setIsItemsModalOpen] = useState(false);
+    const [isSavingItems, setIsSavingItems] = useState(false);
+    const [activeSale, setActiveSale] = useState(null);
+    const [editForm, setEditForm] = useState({
+        fecha: '',
+        nombre_clienta: '',
+        tipo_pago: 'Contado',
+        total_venta: 0,
+    });
+    const [editItems, setEditItems] = useState([]);
+    const [deletedItemIds, setDeletedItemIds] = useState([]);
 
     const handleExportXLSX = async () => {
         if (!isTauri()) return;
@@ -140,6 +183,247 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
             toast.error(t('toast_backup_error'));
         } finally {
             setIsBackingUp(false);
+        }
+    };
+
+    const handleOpenEditSale = (venta) => {
+        setActiveSale(venta);
+        setEditForm({
+            fecha: toInputDateTime(venta.fecha),
+            nombre_clienta: venta.nombre_clienta ?? '',
+            tipo_pago: venta.tipo_pago ?? 'Contado',
+            total_venta: venta.total_venta ?? 0,
+        });
+        setIsEditModalOpen(true);
+    };
+
+    const handleCloseEditSale = () => {
+        setIsEditModalOpen(false);
+        setActiveSale(null);
+    };
+
+    const handleOpenDeleteSale = (venta) => {
+        setActiveSale(venta);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleCloseDeleteSale = () => {
+        setIsDeleteModalOpen(false);
+        setActiveSale(null);
+    };
+
+    const handleSaveSale = async () => {
+        if (!activeSale || !isTauri()) return;
+        const nombre_clienta = editForm.nombre_clienta.trim();
+        if (!nombre_clienta) {
+            toast.error(t('reports_edit_name_required'));
+            return;
+        }
+
+        const updatedSale = {
+            id_venta: activeSale.id_venta,
+            fecha: fromInputDateTime(editForm.fecha),
+            nombre_clienta,
+            total_venta: activeSale.total_venta,
+            tipo_pago: editForm.tipo_pago,
+        };
+
+        try {
+            setIsUpdatingSale(true);
+            await invoke('update_venta', { venta: updatedSale });
+            setSales((prev) => prev.map((s) => (
+                s.id_venta === activeSale.id_venta ? { ...s, ...updatedSale } : s
+            )));
+            toast.success(t('toast_sale_updated'));
+            handleCloseEditSale();
+        } catch (error) {
+            console.error('Error updating sale:', error);
+            toast.error(t('toast_sale_update_error'));
+        } finally {
+            setIsUpdatingSale(false);
+        }
+    };
+
+    const handleConfirmDeleteSale = async () => {
+        if (!activeSale || !isTauri()) return;
+        try {
+            setIsDeletingSale(true);
+            await invoke('delete_venta', { id: activeSale.id_venta });
+            setSales((prev) => prev.filter((s) => s.id_venta !== activeSale.id_venta));
+            setSoldProducts((prev) => prev.filter((p) => p.id_venta !== activeSale.id_venta));
+            setExpandedSales((prev) => {
+                const next = new Set(prev);
+                next.delete(activeSale.id_venta);
+                return next;
+            });
+            toast.success(t('toast_sale_deleted'));
+            handleCloseDeleteSale();
+        } catch (error) {
+            console.error('Error deleting sale:', error);
+            toast.error(t('toast_sale_delete_error'));
+        } finally {
+            setIsDeletingSale(false);
+        }
+    };
+
+    const handleOpenItemsEdit = (venta) => {
+        const saleItems = productsBySaleId.get(venta.id_venta) || [];
+        setActiveSale(venta);
+        setEditItems(
+            saleItems.map((item) => ({
+                id_producto_vendido: item.id_producto_vendido,
+                id_venta: item.id_venta,
+                id_producto: item.id_producto,
+                nombre_producto_snapshot: item.nombre_producto_snapshot,
+                cantidad: item.cantidad,
+                precio_unitario: item.precio_unitario,
+                subtotal: item.subtotal,
+                original_id_producto: item.id_producto,
+                original_cantidad: item.cantidad,
+            }))
+        );
+        setDeletedItemIds([]);
+        setIsItemsModalOpen(true);
+    };
+
+    const handleCloseItemsEdit = () => {
+        setIsItemsModalOpen(false);
+        setEditItems([]);
+        setDeletedItemIds([]);
+        setActiveSale(null);
+    };
+
+    const usedProductIds = useMemo(
+        () => new Set(editItems.map((item) => item.id_producto)),
+        [editItems]
+    );
+
+    const handleAddItem = () => {
+        const available = products.filter((p) => !usedProductIds.has(p.id_producto));
+        if (available.length === 0) {
+            toast.error(t('reports_items_no_products'));
+            return;
+        }
+        const firstProduct = available[0];
+        setEditItems((prev) => ([
+            ...prev,
+            {
+                temp_id: `new-${Date.now()}`,
+                id_producto: firstProduct.id_producto,
+                nombre_producto_snapshot: firstProduct.nombre_producto,
+                cantidad: 1,
+                precio_unitario: firstProduct.precio,
+                subtotal: firstProduct.precio,
+            },
+        ]));
+    };
+
+    const handleRemoveItem = (item) => {
+        if (item.id_producto_vendido) {
+            setDeletedItemIds((prev) => [...prev, item.id_producto_vendido]);
+        }
+        setEditItems((prev) => prev.filter((row) => row !== item));
+    };
+
+    const handleItemProductChange = (index, productId) => {
+        const product = productsById.get(Number(productId));
+        setEditItems((prev) => prev.map((row, i) => {
+            if (i !== index) return row;
+            const precio_unitario = product?.precio ?? 0;
+            return {
+                ...row,
+                id_producto: product?.id_producto ?? null,
+                nombre_producto_snapshot: product?.nombre_producto ?? '',
+                precio_unitario,
+                cantidad: 1,
+                subtotal: precio_unitario,
+            };
+        }));
+    };
+
+    const handleItemQtyChange = (index, value) => {
+        const cantidad = Math.max(1, Number(value) || 1);
+        setEditItems((prev) => prev.map((row, i) => {
+            if (i !== index) return row;
+            return {
+                ...row,
+                cantidad,
+                subtotal: cantidad * (Number(row.precio_unitario) || 0),
+            };
+        }));
+    };
+
+    const handleSaveItems = async () => {
+        if (!activeSale || !isTauri()) return;
+        if (editItems.length === 0) {
+            toast.error(t('reports_items_min_one'));
+            return;
+        }
+
+        try {
+            setIsSavingItems(true);
+            const deletedIds = new Set(deletedItemIds);
+
+            for (const item of editItems) {
+                const payload = {
+                    id_producto_vendido: item.id_producto_vendido,
+                    id_venta: activeSale.id_venta,
+                    id_producto: item.id_producto,
+                    nombre_producto_snapshot: item.nombre_producto_snapshot,
+                    cantidad: item.cantidad,
+                    precio_unitario: item.precio_unitario,
+                    subtotal: item.subtotal,
+                };
+
+                if (item.id_producto_vendido) {
+                    if (item.original_id_producto && item.id_producto !== item.original_id_producto) {
+                        await invoke('delete_producto_vendido', { id: item.id_producto_vendido });
+                        await invoke('create_producto_vendido', {
+                            idVenta: activeSale.id_venta,
+                            idProducto: item.id_producto,
+                            nombreProductoSnapshot: item.nombre_producto_snapshot,
+                            cantidad: item.cantidad,
+                            precioUnitario: item.precio_unitario,
+                            subtotal: item.subtotal,
+                        });
+                    } else {
+                        await invoke('update_producto_vendido', { productoVendido: payload });
+                    }
+                } else {
+                    await invoke('create_producto_vendido', {
+                        idVenta: activeSale.id_venta,
+                        idProducto: item.id_producto,
+                        nombreProductoSnapshot: item.nombre_producto_snapshot,
+                        cantidad: item.cantidad,
+                        precioUnitario: item.precio_unitario,
+                        subtotal: item.subtotal,
+                    });
+                }
+            }
+
+            for (const id of deletedIds) {
+                await invoke('delete_producto_vendido', { id });
+            }
+
+            const newTotal = editItems.reduce((sum, item) => sum + Number(item.subtotal || 0), 0);
+            await invoke('update_venta', {
+                venta: {
+                    id_venta: activeSale.id_venta,
+                    fecha: activeSale.fecha,
+                    nombre_clienta: activeSale.nombre_clienta,
+                    total_venta: newTotal,
+                    tipo_pago: activeSale.tipo_pago,
+                },
+            });
+
+            await loadReportsData();
+            toast.success(t('toast_sale_items_saved'));
+            handleCloseItemsEdit();
+        } catch (error) {
+            console.error('Error updating sale items:', error);
+            toast.error(t('toast_sale_items_error'));
+        } finally {
+            setIsSavingItems(false);
         }
     };
 
@@ -240,6 +524,9 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                                                     saleProducts={saleProducts}
                                                     isExpanded={isExpanded}
                                                     onToggle={toggleExpanded}
+                                                    onEditSale={handleOpenEditSale}
+                                                    onDeleteSale={handleOpenDeleteSale}
+                                                    onEditItems={handleOpenItemsEdit}
                                                     formatDate={formatDate}
                                                     formatMoney={formatMoney}
                                                     t={t}
@@ -333,12 +620,189 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                         </div>
                     </div>
                 </section>
+
+                {isEditModalOpen && (
+                    <div className="reports-modal-overlay" onClick={handleCloseEditSale}>
+                        <div className="reports-modal" onClick={(event) => event.stopPropagation()}>
+                            <div className="reports-modal-header">
+                                <h3>{t('reports_edit_title')}</h3>
+                                <p>{t('reports_edit_desc')}</p>
+                            </div>
+                            <div className="reports-modal-body">
+                                <label className="reports-modal-field">
+                                    {t('reports_edit_date')}
+                                    <input
+                                        type="datetime-local"
+                                        value={editForm.fecha}
+                                        onChange={(event) => setEditForm((prev) => ({ ...prev, fecha: event.target.value }))}
+                                    />
+                                </label>
+                                <label className="reports-modal-field">
+                                    {t('reports_edit_client')}
+                                    <input
+                                        type="text"
+                                        value={editForm.nombre_clienta}
+                                        onChange={(event) => setEditForm((prev) => ({ ...prev, nombre_clienta: event.target.value }))}
+                                    />
+                                </label>
+                                <label className="reports-modal-field">
+                                    {t('reports_edit_payment')}
+                                    <select
+                                        value={editForm.tipo_pago}
+                                        onChange={(event) => setEditForm((prev) => ({ ...prev, tipo_pago: event.target.value }))}
+                                    >
+                                        <option value="Contado">{t('reports_edit_payment_contado')}</option>
+                                        <option value="Abono">{t('reports_edit_payment_abono')}</option>
+                                    </select>
+                                </label>
+                                <div className="reports-modal-field">
+                                    {t('reports_edit_total')}
+                                    <div className="reports-modal-readonly">{formatMoney(editForm.total_venta)}</div>
+                                </div>
+                            </div>
+                            <div className="reports-modal-actions">
+                                <button type="button" className="reports-modal-button reports-modal-secondary" onClick={handleCloseEditSale}>
+                                    {t('reports_edit_cancel')}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="reports-modal-button reports-modal-primary"
+                                    onClick={handleSaveSale}
+                                    disabled={isUpdatingSale}
+                                >
+                                    {isUpdatingSale ? '...' : t('reports_edit_save')}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {isDeleteModalOpen && (
+                    <div className="reports-modal-overlay" onClick={handleCloseDeleteSale}>
+                        <div className="reports-modal reports-modal-compact" onClick={(event) => event.stopPropagation()}>
+                            <div className="reports-modal-header">
+                                <h3>{t('reports_delete_title')}</h3>
+                                <p>{t('reports_delete_desc')}</p>
+                            </div>
+                            <div className="reports-modal-body">
+                                <p className="reports-modal-text">{t('reports_delete_warning')}</p>
+                            </div>
+                            <div className="reports-modal-actions">
+                                <button type="button" className="reports-modal-button reports-modal-secondary" onClick={handleCloseDeleteSale}>
+                                    {t('reports_delete_cancel')}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="reports-modal-button reports-modal-danger"
+                                    onClick={handleConfirmDeleteSale}
+                                    disabled={isDeletingSale}
+                                >
+                                    {isDeletingSale ? '...' : t('reports_delete_confirm')}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {isItemsModalOpen && (
+                    <div className="reports-modal-overlay" onClick={handleCloseItemsEdit}>
+                        <div className="reports-modal reports-modal-wide" onClick={(event) => event.stopPropagation()}>
+                            <div className="reports-modal-header">
+                                <h3>{t('reports_items_title')}</h3>
+                                <p>{t('reports_items_desc')}</p>
+                            </div>
+                            <div className="reports-items-list">
+                                {editItems.length === 0 ? (
+                                    <p className="reports-modal-text">{t('reports_items_empty')}</p>
+                                ) : (
+                                    editItems.map((item, index) => (
+                                        <div
+                                            key={item.id_producto_vendido ?? item.temp_id ?? index}
+                                            className="reports-items-row"
+                                        >
+                                            <select
+                                                value={item.id_producto ?? ''}
+                                                onChange={(event) => handleItemProductChange(index, event.target.value)}
+                                            >
+                                                {!productsById.has(item.id_producto) && item.id_producto && (
+                                                    <option value={item.id_producto}>
+                                                        {item.nombre_producto_snapshot || `ID ${item.id_producto}`}
+                                                    </option>
+                                                )}
+                                                {products
+                                                    .filter((p) => p.id_producto === item.id_producto || !usedProductIds.has(p.id_producto))
+                                                    .map((product) => (
+                                                        <option key={product.id_producto} value={product.id_producto}>
+                                                            {product.nombre_producto}
+                                                        </option>
+                                                    ))}
+                                            </select>
+                                            <select
+                                                value={item.cantidad}
+                                                onChange={(event) => handleItemQtyChange(index, event.target.value)}
+                                            >
+                                                {(() => {
+                                                    const prod = productsById.get(item.id_producto);
+                                                    const currentStock = prod?.stock ?? 0;
+                                                    const sameProduct = item.id_producto === item.original_id_producto;
+                                                    const alreadySold = (item.id_producto_vendido && sameProduct) ? (item.original_cantidad ?? 0) : 0;
+                                                    const maxQty = Math.max(1, currentStock + alreadySold);
+                                                    return Array.from({ length: maxQty }, (_, i) => i + 1).map((n) => (
+                                                        <option key={n} value={n}>{n}</option>
+                                                    ));
+                                                })()}
+                                            </select>
+                                            <div className="reports-items-price">{formatMoney(item.precio_unitario)}</div>
+                                            <div className="reports-items-subtotal">{formatMoney(item.subtotal)}</div>
+                                            <button
+                                                type="button"
+                                                className="reports-items-remove"
+                                                onClick={() => handleRemoveItem(item)}
+                                            >
+                                                {t('reports_items_remove')}
+                                            </button>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                            <div className="reports-items-footer">
+                                <button
+                                    type="button"
+                                    className="reports-items-add"
+                                    onClick={handleAddItem}
+                                    disabled={products.filter((p) => !usedProductIds.has(p.id_producto)).length === 0}
+                                >
+                                    + {t('reports_items_add')}
+                                </button>
+                                <div className="reports-items-total">
+                                    <span>{t('reports_items_total')}</span>
+                                    <strong>
+                                        {formatMoney(editItems.reduce((sum, item) => sum + Number(item.subtotal || 0), 0))}
+                                    </strong>
+                                </div>
+                            </div>
+                            <div className="reports-modal-actions">
+                                <button type="button" className="reports-modal-button reports-modal-secondary" onClick={handleCloseItemsEdit}>
+                                    {t('reports_items_cancel')}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="reports-modal-button reports-modal-primary"
+                                    onClick={handleSaveItems}
+                                    disabled={isSavingItems}
+                                >
+                                    {isSavingItems ? '...' : t('reports_items_save')}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </main>
         </div>
     );
 }
 
-function SaleRow({ venta, saleProducts, isExpanded, onToggle, formatDate, formatMoney, t }) {
+function SaleRow({ venta, saleProducts, isExpanded, onToggle, onEditSale, onDeleteSale, onEditItems, formatDate, formatMoney, t }) {
     const saleId = venta.id_venta;
     const totalQty = saleProducts.reduce((sum, p) => sum + p.cantidad, 0);
 
@@ -410,6 +874,38 @@ function SaleRow({ venta, saleProducts, isExpanded, onToggle, formatDate, format
                                         </svg>
                                         {venta.nombre_clienta}
                                     </span>
+                                </div>
+                                <div className="reports-detail-actions">
+                                    <button
+                                        type="button"
+                                        className="reports-detail-action"
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                            onEditItems(venta);
+                                        }}
+                                    >
+                                        {t('reports_items_action')}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="reports-detail-action edit"
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                            onEditSale(venta);
+                                        }}
+                                    >
+                                        {t('reports_edit_action')}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="reports-detail-action delete"
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                            onDeleteSale(venta);
+                                        }}
+                                    >
+                                        {t('reports_delete_action')}
+                                    </button>
                                 </div>
                             </div>
 
