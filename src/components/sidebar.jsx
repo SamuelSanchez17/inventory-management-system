@@ -1,7 +1,16 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  CaretLeft,
+  CaretRight,
+  CurrencyDollar,
+  FileText,
+  GearSix,
+  HouseSimple,
+  Package,
+} from 'phosphor-react';
 import { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import { LanguageContext } from '../context/LanguageContext';
+import { House } from 'lucide-react';
 
 export default function Sidebar({ onNavigate, activePage, isCollapsed, toggleSidebar })
 {
@@ -17,7 +26,11 @@ export default function Sidebar({ onNavigate, activePage, isCollapsed, toggleSid
       } border-r flex flex-col items-center py-8 relative`}>
         {/* Botón toggle */}
         <button onClick={toggleSidebar} className={`absolute top-4 right-4 p-1 rounded-lg transition-colors ${isDark ? 'hover:bg-gray-700' : 'hover:bg-rose-200/60'}`}>
-          {isCollapsed ? <ChevronRight size={20} className={isDark ? 'text-gray-300' : ''} /> : <ChevronLeft size={20} className={isDark ? 'text-gray-300' : ''} />}
+          {isCollapsed ? (
+            <CaretRight size={20} weight="duotone" className={isDark ? 'text-gray-300' : ''} />
+          ) : (
+            <CaretLeft size={20} weight="duotone" className={isDark ? 'text-gray-300' : ''} />
+          )}
         </button>
         {/* Logo y nombre */}
         <div className="mb-8 text-center">
@@ -31,45 +44,45 @@ export default function Sidebar({ onNavigate, activePage, isCollapsed, toggleSid
         {/* Navegación */}
         <nav className="flex-1 w-full">
           <ul className="space-y-2 px-6">
-            <li className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} py-2 px-3 rounded-lg transition-all duration-300 ${
+            <li className={`flex items-center w-full ${isCollapsed ? 'justify-center' : 'justify-between'} py-2 px-3 rounded-lg transition-all duration-300 ${
               activePage === 'dashboard' 
                 ? isDark ? 'bg-gray-700 text-pink-400 font-semibold' : 'bg-rose-200/80 text-rose-800 font-semibold'
                 : isDark ? 'hover:bg-gray-700 text-gray-300 cursor-pointer' : 'hover:bg-rose-200/60 cursor-pointer'
             }`} onClick={() => onNavigate('dashboard')}>
-              <span>🏠</span>
-              {!isCollapsed && <span>{t('sidebar_dashboard')}</span>}
+              {!isCollapsed && <span className="flex-1">{t('sidebar_dashboard')}</span>}
+              <House size={18} weight="duotone" className="text-current shrink-0" />
             </li>
-            <li className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} py-2 px-3 rounded-lg transition-all duration-300 ${
+            <li className={`flex items-center w-full ${isCollapsed ? 'justify-center' : 'justify-between'} py-2 px-3 rounded-lg transition-all duration-300 ${
               activePage === 'products' 
                 ? isDark ? 'bg-gray-700 text-pink-400 font-semibold' : 'bg-rose-200/80 text-rose-800 font-semibold'
                 : isDark ? 'hover:bg-gray-700 text-gray-300 cursor-pointer' : 'hover:bg-rose-200/60 cursor-pointer'
             }`} onClick={() => onNavigate('products')}>
-              <span>📦</span>
-              {!isCollapsed && <span>{t('sidebar_products')}</span>}
+              {!isCollapsed && <span className="flex-1">{t('sidebar_products')}</span>}
+              <Package size={18} weight="duotone" className="text-current shrink-0" />
             </li>
-            <li className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} py-2 px-3 rounded-lg transition-all duration-300 ${
+            <li className={`flex items-center w-full ${isCollapsed ? 'justify-center' : 'justify-between'} py-2 px-3 rounded-lg transition-all duration-300 ${
               activePage === 'sales' 
                 ? isDark ? 'bg-gray-700 text-pink-400 font-semibold' : 'bg-rose-200/80 text-rose-800 font-semibold'
                 : isDark ? 'hover:bg-gray-700 text-gray-300 cursor-pointer' : 'hover:bg-rose-200/60 cursor-pointer'
             }`} onClick={() => onNavigate('sales')}>
-              <span>💰</span>
-              {!isCollapsed && <span>{t('sidebar_sales')}</span>}
+              {!isCollapsed && <span className="flex-1">{t('sidebar_sales')}</span>}
+              <CurrencyDollar size={18} weight="duotone" className="text-current shrink-0" />
             </li>
-            <li className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} py-2 px-3 rounded-lg transition-all duration-300 ${
+            <li className={`flex items-center w-full ${isCollapsed ? 'justify-center' : 'justify-between'} py-2 px-3 rounded-lg transition-all duration-300 ${
               activePage === 'reports' 
                 ? isDark ? 'bg-gray-700 text-pink-400 font-semibold' : 'bg-rose-200/80 text-rose-800 font-semibold'
                 : isDark ? 'hover:bg-gray-700 text-gray-300 cursor-pointer' : 'hover:bg-rose-200/60 cursor-pointer'
             }`} onClick={() => onNavigate('reports')}>
-              <span>📄</span>
-              {!isCollapsed && <span>{t('sidebar_reports')}</span>}
+              {!isCollapsed && <span className="flex-1">{t('sidebar_reports')}</span>}
+              <FileText size={18} weight="duotone" className="text-current shrink-0" />
             </li>
-            <li className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'} py-2 px-3 rounded-lg transition-all duration-300 ${
+            <li className={`flex items-center w-full ${isCollapsed ? 'justify-center' : 'justify-between'} py-2 px-3 rounded-lg transition-all duration-300 ${
               activePage === 'settings' 
                 ? isDark ? 'bg-gray-700 text-pink-400 font-semibold' : 'bg-rose-200/80 text-rose-800 font-semibold'
                 : isDark ? 'hover:bg-gray-700 text-gray-300 cursor-pointer' : 'hover:bg-rose-200/60 cursor-pointer'
             }`} onClick={() => onNavigate('settings')}>
-              <span>⚙️</span>
-              {!isCollapsed && <span>{t('sidebar_settings')}</span>}
+              {!isCollapsed && <span className="flex-1">{t('sidebar_settings')}</span>}
+              <GearSix size={18} weight="duotone" className="text-current shrink-0" />
             </li>
           </ul>
         </nav>
