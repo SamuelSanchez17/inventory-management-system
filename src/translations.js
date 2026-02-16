@@ -86,6 +86,10 @@ const translations = {
     products_btn_save_cat: 'Guardar',
     products_btn_cancel_cat: 'Cancelar',
     products_delete_category_confirm: 'Eliminar categoria? Los productos quedaran sin categoria.',
+    delete_cat_modal_title: '¿Eliminar categoría?',
+    delete_cat_modal_body: 'Esta acción eliminará la categoría de forma permanente. Los productos asociados quedarán sin categoría asignada.',
+    delete_cat_modal_warning: 'Esta acción no se puede deshacer.',
+    delete_cat_modal_confirm: 'Sí, eliminar',
     products_fields_required: 'Por favor completa los campos obligatorios',
 
     // ── Toasts (Products) ──
@@ -310,6 +314,10 @@ const translations = {
     products_btn_save_cat: 'Save',
     products_btn_cancel_cat: 'Cancel',
     products_delete_category_confirm: 'Delete category? Products will be left without a category.',
+    delete_cat_modal_title: 'Delete category?',
+    delete_cat_modal_body: 'This action will permanently delete the category. Associated products will be left without an assigned category.',
+    delete_cat_modal_warning: 'This action cannot be undone.',
+    delete_cat_modal_confirm: 'Yes, delete',
     products_fields_required: 'Please fill in all required fields',
 
     // ── Toasts (Products) ──

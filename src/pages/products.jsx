@@ -18,6 +18,8 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
   const [miniaturaBase64, setMiniaturaBase64] = useState(null);
   const [editingCategoryId, setEditingCategoryId] = useState(null);
   const [editingCategoryName, setEditingCategoryName] = useState('');
+  const [showDeleteCatModal, setShowDeleteCatModal] = useState(false);
+  const [pendingDeleteCat, setPendingDeleteCat] = useState(null);
   
   const [formData, setFormData] = useState({
     nombre_producto: '',
@@ -137,25 +139,31 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
     }
   };
 
-  const handleDeleteCategory = async (cat) => {
-    if (!window.confirm(t('products_delete_category_confirm'))) {
-      return;
-    }
+  const handleDeleteCategory = (cat) => {
+    setPendingDeleteCat(cat);
+    setShowDeleteCatModal(true);
+  };
+
+  const confirmDeleteCategory = async () => {
+    if (!pendingDeleteCat) return;
+
+    setShowDeleteCatModal(false);
 
     if (!isTauri()) {
       toast.error('Backend Tauri no disponible. Ejecuta tauri dev.');
+      setPendingDeleteCat(null);
       return;
     }
 
     try {
-      await invoke('delete_categoria', { id: cat.id_categoria });
-      setCategories(categories.filter((c) => c.id_categoria !== cat.id_categoria));
+      await invoke('delete_categoria', { id: pendingDeleteCat.id_categoria });
+      setCategories(categories.filter((c) => c.id_categoria !== pendingDeleteCat.id_categoria));
 
-      if (selectedCategory === cat.nombre) {
+      if (selectedCategory === pendingDeleteCat.nombre) {
         setSelectedCategory('');
       }
 
-      if (Number(formData.id_categoria) === cat.id_categoria) {
+      if (Number(formData.id_categoria) === pendingDeleteCat.id_categoria) {
         setFormData({
           ...formData,
           id_categoria: ''
@@ -166,7 +174,14 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
     } catch (error) {
       console.error('Error al eliminar categoria:', error);
       toast.error(t('toast_category_delete_error'));
+    } finally {
+      setPendingDeleteCat(null);
     }
+  };
+
+  const cancelDeleteCategory = () => {
+    setShowDeleteCatModal(false);
+    setPendingDeleteCat(null);
   };
 
   // Manejar cambios en el formulario
@@ -517,6 +532,89 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
         </div>
       )}
       </main>
+
+      {/* ── Modal de confirmación para eliminar categoría ── */}
+      {showDeleteCatModal && (
+        <div
+          className="confirm-modal-overlay"
+          onClick={cancelDeleteCategory}
+        >
+          <div
+            className={`confirm-modal-content ${
+              isDark ? 'confirm-modal-dark' : 'confirm-modal-light'
+            }`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Icono de advertencia */}
+            <div className={`confirm-modal-icon-wrapper ${
+              isDark ? 'confirm-modal-icon-dark' : 'confirm-modal-icon-light'
+            }`}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 6h18" />
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                <line x1="10" y1="11" x2="10" y2="17" />
+                <line x1="14" y1="11" x2="14" y2="17" />
+              </svg>
+            </div>
+
+            {/* Título */}
+            <h3 className={`confirm-modal-title ${
+              isDark ? 'text-gray-100' : 'text-gray-900'
+            }`}>
+              {t('delete_cat_modal_title')}
+            </h3>
+
+            {/* Cuerpo */}
+            <p className={`confirm-modal-body ${
+              isDark ? 'text-gray-400' : 'text-gray-600'
+            }`}>
+              {t('delete_cat_modal_body')}
+            </p>
+
+            {/* Nombre de la categoría */}
+            <div className={`confirm-modal-file ${
+              isDark ? 'bg-gray-700/50 text-gray-300' : 'bg-gray-100 text-gray-700'
+            }`}>
+              <span className="confirm-modal-file-icon">🏷️</span>
+              <span className="confirm-modal-file-name">
+                {pendingDeleteCat?.nombre}
+              </span>
+            </div>
+
+            {/* Nota de advertencia */}
+            <div className={`confirm-modal-note ${
+              isDark
+                ? 'bg-amber-900/30 text-amber-300 border-amber-700'
+                : 'bg-amber-50 text-amber-800 border-amber-200'
+            }`}>
+              ⚠️ {t('delete_cat_modal_warning')}
+            </div>
+
+            {/* Botones */}
+            <div className="confirm-modal-actions">
+              <button
+                type="button"
+                onClick={cancelDeleteCategory}
+                className={`confirm-modal-btn confirm-modal-btn-cancel ${
+                  isDark
+                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {t('confirm_modal_cancel')}
+              </button>
+              <button
+                type="button"
+                onClick={confirmDeleteCategory}
+                className="confirm-modal-btn confirm-modal-btn-confirm"
+              >
+                {t('delete_cat_modal_confirm')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
