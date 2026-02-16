@@ -91,14 +91,14 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
     const [isExporting, setIsExporting] = useState(false);
     const [isBackingUp, setIsBackingUp] = useState(false);
 
-    const handleExportCSV = async () => {
+    const handleExportXLSX = async () => {
         if (!isTauri()) return;
 
         try {
             const today = new Date().toISOString().split('T')[0];
             const filePath = await save({
-                defaultPath: `inventario_${today}.csv`,
-                filters: [{ name: 'CSV', extensions: ['csv'] }],
+                defaultPath: `inventario_${today}.xlsx`,
+                filters: [{ name: 'Excel', extensions: ['xlsx'] }],
             });
 
             if (!filePath) {
@@ -107,10 +107,10 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
             }
 
             setIsExporting(true);
-            await invoke('export_all_csv', { rutaDestino: filePath });
+            await invoke('export_all_xlsx', { rutaDestino: filePath });
             toast.success(t('toast_export_csv_success'));
         } catch (error) {
-            console.error('Error exporting CSV:', error);
+            console.error('Error exporting XLSX:', error);
             toast.error(t('toast_export_csv_error'));
         } finally {
             setIsExporting(false);
@@ -308,7 +308,7 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                             <button
                                 type="button"
                                 className="reports-export-btn reports-export-csv"
-                                onClick={handleExportCSV}
+                                onClick={handleExportXLSX}
                                 disabled={isExporting}
                             >
                                 <span className="export-btn-icon">📊</span>

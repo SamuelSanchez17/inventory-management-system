@@ -72,7 +72,7 @@ pub fn run() {
       sold_products::delete_producto_vendido,
       sold_products::delete_productos_by_venta,
 
-      export::export_all_csv,
+      export::export_all_xlsx,
       export::backup_database,
       export::import_database,
     ])

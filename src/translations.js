@@ -170,8 +170,8 @@ const translations = {
     // ── Export / Backup ──
     reports_export_title: 'Exportar y Respaldar',
     reports_export_desc: 'Descarga una copia de tus datos para tenerlos seguros.',
-    reports_export_csv_btn: '📊 Descargar Datos (CSV)',
-    reports_export_csv_desc: 'Descarga todos tus datos en un archivo que puedes abrir en Excel.',
+    reports_export_csv_btn: '📊 Descargar Datos (Excel)',
+    reports_export_csv_desc: 'Descarga todos tus datos en un archivo Excel (.xlsx).',
     reports_backup_btn: '💾 Crear Respaldo',
     reports_backup_desc: 'Guarda una copia de seguridad completa de la aplicación.',
     toast_export_csv_success: 'Archivo CSV guardado correctamente',
@@ -398,8 +398,8 @@ const translations = {
     // ── Export / Backup ──
     reports_export_title: 'Export & Backup',
     reports_export_desc: 'Download a copy of your data to keep it safe.',
-    reports_export_csv_btn: '📊 Download Data (CSV)',
-    reports_export_csv_desc: 'Download all your data in a file you can open in Excel.',
+    reports_export_csv_btn: '📊 Download Data (Excel)',
+    reports_export_csv_desc: 'Download all your data as an Excel file (.xlsx).',
     reports_backup_btn: '💾 Create Backup',
     reports_backup_desc: 'Save a complete backup copy of the application.',
     toast_export_csv_success: 'CSV file saved successfully',
