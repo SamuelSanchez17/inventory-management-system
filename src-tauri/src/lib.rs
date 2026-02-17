@@ -63,6 +63,7 @@ pub fn run() {
       sales::create_venta_completa,
       sales::get_sales_today,
       sales::get_sales_month,
+      sales::get_top_productos,
 
       sold_products::list_productos_vendidos,
       sold_products::get_producto_vendido,

@@ -6,6 +6,7 @@ import { ThemeContext } from '../context/ThemeContext';
 import { LanguageContext } from '../context/LanguageContext';
 import { invoke, isTauri, convertFileSrc } from '@tauri-apps/api/core';
 import { CurrencyDollar, Package, TrendUp, Warning } from 'phosphor-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import '../styles/dashboard.css';
 
 export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar }) {
@@ -16,6 +17,7 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
   const [categories, setCategories] = useState([]);
   const [salesToday, setSalesToday] = useState(0);
   const [salesMonth, setSalesMonth] = useState(0);
+  const [topProductos, setTopProductos] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [pageIndex, setPageIndex] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
@@ -36,17 +38,19 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
   useEffect(() => {
     const loadData = async () => {
       if(!isTauri()) return;
-      const[productsData, categoriesData, salesTodayData, salesMonthData] = await Promise.all
+      const [productsData, categoriesData, salesTodayData, salesMonthData, topProductosData] = await Promise.all
       ([
         invoke('list_productos'),
         invoke('list_categorias'),
         invoke('get_sales_today'),
-        invoke('get_sales_month')
+        invoke('get_sales_month'),
+        invoke('get_top_productos')
       ]);
       setProducts(productsData);
       setCategories(categoriesData);
       setSalesToday(salesTodayData);
       setSalesMonth(salesMonthData);
+      setTopProductos(topProductosData);
     };
     loadData();
   }, []);
@@ -551,18 +555,78 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
                 })}
               </ul>
             </div>
-            {/* Gráfica de ventas (placeholder) */}
-            <div className="dashboard-card">
-              <h2 className="dashboard-card-title">{t('dashboard_weekly_sales')}</h2>
-              <div className="sales-chart">
-                {/* Simulación de barras */}
-                {[60, 80, 100, 70, 90, 110, 95].map((h, i) => (
-                  <div key={i} className="chart-bar" style={{ height: `${h / 1.5}px` }} />
-                ))}
-              </div>
-              <div className="chart-labels">
-                <span>{t('dashboard_days')[0]}</span><span>{t('dashboard_days')[1]}</span><span>{t('dashboard_days')[2]}</span><span>{t('dashboard_days')[3]}</span><span>{t('dashboard_days')[4]}</span><span>{t('dashboard_days')[5]}</span><span>{t('dashboard_days')[6]}</span>
-              </div>
+            {/* Top 5 Productos Más Vendidos */}
+            <div className="dashboard-card dashboard-card-chart">
+              <h2 className="dashboard-card-title">{t('dashboard_top5_title')}</h2>
+              {topProductos.length === 0 ? (
+                <div className="top5-empty">
+                  <p>{t('dashboard_top5_empty')}</p>
+                </div>
+              ) : (
+                <div className="top5-chart-wrapper">
+                  <ResponsiveContainer width="100%" height={topProductos.length * 64 + 40}>
+                    <BarChart
+                      data={topProductos.map(p => ({
+                        nombre: p.nombre.length > 22 ? p.nombre.slice(0, 22) + '\u2026' : p.nombre,
+                        nombreCompleto: p.nombre,
+                        unidades: p.unidades,
+                        ingreso: Number(p.ingreso.toFixed(2)),
+                      }))}
+                      layout="vertical"
+                      margin={{ top: 4, right: 24, left: 8, bottom: 4 }}
+                      barCategoryGap="20%"
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke={isDark ? 'rgba(148,163,184,0.12)' : '#e2e8f0'} horizontal={false} />
+                      <XAxis
+                        type="number"
+                        tick={{ fill: isDark ? '#94a3b8' : '#64748b', fontSize: 12 }}
+                        axisLine={false}
+                        tickLine={false}
+                        tickFormatter={(v) => `$${v}`}
+                      />
+                      <YAxis
+                        type="category"
+                        dataKey="nombre"
+                        width={160}
+                        tick={{ fill: isDark ? '#cbd5e1' : '#334155', fontSize: 13, fontWeight: 500 }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          background: isDark ? '#1e293b' : '#ffffff',
+                          border: `1px solid ${isDark ? 'rgba(148,163,184,0.25)' : '#e2e8f0'}`,
+                          borderRadius: 12,
+                          boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+                          color: isDark ? '#f1f5f9' : '#1e293b',
+                          fontSize: 13,
+                          padding: '10px 14px',
+                        }}
+                        cursor={{ fill: isDark ? 'rgba(56,189,248,0.06)' : 'rgba(15,76,129,0.04)' }}
+                        formatter={(value, name) => {
+                          if (name === 'ingreso') return [`$${value.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`, t('dashboard_top5_revenue')];
+                          return [value, t('dashboard_top5_units')];
+                        }}
+                        labelFormatter={(label, payload) => {
+                          const item = payload?.[0]?.payload;
+                          return item?.nombreCompleto || label;
+                        }}
+                      />
+                      <Bar dataKey="ingreso" radius={[0, 8, 8, 0]} maxBarSize={28}>
+                        {topProductos.map((_, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={isDark
+                              ? ['#38bdf8', '#22d3ee', '#34d399', '#a78bfa', '#fb923c'][index]
+                              : ['#0f4c81', '#0891b2', '#059669', '#7c3aed', '#ea580c'][index]
+                            }
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
             </div>
           </div>
         </div>

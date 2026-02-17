@@ -723,52 +723,45 @@
   text-align: right;
 }
 
-/* Gráfica de ventas */
-.sales-chart {
+/* Top 5 Productos - Gráfico Recharts */
+.dashboard-card-chart {
+  min-height: 200px;
+}
+
+.top5-chart-wrapper {
+  width: 100%;
+  overflow: hidden;
+}
+
+.top5-empty {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-around;
-  gap: 8px;
-  height: 120px;
-  margin-bottom: 16px;
-  padding: 12px 0;
-}
-
-.chart-bar {
-  flex: 1;
-  border-radius: 8px 8px 0 0;
-  background: linear-gradient(135deg, var(--dashboard-primary) 0%, var(--dashboard-accent) 100%);
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(15, 76, 129, 0.2);
-  min-height: 4px;
-}
-
-.chart-bar:hover {
-  transform: scaleY(1.1);
-  box-shadow: 0 6px 16px rgba(15, 76, 129, 0.3);
-}
-
-.chart-labels {
-  display: flex;
-  justify-content: space-around;
-  gap: 8px;
-  font-size: 0.8rem;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
   color: var(--dashboard-muted);
-  font-weight: 500;
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+.dashboard-card-chart .recharts-cartesian-grid line {
+  stroke-opacity: 0.5;
+}
+
+.dashboard-card-chart .recharts-tooltip-wrapper {
+  z-index: 10;
+}
+
+.dashboard-card-chart .recharts-bar-rectangle {
+  transition: opacity 0.2s ease;
+}
+
+.dashboard-card-chart .recharts-bar-rectangle:hover {
+  opacity: 0.85;
 }
 
 /* Modo oscuro - ajustes adicionales */
 .dashboard-dark .dashboard-page {
   color: var(--dashboard-text);
-}
-
-.dashboard-dark .chart-bar {
-  background: linear-gradient(135deg, var(--dashboard-primary) 0%, var(--dashboard-accent-strong) 100%);
-  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
-}
-
-.dashboard-dark .chart-bar:hover {
-  box-shadow: 0 6px 16px rgba(56, 189, 248, 0.3);
 }
 
 /* Responsive */

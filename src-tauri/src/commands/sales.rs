@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use tauri::State;
 use crate::database;
-use crate::models::{Venta, TipoPago, VentaCompletaInput, VentaCompletaOutput};
+use crate::models::{Venta, TipoPago, VentaCompletaInput, VentaCompletaOutput, TopProducto};
 use crate::services::venta_service::VentaService;
 use crate::services::producto_vendido_service::ProductoVendidoService;
 use crate::services::producto_service::ProductoService;
@@ -120,6 +120,37 @@ pub fn create_venta_completa(
         total_venta,
         items_insertados,
     })
+}
+
+// Top 5 productos más vendidos (unidades + ingreso)
+#[tauri::command]
+pub fn get_top_productos(db_path: State<'_, PathBuf>) -> Result<Vec<TopProducto>, String> {
+    let db_path: &PathBuf = db_path.inner();
+    let conn = database::init_db(db_path).map_err(|e| e.to_string())?;
+
+    let mut stmt = conn.prepare(
+        "SELECT nombre_producto_snapshot, \
+                SUM(cantidad) AS total_unidades, \
+                SUM(subtotal) AS total_ingreso \
+         FROM productos_vendidos \
+         GROUP BY nombre_producto_snapshot \
+         ORDER BY total_ingreso DESC \
+         LIMIT 5"
+    ).map_err(|e| e.to_string())?;
+
+    let rows = stmt.query_map([], |row| {
+        Ok(TopProducto {
+            nombre: row.get(0)?,
+            unidades: row.get(1)?,
+            ingreso: row.get(2)?,
+        })
+    }).map_err(|e| e.to_string())?;
+
+    let mut result = Vec::new();
+    for row in rows {
+        result.push(row.map_err(|e| e.to_string())?);
+    }
+    Ok(result)
 }
 
 //Comando tauri para obtener el total de ventas a la fecha actual

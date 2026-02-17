@@ -82,3 +82,12 @@ pub struct VentaCompletaOutput
     pub total_venta: f64,
     pub items_insertados: usize,
 }
+
+// Top productos más vendidos (para dashboard)
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TopProducto
+{
+    pub nombre: String,
+    pub unidades: i64,
+    pub ingreso: f64,
+}
