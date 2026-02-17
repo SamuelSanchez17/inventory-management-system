@@ -6,7 +6,7 @@ import Sidebar from '../components/sidebar';
 import { useContext } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import { LanguageContext } from '../context/LanguageContext';
-import { Image, Tag, Trash, Warning } from 'phosphor-react';
+import { Image as ImageIcon, Tag, Trash, Warning } from 'phosphor-react';
 
 export default function Products({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar }) {
   const { getActiveTheme } = useContext(ThemeContext);
@@ -52,7 +52,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
 
   const makeThumbnail = (file, maxSize = 200) =>
     new Promise((resolve, reject) => {
-      const img = new Image();
+      const img = new window.Image();
       const reader = new FileReader();
 
       reader.onload = (event) => {
@@ -400,7 +400,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
                       <img src={formData.ruta_imagen} alt="Producto" />
                     ) : (
                       <div className="placeholder">
-                        <Image size={48} weight="duotone" />
+                        <ImageIcon size={48} weight="duotone" />
                         <span>{t('products_image_load')}</span>
                       </div>
                     )}

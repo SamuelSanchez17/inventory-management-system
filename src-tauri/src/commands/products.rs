@@ -47,6 +47,8 @@ pub fn create_producto(
             .ok_or("No se pudo resolver la carpeta de imagenes")?
             .join("images");
 
+        fs::create_dir_all(&image_dir).map_err(|e| e.to_string())?;
+
         let filename = format!("producto_{}_{}.{}", chrono::Utc::now().timestamp_millis(),
             uuid::Uuid::new_v4(),
             ext);
@@ -82,18 +84,23 @@ pub fn update_producto(
             .parent()
             .ok_or("No se pudo resolver la carpeta de imagenes")?
             .join("images");
-    
 
-    let filename = format!(
-        "producto_{}_{}.{}",
-        chrono::Utc::now().timestamp_millis(),
-        uuid::Uuid::new_v4(),
-        ext
-    );
+        fs::create_dir_all(&image_dir).map_err(|e| e.to_string())?;
 
-    let full_path = image_dir.join(filename);
-    fs::write(&full_path, bytes).map_err(|e| e.to_string())?;
-    updated.ruta_imagen = Some(full_path.to_string_lossy().to_string());
+        if let Some(existing_path) = updated.ruta_imagen.as_deref() {
+            let _ = fs::remove_file(existing_path);
+        }
+
+        let filename = format!(
+            "producto_{}_{}.{}",
+            chrono::Utc::now().timestamp_millis(),
+            uuid::Uuid::new_v4(),
+            ext
+        );
+
+        let full_path = image_dir.join(filename);
+        fs::write(&full_path, bytes).map_err(|e| e.to_string())?;
+        updated.ruta_imagen = Some(full_path.to_string_lossy().to_string());
     }
 
     if let Some(mini) = miniatura_base64

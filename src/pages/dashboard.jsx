@@ -211,7 +211,7 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
 
   const makeThumbnail = (file, maxSize = 200) =>
     new Promise((resolve, reject) => {
-      const img = new Image();
+      const img = new window.Image();
       const reader = new FileReader();
 
       reader.onload = (event) => {
@@ -466,11 +466,11 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
                       ) : (
                         <div className="product-thumbnail-placeholder" />
                       )}
-                      <span>
+                      <div className="product-info">
                         <div className="product-name">{p.nombre_producto}</div>
-                      </span>
+                      </div>
                     </td>
-                    <td>{categoryName}</td>
+                    <td className="table-cell-category" title={categoryName}>{categoryName}</td>
                     <td>{p.stock}</td>
                     <td>${p.precio}</td>
                     <td>
