@@ -735,6 +735,42 @@
   text-align: right;
 }
 
+.low-stock-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-size: 0.8rem;
+  color: var(--dashboard-muted);
+}
+
+.low-stock-pagination-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.low-stock-pagination-buttons button {
+  padding: 4px 10px;
+  border: 1px solid var(--dashboard-border);
+  border-radius: 8px;
+  background: var(--dashboard-bg);
+  color: var(--dashboard-text);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.low-stock-pagination-buttons button:hover:not(:disabled) {
+  background: var(--dashboard-accent);
+  color: white;
+  border-color: var(--dashboard-accent);
+}
+
+.low-stock-pagination-buttons button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Top 5 Productos - Gráfico Recharts */
 .dashboard-card-chart {
   min-height: 200px;

@@ -20,6 +20,7 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
   const [topProductos, setTopProductos] = useState([]);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [pageIndex, setPageIndex] = useState(1);
+  const [lowStockPage, setLowStockPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -195,12 +196,17 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
     [products, lowStockLimit]
   );
 
-  const lowStockProducts = useMemo(
-    () => 
-      products
-    .filter((product) => Number(product.stock) <= lowStockLimit)
-    .slice(0, 4),
+  const lowStockPageSize = 4;
+  const lowStockItems = useMemo(
+    () => products.filter((product) => Number(product.stock) <= lowStockLimit),
     [products, lowStockLimit]
+  );
+  const lowStockTotalPages = Math.max(1, Math.ceil(lowStockItems.length / lowStockPageSize));
+  const safeLowStockPage = Math.min(lowStockPage, lowStockTotalPages);
+  const lowStockStart = (safeLowStockPage - 1) * lowStockPageSize;
+  const lowStockProducts = useMemo(
+    () => lowStockItems.slice(lowStockStart, lowStockStart + lowStockPageSize),
+    [lowStockItems, lowStockStart, lowStockPageSize]
   );
 
   useEffect(() => {
@@ -208,6 +214,12 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
       setPageIndex(safePageIndex);
     }
   }, [pageIndex, safePageIndex]);
+
+  useEffect(() => {
+    if (lowStockPage !== safeLowStockPage) {
+      setLowStockPage(safeLowStockPage);
+    }
+  }, [lowStockPage, safeLowStockPage]);
 
   const makeThumbnail = (file, maxSize = 200) =>
     new Promise((resolve, reject) => {
@@ -554,6 +566,29 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
                   );
                 })}
               </ul>
+              {lowStockItems.length > lowStockPageSize && (
+                <div className="low-stock-pagination">
+                  <span>
+                    {lowStockStart + 1} – {Math.min(lowStockStart + lowStockPageSize, lowStockItems.length)} {t('dashboard_of')} {lowStockItems.length}
+                  </span>
+                  <div className="low-stock-pagination-buttons">
+                    <button
+                      type="button"
+                      onClick={() => setLowStockPage((prev) => Math.max(1, prev - 1))}
+                      disabled={safeLowStockPage === 1}
+                    >
+                      {"<"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setLowStockPage((prev) => Math.min(lowStockTotalPages, prev + 1))}
+                      disabled={safeLowStockPage === lowStockTotalPages}
+                    >
+                      {">"}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
             {/* Top 5 Productos Más Vendidos */}
             <div className="dashboard-card dashboard-card-chart">
