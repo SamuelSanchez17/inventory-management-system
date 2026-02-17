@@ -9,7 +9,7 @@ pub struct ProductoRepo<'a> {
 
 impl<'a> ProductoRepo<'a> {
     pub fn list(&self) -> rusqlite::Result<Vec<Producto>> {
-        let mut stmt = self.conn.prepare("SELECT id_producto, nombre_producto, id_categoria, ruta_imagen, miniatura_base64, stock, precio, creado_at, actualizado_at FROM productos")?;
+        let mut stmt = self.conn.prepare("SELECT id_producto, nombre_producto, id_categoria, ruta_imagen, miniatura_base64, stock, precio, creado_at, actualizado_at, activo FROM productos WHERE activo = 1")?;
 
         let rows = stmt.query_map([], |row| {
             Ok(Producto {
@@ -22,6 +22,7 @@ impl<'a> ProductoRepo<'a> {
                 precio: row.get(6)?,
                 creado_at: row.get(7)?,
                 actualizado_at: row.get(8)?,
+                activo: row.get(9)?,
             })
         })?;
         let mut productos = Vec::new();
@@ -34,7 +35,7 @@ impl<'a> ProductoRepo<'a> {
     //get
     pub fn get(&self, id: i64) -> rusqlite::Result<Producto> {
         self.conn.query_row(
-            "SELECT id_producto, nombre_producto, id_categoria, ruta_imagen, miniatura_base64, stock, precio, creado_at, actualizado_at FROM productos WHERE id_producto = ?1",
+            "SELECT id_producto, nombre_producto, id_categoria, ruta_imagen, miniatura_base64, stock, precio, creado_at, actualizado_at, activo FROM productos WHERE id_producto = ?1",
             params![id],
             |row| {
                 Ok(Producto {
@@ -47,6 +48,7 @@ impl<'a> ProductoRepo<'a> {
                     precio: row.get(6)?,
                     creado_at: row.get(7)?,
                     actualizado_at: row.get(8)?,
+                    activo: row.get(9)?,
                 })
             },
         )
@@ -78,9 +80,9 @@ impl<'a> ProductoRepo<'a> {
         Ok(())
     }
 
-    //delete
+    //soft delete (marca como descontinuado)
     pub fn delete(&self, id: i64) -> rusqlite::Result<()> {
-        self.conn.execute("DELETE FROM productos WHERE id_producto = ?1", params![id])?;
+        self.conn.execute("UPDATE productos SET activo = 0, actualizado_at = datetime('now','localtime') WHERE id_producto = ?1", params![id])?;
         Ok(())
     }
 

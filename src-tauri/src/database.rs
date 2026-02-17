@@ -20,6 +20,7 @@ pub fn init_db<P: AsRef<Path>> (db_path: P) -> Result<Connection> {
 
     migrate_add_miniatura(&conn)?;
     migrate_add_nombre_producto_snapshot(&conn)?;
+    migrate_add_activo(&conn)?;
 
     Ok(conn)
 
@@ -62,6 +63,15 @@ fn migrate_add_nombre_producto_snapshot(conn: &rusqlite::Connection) -> rusqlite
             "UPDATE productos_vendidos SET nombre_producto_snapshot = (SELECT nombre_producto FROM productos WHERE productos.id_producto = productos_vendidos.id_producto) WHERE nombre_producto_snapshot = ''",
             [],
         )?;
+    }
+    Ok(())
+}
+
+fn migrate_add_activo(conn: &rusqlite::Connection) -> rusqlite::Result<()>
+{
+    if !ensure_column_exists(conn, "productos", "activo")?
+    {
+        conn.execute("ALTER TABLE productos ADD COLUMN activo INTEGER NOT NULL DEFAULT 1", [])?;
     }
     Ok(())
 }

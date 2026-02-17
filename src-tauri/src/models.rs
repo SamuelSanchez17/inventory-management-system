@@ -13,6 +13,12 @@ pub struct Producto
     pub precio: f64,
     pub creado_at: Option<String>,
     pub actualizado_at: Option<String>,
+    #[serde(default = "default_activo")]
+    pub activo: i64,
+}
+
+fn default_activo() -> i64 {
+    1
 }
 
 #[derive(Debug, Serialize, Deserialize)]

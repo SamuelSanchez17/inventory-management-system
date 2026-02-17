@@ -23,15 +23,15 @@ pub fn export_all_xlsx(
 
     // Número de columnas por tabla
     const CAT_COLS: u16 = 2;
-    const PROD_COLS: u16 = 7;
+    const PROD_COLS: u16 = 8;
     const VENT_COLS: u16 = 5;
     const PV_COLS: u16 = 6;
 
     // Columnas de inicio de cada tabla (con 1 columna gap entre cada una)
     const CAT_START: u16 = 0;                                          // A
     const PROD_START: u16 = CAT_START + CAT_COLS + 1;                  // D  (0+2+1=3)
-    const VENT_START: u16 = PROD_START + PROD_COLS + 1;                // L  (3+7+1=11)
-    const PV_START: u16 = VENT_START + VENT_COLS + 1;                  // R  (11+5+1=17)
+    const VENT_START: u16 = PROD_START + PROD_COLS + 1;                // M  (3+8+1=12)
+    const PV_START: u16 = VENT_START + VENT_COLS + 1;                  // S  (12+5+1=18)
 
     // ── Recopilar datos ──
 
@@ -58,14 +58,14 @@ pub fn export_all_xlsx(
     // Productos (JOIN con categorias para mostrar nombre en vez de id)
     let prod_headers = [
         "id_producto", "nombre_producto", "categoria",
-        "stock", "precio", "creado_at", "actualizado_at",
+        "stock", "precio", "creado_at", "actualizado_at", "estado",
     ];
     let mut prod_rows: Vec<Vec<String>> = Vec::new();
     {
         let mut stmt = conn
             .prepare(
                 "SELECT p.id_producto, p.nombre_producto, COALESCE(c.nombre, '') as categoria, \
-                        p.stock, p.precio, p.creado_at, p.actualizado_at \
+                        p.stock, p.precio, p.creado_at, p.actualizado_at, p.activo \
                  FROM productos p \
                  LEFT JOIN categorias c ON p.id_categoria = c.id_categoria \
                  ORDER BY p.id_producto",
@@ -74,6 +74,7 @@ pub fn export_all_xlsx(
         let rows = stmt
             .query_map([], |row| {
                 let precio: f64 = row.get(4)?;
+                let activo: i64 = row.get(7)?;
                 Ok(vec![
                     row.get::<_, i64>(0)?.to_string(),
                     row.get::<_, String>(1)?,
@@ -82,6 +83,7 @@ pub fn export_all_xlsx(
                     if precio.fract() == 0.0 { format!("{}", precio as i64) } else { format!("{}", precio) },
                     row.get::<_, Option<String>>(5)?.unwrap_or_default(),
                     row.get::<_, Option<String>>(6)?.unwrap_or_default(),
+                    if activo == 1 { "Activo".to_string() } else { "Descontinuado".to_string() },
                 ])
             })
             .map_err(|e| e.to_string())?;

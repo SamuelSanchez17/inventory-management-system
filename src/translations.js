@@ -56,8 +56,8 @@ const translations = {
     toast_tauri_unavailable: 'Backend Tauri no disponible. Ejecuta tauri dev.',
     toast_product_updated: 'Producto actualizado.',
     toast_product_update_error: 'No se pudo actualizar el producto.',
-    toast_product_deleted: 'Producto eliminado.',
-    toast_product_delete_error: 'No se pudo eliminar el producto.',
+    toast_product_deleted: 'Producto descontinuado exitosamente.',
+    toast_product_delete_error: 'No se pudo descontinuar el producto.',
 
     // ── Products page ──
     products_title: 'Agregar Productos',
@@ -324,8 +324,8 @@ const translations = {
     toast_tauri_unavailable: 'Tauri backend not available. Run tauri dev.',
     toast_product_updated: 'Product updated.',
     toast_product_update_error: 'Could not update the product.',
-    toast_product_deleted: 'Product deleted.',
-    toast_product_delete_error: 'Could not delete the product.',
+    toast_product_deleted: 'Product discontinued successfully.',
+    toast_product_delete_error: 'Could not discontinue the product.',
 
     // ── Products page ──
     products_title: 'Add Products',
