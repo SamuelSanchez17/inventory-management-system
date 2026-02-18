@@ -29,3 +29,4 @@ chrono = "0.4.43"
 uuid = { version = "1.20.0", features = ["v4"] }
 tauri-plugin-dialog = "2.6.0"
 rust_xlsxwriter = "0.93"
+tauri-plugin-updater = "2.10.0"
