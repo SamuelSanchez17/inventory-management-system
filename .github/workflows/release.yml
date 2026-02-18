@@ -3,7 +3,7 @@ name: "Publish Release"
 on:
   push:
     branches:
-      - main # Se dispara cuando subes a la rama main
+      - main 
 
 jobs:
   publish-tauri:
@@ -43,6 +43,7 @@ jobs:
         with:
           tagName: app-v__VERSION__ #crea el tag automáticamente
           releaseName: "App v__VERSION__"
+          includeUpdaterJson: true
           releaseBody: "Novedades en esta versión."
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false

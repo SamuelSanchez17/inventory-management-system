@@ -36,10 +36,10 @@
   },
     "plugins": {
     "updater": {
-      "pubkey": "CONTENIDO_CLAVE_PUBLICA",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlBQzQ3N0NBMDQ4MTM5NDEKUldSQk9ZRUV5bmZFbWh2RlZqUmdvT3lYUFFvVks2bWdFazUxdXFjRURBMm42c0UraGp5RHRrb1oK",
       "endpoints": 
       [
-        "https://tu-servidor.com{{target}}-{{arch}}/{{current_version}}"
+        "https://github.com/SamuelSanchez17/inventory-management-system/releases/latest/download/latest.json"
       ]
     }
   }
