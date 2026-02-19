@@ -485,53 +485,6 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
           </div>
         </div>
       </div>
-
-      {/* Tabla de productos registrados */}
-      {products.length > 0 && (
-        <div className="productos-registrados">
-          <h3>{t('products_registered_title')}</h3>
-          <div className="tabla-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>{t('products_col_image')}</th>
-                  <th>{t('products_col_name')}</th>
-                  <th>{t('products_col_category')}</th>
-                  <th>{t('products_col_stock')}</th>
-                  <th>{t('products_col_price')}</th>
-                  <th>{t('products_col_actions')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((product) => (
-                  <tr key={product.id_producto}>
-                    <td>
-                      {product.ruta_imagen && (
-                        <img src={product.ruta_imagen} alt={product.nombre_producto} style={{width: '50px', height: '50px', objectFit: 'cover', borderRadius: '4px'}} />
-                      )}
-                    </td>
-                    <td>{product.nombre_producto}</td>
-                    <td>{product.id_categoria}</td>
-                    <td>{product.stock}</td>
-                    <td>${product.precio}</td>
-                    <td className="acciones">
-                      <button className="btn-edit">
-                        ✏️
-                      </button>
-                      <button
-                        className="btn-delete"
-                        onClick={() => handleDeleteProduct(product.id_producto)}
-                      >
-                        <Trash size={16} weight="duotone" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
       </main>
 
       {/* ── Modal de confirmación para eliminar categoría ── */}
