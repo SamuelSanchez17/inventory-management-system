@@ -15,7 +15,7 @@ import { ThemeContext } from '../context/ThemeContext';
 import { LanguageContext } from '../context/LanguageContext';
 import '../styles/sales.css';
 
-export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar }) {
+export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar, profile }) {
   const { getActiveTheme } = useContext(ThemeContext);
   const { t } = useContext(LanguageContext);
   const isDark = getActiveTheme() === 'oscuro';
@@ -276,6 +276,7 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
         activePage={currentPage}
         isCollapsed={isSidebarCollapsed}
         toggleSidebar={toggleSidebar}
+        profile={profile}
       />
 
       <main className={`sales-page ${isDark ? 'sales-dark' : ''}`}>

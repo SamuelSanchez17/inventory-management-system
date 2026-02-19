@@ -9,7 +9,7 @@ import { CurrencyDollar, Package, TrendUp, Warning } from 'phosphor-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import '../styles/dashboard.css';
 
-export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar }) {
+export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar, profile }) {
   const { getActiveTheme } = useContext(ThemeContext);
   const { t } = useContext(LanguageContext);
   const isDark = getActiveTheme() === 'oscuro';
@@ -422,7 +422,7 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
   return (
     <div className={`min-h-screen flex ${isDark ? 'dashboard-dark' : ''}`}>
       {/* Sidebar */}
-      <Sidebar onNavigate={onNavigate} activePage={currentPage} isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} />
+      <Sidebar onNavigate={onNavigate} activePage={currentPage} isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} profile={profile} />
 
       {/* Main content */}
       <main className="dashboard-page">

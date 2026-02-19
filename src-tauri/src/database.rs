@@ -21,6 +21,7 @@ pub fn init_db<P: AsRef<Path>> (db_path: P) -> Result<Connection> {
     migrate_add_miniatura(&conn)?;
     migrate_add_nombre_producto_snapshot(&conn)?;
     migrate_add_activo(&conn)?;
+    migrate_create_perfil(&conn)?;
 
     Ok(conn)
 
@@ -73,6 +74,20 @@ fn migrate_add_activo(conn: &rusqlite::Connection) -> rusqlite::Result<()>
     {
         conn.execute("ALTER TABLE productos ADD COLUMN activo INTEGER NOT NULL DEFAULT 1", [])?;
     }
+    Ok(())
+}
+
+fn migrate_create_perfil(conn: &rusqlite::Connection) -> rusqlite::Result<()>
+{
+    conn.execute_batch(
+        "CREATE TABLE IF NOT EXISTS perfil (
+            id INTEGER PRIMARY KEY,
+            nombre TEXT NOT NULL DEFAULT '',
+            cargo TEXT NOT NULL DEFAULT '',
+            ruta_foto TEXT,
+            miniatura_base64 TEXT
+        );"
+    )?;
     Ok(())
 }
 

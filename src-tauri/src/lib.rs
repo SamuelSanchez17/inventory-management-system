@@ -6,6 +6,7 @@ use commands::categories;
 use commands::sales;
 use commands::sold_products;
 use commands::export;
+use commands::profile;
 
 mod database; //para manejo de la base de datos
 mod models; //definicion de modelo de datos
@@ -76,6 +77,9 @@ pub fn run() {
       export::export_all_xlsx,
       export::backup_database,
       export::import_database,
+
+      profile::get_perfil,
+      profile::save_perfil,
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

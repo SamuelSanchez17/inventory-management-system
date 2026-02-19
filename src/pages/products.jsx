@@ -8,7 +8,7 @@ import { ThemeContext } from '../context/ThemeContext';
 import { LanguageContext } from '../context/LanguageContext';
 import { Image as ImageIcon, Tag, Trash, Warning } from 'phosphor-react';
 
-export default function Products({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar }) {
+export default function Products({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar, profile }) {
   const { getActiveTheme } = useContext(ThemeContext);
   const { t } = useContext(LanguageContext);
   const isDark = getActiveTheme() === 'oscuro';
@@ -291,7 +291,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
   return (
     <div className={`min-h-screen flex ${isDark ? 'bg-gray-900' : 'bg-rose-50'}`}>
       {/* Sidebar */}
-      <Sidebar onNavigate={onNavigate} activePage={currentPage} isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} />
+      <Sidebar onNavigate={onNavigate} activePage={currentPage} isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} profile={profile} />
 
       {/* Main content */}
       <main className={`products-container ${isDark ? 'products-dark' : ''}`}>

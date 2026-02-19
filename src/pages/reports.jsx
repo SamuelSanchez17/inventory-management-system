@@ -8,7 +8,7 @@ import { ThemeContext } from '../context/ThemeContext';
 import { LanguageContext } from '../context/LanguageContext';
 import '../styles/reports.css';
 
-export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar }) {
+export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar, profile }) {
     const { getActiveTheme } = useContext(ThemeContext);
     const { t, language } = useContext(LanguageContext);
     const isDark = getActiveTheme() === 'oscuro';
@@ -453,6 +453,7 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                 activePage={currentPage}
                 isCollapsed={isSidebarCollapsed}
                 toggleSidebar={toggleSidebar}
+                profile={profile}
             />
 
             <main className="reports-page">

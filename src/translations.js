@@ -265,6 +265,23 @@ const translations = {
     config_btn_save: 'Guardar',
     config_btn_saved: 'Guardado',
     config_btn_saved_success: '✓ ¡Guardado!',
+
+    // ── Profile (Configuration) ──
+    profile_title: 'Mi Perfil',
+    profile_desc: 'Personaliza tu nombre, foto y cargo para que se muestren en la barra lateral.',
+    profile_name_label: 'Nombre',
+    profile_name_placeholder: 'Ej. María García',
+    profile_role_label: 'Cargo',
+    profile_role_placeholder: 'Ej. Consultora de Belleza',
+    profile_photo_label: 'Foto de Perfil',
+    profile_photo_change: 'Cambiar foto',
+    profile_photo_upload: 'Subir foto',
+    profile_btn_save: 'Guardar Perfil',
+    profile_btn_saving: 'Guardando...',
+    toast_profile_saved: 'Perfil actualizado correctamente.',
+    toast_profile_error: 'No se pudo guardar el perfil.',
+    profile_default_name: 'Usuario',
+    profile_default_role: 'Administradora',
   },
 
   en: {
@@ -532,6 +549,23 @@ const translations = {
     config_btn_save: 'Save',
     config_btn_saved: 'Saved',
     config_btn_saved_success: '✓ Saved!',
+
+    // ── Profile (Configuration) ──
+    profile_title: 'My Profile',
+    profile_desc: 'Customize your name, photo and role to display in the sidebar.',
+    profile_name_label: 'Name',
+    profile_name_placeholder: 'E.g. Maria Garcia',
+    profile_role_label: 'Role',
+    profile_role_placeholder: 'E.g. Beauty Consultant',
+    profile_photo_label: 'Profile Photo',
+    profile_photo_change: 'Change photo',
+    profile_photo_upload: 'Upload photo',
+    profile_btn_save: 'Save Profile',
+    profile_btn_saving: 'Saving...',
+    toast_profile_saved: 'Profile updated successfully.',
+    toast_profile_error: 'Could not save the profile.',
+    profile_default_name: 'User',
+    profile_default_role: 'Administrator',
   },
 };
 

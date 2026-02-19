@@ -97,3 +97,14 @@ pub struct TopProducto
     pub unidades: i64,
     pub ingreso: f64,
 }
+
+// Perfil del usuario
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Perfil
+{
+    pub id: i64,
+    pub nombre: String,
+    pub cargo: String,
+    pub ruta_foto: Option<String>,
+    pub miniatura_base64: Option<String>,
+}
