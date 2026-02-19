@@ -1,8 +1,8 @@
 const translations = {
   es: {
     // ── Sidebar ──
-    sidebar_title: 'Inventario',
-    sidebar_profile: 'Mary - Inventario',
+    sidebar_title: 'Sala de exposición digital',
+    sidebar_profile: 'Mary - Consultora de Belleza',
     sidebar_dashboard: 'Dashboard',
     sidebar_products: 'Productos',
     sidebar_sales: 'Ventas',
@@ -16,7 +16,7 @@ const translations = {
     dashboard_metric_low_stock: 'Productos con Stock Bajo',
     dashboard_metric_sales_today: 'Ventas Semanales',
     dashboard_metric_sales_month: 'Ventas Mensuales',
-    dashboard_section_products: 'Productos',
+    dashboard_section_products: 'Productos Registrados',
     dashboard_col_name: 'Nombre del Producto',
     dashboard_col_category: 'Categoría',
     dashboard_col_stock: 'Stock',
@@ -269,8 +269,8 @@ const translations = {
 
   en: {
     // ── Sidebar ──
-    sidebar_title: 'Inventory',
-    sidebar_profile: 'Mary - Inventory',
+    sidebar_title: 'Showroom Digital',
+    sidebar_profile: 'Mary - Beauty Consultant',
     sidebar_dashboard: 'Dashboard',
     sidebar_products: 'Products',
     sidebar_sales: 'Sales',
@@ -284,7 +284,7 @@ const translations = {
     dashboard_metric_low_stock: 'Low Stock Products',
     dashboard_metric_sales_today: 'Weekly Sales',
     dashboard_metric_sales_month: 'Monthly Sales',
-    dashboard_section_products: 'Products',
+    dashboard_section_products: 'Registered Products',
     dashboard_col_name: 'Product Name',
     dashboard_col_category: 'Category',
     dashboard_col_stock: 'Stock',

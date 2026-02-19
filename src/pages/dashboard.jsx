@@ -463,49 +463,57 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
                 </tr>
               </thead>
               <tbody>
-                {pagedProducts.map((p) => {
-                  const categoryName = categoryMap.get(p.id_categoria) || t('dashboard_no_category');
-                  const imageSrc = p.miniatura_base64
-                    ? `data:image/jpeg;base64,${p.miniatura_base64}`
-                    : p.ruta_imagen
-                    ? convertFileSrc(p.ruta_imagen)
-                    : null;
-                  return (
-                  <tr key={p.id_producto ?? p.nombre_producto}>
-                    <td className="table-cell-product">
-                      {imageSrc ? (
-                        <img src={imageSrc} alt="" className="product-thumbnail" />
-                      ) : (
-                        <div className="product-thumbnail-placeholder" />
-                      )}
-                      <div className="product-info">
-                        <div className="product-name">{p.nombre_producto}</div>
-                      </div>
-                    </td>
-                    <td className="table-cell-category" title={categoryName}>{categoryName}</td>
-                    <td>{p.stock}</td>
-                    <td>${p.precio}</td>
-                    <td>
-                      <div className="dashboard-table-actions">
-                        <button
-                          type="button"
-                          className="dashboard-action-button dashboard-action-edit"
-                          onClick={() => openEditModal(p)}
-                        >
-                          {t('dashboard_btn_edit')}
-                        </button>
-                        <button
-                          type="button"
-                          className="dashboard-action-button dashboard-action-delete"
-                          onClick={() => openDeleteModal(p)}
-                        >
-                          {t('dashboard_btn_delete')}
-                        </button>
-                      </div>
+                {pagedProducts.length === 0 ? (
+                  <tr>
+                    <td colSpan="5">
+                      <div className="top5-empty">Aun no hay productos registrados.</div>
                     </td>
                   </tr>
-                  );
-                })}
+                ) : (
+                  pagedProducts.map((p) => {
+                    const categoryName = categoryMap.get(p.id_categoria) || t('dashboard_no_category');
+                    const imageSrc = p.miniatura_base64
+                      ? `data:image/jpeg;base64,${p.miniatura_base64}`
+                      : p.ruta_imagen
+                      ? convertFileSrc(p.ruta_imagen)
+                      : null;
+                    return (
+                      <tr key={p.id_producto ?? p.nombre_producto}>
+                        <td className="table-cell-product">
+                          {imageSrc ? (
+                            <img src={imageSrc} alt="" className="product-thumbnail" />
+                          ) : (
+                            <div className="product-thumbnail-placeholder" />
+                          )}
+                          <div className="product-info">
+                            <div className="product-name">{p.nombre_producto}</div>
+                          </div>
+                        </td>
+                        <td className="table-cell-category" title={categoryName}>{categoryName}</td>
+                        <td>{p.stock}</td>
+                        <td>${p.precio}</td>
+                        <td>
+                          <div className="dashboard-table-actions">
+                            <button
+                              type="button"
+                              className="dashboard-action-button dashboard-action-edit"
+                              onClick={() => openEditModal(p)}
+                            >
+                              {t('dashboard_btn_edit')}
+                            </button>
+                            <button
+                              type="button"
+                              className="dashboard-action-button dashboard-action-delete"
+                              onClick={() => openDeleteModal(p)}
+                            >
+                              {t('dashboard_btn_delete')}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
 
@@ -552,42 +560,50 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
             {/* Productos con stock bajo */}
             <div className="dashboard-card">
               <h2 className="dashboard-card-title">{t('dashboard_low_stock_title')}</h2>
-              <ul className="low-stock-list">
-                {lowStockProducts.map((item) => {
-                  const categoryName = categoryMap.get(item.id_categoria) || t('dashboard_no_category');
-                  return (
-                    <li key={item.id_producto ?? item.nombre_producto} className="low-stock-item">
-                      <div className='low-stock-info'>
-                        <div className='low-stock-name'>{item.nombre_producto}</div>
-                        <div className='low-stock-category'>{categoryName}</div>
-                      </div>
-                      <span className='low-stock-quantity'>{item.stock}</span>
-                    </li>
-                  );
-                })}
-              </ul>
-              {lowStockItems.length > lowStockPageSize && (
-                <div className="low-stock-pagination">
-                  <span>
-                    {lowStockStart + 1} – {Math.min(lowStockStart + lowStockPageSize, lowStockItems.length)} {t('dashboard_of')} {lowStockItems.length}
-                  </span>
-                  <div className="low-stock-pagination-buttons">
-                    <button
-                      type="button"
-                      onClick={() => setLowStockPage((prev) => Math.max(1, prev - 1))}
-                      disabled={safeLowStockPage === 1}
-                    >
-                      {"<"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setLowStockPage((prev) => Math.min(lowStockTotalPages, prev + 1))}
-                      disabled={safeLowStockPage === lowStockTotalPages}
-                    >
-                      {">"}
-                    </button>
-                  </div>
+              {lowStockItems.length === 0 ? (
+                <div className="top5-empty">
+                  <p>Aun no hay productos con bajo stock.</p>
                 </div>
+              ) : (
+                <>
+                  <ul className="low-stock-list">
+                    {lowStockProducts.map((item) => {
+                      const categoryName = categoryMap.get(item.id_categoria) || t('dashboard_no_category');
+                      return (
+                        <li key={item.id_producto ?? item.nombre_producto} className="low-stock-item">
+                          <div className='low-stock-info'>
+                            <div className='low-stock-name'>{item.nombre_producto}</div>
+                            <div className='low-stock-category'>{categoryName}</div>
+                          </div>
+                          <span className='low-stock-quantity'>{item.stock}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  {lowStockItems.length > lowStockPageSize && (
+                    <div className="low-stock-pagination">
+                      <span>
+                        {lowStockStart + 1} – {Math.min(lowStockStart + lowStockPageSize, lowStockItems.length)} {t('dashboard_of')} {lowStockItems.length}
+                      </span>
+                      <div className="low-stock-pagination-buttons">
+                        <button
+                          type="button"
+                          onClick={() => setLowStockPage((prev) => Math.max(1, prev - 1))}
+                          disabled={safeLowStockPage === 1}
+                        >
+                          {"<"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setLowStockPage((prev) => Math.min(lowStockTotalPages, prev + 1))}
+                          disabled={safeLowStockPage === lowStockTotalPages}
+                        >
+                          {">"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
             </div>
             {/* Top 5 Productos Más Vendidos */}
