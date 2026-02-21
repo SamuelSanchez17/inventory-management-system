@@ -7,18 +7,39 @@ import {
   House,
   Package,
 } from 'phosphor-react';
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect, useCallback } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import { LanguageContext } from '../context/LanguageContext';
+import translations from '../translations';
 
-export default function Sidebar({ onNavigate, activePage, isCollapsed, toggleSidebar, profile })
+export default function Sidebar({ onNavigate, activePage, isCollapsed, toggleSidebar, profile, draftTheme, draftLanguage, draftTextSize })
 {
     const { getActiveTheme } = useContext(ThemeContext);
     const { t } = useContext(LanguageContext);
-    const isDark = getActiveTheme() === 'oscuro';
+    
+    // Usar draft si está disponible, sino usar contexto normal
+    const getActiveDraftTheme = useCallback(() => {
+      if (!draftTheme) return getActiveTheme();
+      if (draftTheme === 'sistema') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'oscuro' : 'claro';
+      }
+      return draftTheme;
+    }, [draftTheme, getActiveTheme]);
 
-    const profileName = profile?.nombre || t('profile_default_name');
-    const profileRole = profile?.cargo || t('profile_default_role');
+    const getDrafte = useCallback((key) => {
+      if (!draftLanguage) return t(key);
+      const dict = translations[draftLanguage] || translations.es;
+      return dict[key] !== undefined ? dict[key] : key;
+    }, [draftLanguage, t]);
+
+    const isDark = getActiveDraftTheme() === 'oscuro';
+
+    const getDraftFontSize = () => {
+      return draftTextSize === 'grande' ? '18px' : '16px';
+    };
+
+    const profileName = profile?.nombre || getDrafte('profile_default_name');
+    const profileRole = profile?.cargo || getDrafte('profile_default_role');
     const profileMiniatura = profile?.miniatura_base64
       ? `data:image/jpeg;base64,${profile.miniatura_base64}`
       : null;
@@ -65,7 +86,7 @@ export default function Sidebar({ onNavigate, activePage, isCollapsed, toggleSid
         isDark 
           ? 'bg-gray-800 border-gray-700' 
           : 'bg-rose-100/80 border-rose-200'
-      } border-r flex flex-col relative`}>
+      } border-r flex flex-col relative`} style={{ fontSize: getDraftFontSize() }}>
         {/* Botón toggle - Posicionado correctamente según el ancho */}
         <button onClick={toggleSidebar} className={`absolute z-20 p-1.5 rounded-lg shadow-sm transition-all duration-300 ${isCollapsed ? 'left-1/2 -translate-x-1/2 top-1' : 'right-3 top-3'} ${isDark ? 'bg-white/5 ring-1 ring-white/10 hover:bg-white/10' : 'bg-black/5 ring-1 ring-black/5 hover:bg-rose-200/60'}`}>
           {isCollapsed ? (
@@ -115,7 +136,7 @@ export default function Sidebar({ onNavigate, activePage, isCollapsed, toggleSid
             <p className={`text-center text-[11px] mt-0.5 transition-colors duration-300 ${
               isDark ? 'text-gray-400' : 'text-rose-700/60'
             }`}>
-              {t('sidebar_title')}
+              {getDrafte('sidebar_title')}
             </p>
 
             {/* Rango/Puesto (Subtítulo) con indicador de estatus */}
@@ -131,7 +152,7 @@ export default function Sidebar({ onNavigate, activePage, isCollapsed, toggleSid
                   ? 'text-gray-400' 
                   : 'text-rose-700/75'
               }`}>
-                {profileRole} • {isActive ? 'Activa' : 'Inactiva'}
+                {profileRole} • {isActive ? getDrafte('sidebar_active') : getDrafte('sidebar_inactive')}
               </p>
             </div>
           </div>
@@ -149,40 +170,40 @@ export default function Sidebar({ onNavigate, activePage, isCollapsed, toggleSid
               activePage === 'dashboard' 
                 ? isDark ? 'bg-gray-700 text-pink-400 font-semibold' : 'bg-rose-200/80 text-rose-800 font-semibold'
                 : isDark ? 'hover:bg-gray-700 text-gray-300 cursor-pointer' : 'hover:bg-rose-200/60 cursor-pointer'
-            }`} onClick={() => onNavigate('dashboard')} title={isCollapsed ? t('sidebar_dashboard') : ''}>
-              {!isCollapsed && <span className="flex-1">{t('sidebar_dashboard')}</span>}
+            }`} onClick={() => onNavigate('dashboard')} title={isCollapsed ? getDrafte('sidebar_dashboard') : ''}>
+              {!isCollapsed && <span className="flex-1">{getDrafte('sidebar_dashboard')}</span>}
               <House size={18} weight="duotone" className="text-current shrink-0" />
             </li>
             <li className={`flex items-center w-full ${isCollapsed ? 'justify-center' : 'justify-between'} py-2.5 px-3 rounded-lg transition-all duration-300 ${
               activePage === 'products' 
                 ? isDark ? 'bg-gray-700 text-pink-400 font-semibold' : 'bg-rose-200/80 text-rose-800 font-semibold'
                 : isDark ? 'hover:bg-gray-700 text-gray-300 cursor-pointer' : 'hover:bg-rose-200/60 cursor-pointer'
-            }`} onClick={() => onNavigate('products')} title={isCollapsed ? t('sidebar_products') : ''}>
-              {!isCollapsed && <span className="flex-1">{t('sidebar_products')}</span>}
+            }`} onClick={() => onNavigate('products')} title={isCollapsed ? getDrafte('sidebar_products') : ''}>
+              {!isCollapsed && <span className="flex-1">{getDrafte('sidebar_products')}</span>}
               <Package size={18} weight="duotone" className="text-current shrink-0" />
             </li>
             <li className={`flex items-center w-full ${isCollapsed ? 'justify-center' : 'justify-between'} py-2.5 px-3 rounded-lg transition-all duration-300 ${
               activePage === 'sales' 
                 ? isDark ? 'bg-gray-700 text-pink-400 font-semibold' : 'bg-rose-200/80 text-rose-800 font-semibold'
                 : isDark ? 'hover:bg-gray-700 text-gray-300 cursor-pointer' : 'hover:bg-rose-200/60 cursor-pointer'
-            }`} onClick={() => onNavigate('sales')} title={isCollapsed ? t('sidebar_sales') : ''}>
-              {!isCollapsed && <span className="flex-1">{t('sidebar_sales')}</span>}
+            }`} onClick={() => onNavigate('sales')} title={isCollapsed ? getDrafte('sidebar_sales') : ''}>
+              {!isCollapsed && <span className="flex-1">{getDrafte('sidebar_sales')}</span>}
               <CurrencyDollar size={18} weight="duotone" className="text-current shrink-0" />
             </li>
             <li className={`flex items-center w-full ${isCollapsed ? 'justify-center' : 'justify-between'} py-2.5 px-3 rounded-lg transition-all duration-300 ${
               activePage === 'reports' 
                 ? isDark ? 'bg-gray-700 text-pink-400 font-semibold' : 'bg-rose-200/80 text-rose-800 font-semibold'
                 : isDark ? 'hover:bg-gray-700 text-gray-300 cursor-pointer' : 'hover:bg-rose-200/60 cursor-pointer'
-            }`} onClick={() => onNavigate('reports')} title={isCollapsed ? t('sidebar_reports') : ''}>
-              {!isCollapsed && <span className="flex-1">{t('sidebar_reports')}</span>}
+            }`} onClick={() => onNavigate('reports')} title={isCollapsed ? getDrafte('sidebar_reports') : ''}>
+              {!isCollapsed && <span className="flex-1">{getDrafte('sidebar_reports')}</span>}
               <FileText size={18} weight="duotone" className="text-current shrink-0" />
             </li>
             <li className={`flex items-center w-full ${isCollapsed ? 'justify-center' : 'justify-between'} py-2.5 px-3 rounded-lg transition-all duration-300 ${
               activePage === 'settings' 
                 ? isDark ? 'bg-gray-700 text-pink-400 font-semibold' : 'bg-rose-200/80 text-rose-800 font-semibold'
                 : isDark ? 'hover:bg-gray-700 text-gray-300 cursor-pointer' : 'hover:bg-rose-200/60 cursor-pointer'
-            }`} onClick={() => onNavigate('settings')} title={isCollapsed ? t('sidebar_settings') : ''}>
-              {!isCollapsed && <span className="flex-1">{t('sidebar_settings')}</span>}
+            }`} onClick={() => onNavigate('settings')} title={isCollapsed ? getDrafte('sidebar_settings') : ''}>
+              {!isCollapsed && <span className="flex-1">{getDrafte('sidebar_settings')}</span>}
               <GearSix size={18} weight="duotone" className="text-current shrink-0" />
             </li>
           </ul>

@@ -8,6 +8,8 @@ const translations = {
     sidebar_sales: 'Ventas',
     sidebar_reports: 'Reportes',
     sidebar_settings: 'Configuración',
+    sidebar_active: 'Activa',
+    sidebar_inactive: 'Inactiva',
 
     // ── Header / Dashboard ──
     dashboard_title: 'Menu Principal',
@@ -265,6 +267,8 @@ const translations = {
     config_btn_save: 'Guardar',
     config_btn_saved: 'Guardado',
     config_btn_saved_success: '✓ ¡Guardado!',
+    config_btn_cancel: 'Descartar',
+    toast_changes_discarded: 'Cambios descartados',
 
     // ── Profile (Configuration) ──
     profile_title: 'Mi Perfil',
@@ -293,6 +297,8 @@ const translations = {
     sidebar_sales: 'Sales',
     sidebar_reports: 'Reports',
     sidebar_settings: 'Settings',
+    sidebar_active: 'Active',
+    sidebar_inactive: 'Inactive',
 
     // ── Header / Dashboard ──
     dashboard_title: 'Main Menu',
@@ -549,6 +555,8 @@ const translations = {
     config_btn_save: 'Save',
     config_btn_saved: 'Saved',
     config_btn_saved_success: '✓ Saved!',
+    config_btn_cancel: 'Discard',
+    toast_changes_discarded: 'Changes discarded',
 
     // ── Profile (Configuration) ──
     profile_title: 'My Profile',

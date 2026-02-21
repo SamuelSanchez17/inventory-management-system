@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect, useRef } from 'react';
+import { useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { ThemeContext } from '../context/ThemeContext';
 import { LanguageContext } from '../context/LanguageContext';
 import { invoke, isTauri } from '@tauri-apps/api/core';
@@ -6,6 +6,7 @@ import { open } from '@tauri-apps/plugin-dialog';
 import toast from 'react-hot-toast';
 import Sidebar from '../components/sidebar';
 import { Camera, FileText, FolderOpen, Globe, Moon, ShieldCheck, TextAa, UserCircle, Warning } from 'phosphor-react';
+import translations from '../translations';
 
 export default function Configuration({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar, profile, onProfileSaved }) {
   const { theme, setTheme, textSize, setTextSize, savePreferences, isSaved, getActiveTheme } = useContext(ThemeContext);
@@ -14,7 +15,38 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
   const [isImporting, setIsImporting] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingFilePath, setPendingFilePath] = useState(null);
-  const isDark = getActiveTheme() === 'oscuro';
+
+  // ── Estados locales (draft) para cambios pendientes ──
+  const [draftTheme, setDraftTheme] = useState(theme);
+  const [draftLanguage, setDraftLanguage] = useState(language);
+  const [draftTextSize, setDraftTextSize] = useState(textSize);
+
+  // Detectar si hay cambios pendientes
+  const hasChanges = draftTheme !== theme || draftLanguage !== language || draftTextSize !== textSize;
+
+  // ── Funciones para preview en vivo (solo en esta página) ──
+  const getActiveDraftTheme = () => {
+    if (draftTheme === 'sistema') {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'oscuro' : 'claro';
+    }
+    return draftTheme;
+  };
+
+  const getDraftt = useCallback(
+    (key) => {
+      const dict = translations[draftLanguage] || translations.es;
+      return dict[key] !== undefined ? dict[key] : key;
+    },
+    [draftLanguage]
+  );
+
+  // Obtener tamaño de fuente para preview
+  const getDraftFontSize = () => {
+    return draftTextSize === 'grande' ? '18px' : '16px';
+  };
+
+  // Usar draft para preview en vivo
+  const isDark = getActiveDraftTheme() === 'oscuro';
 
   // ── Profile state ──
   const [profileName, setProfileName] = useState('');
@@ -107,9 +139,24 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
   };
 
   const handleSave = () => {
+    // Aplicar todos los cambios al contexto global
+    if (draftTheme !== theme) setTheme(draftTheme);
+    if (draftLanguage !== language) setLanguage(draftLanguage);
+    if (draftTextSize !== textSize) setTextSize(draftTextSize);
+    
     savePreferences();
     setShowSaved(true);
     setTimeout(() => setShowSaved(false), 2000);
+  };
+
+  const handleCancel = () => {
+    // Descartar cambios y volver a los valores originales
+    setDraftTheme(theme);
+    setDraftLanguage(language);
+    setDraftTextSize(textSize);
+    toast(getDraftt('toast_changes_discarded') || 'Cambios descartados', { 
+      icon: 'ℹ️' 
+    });
   };
 
   const handleImportDB = async () => {
@@ -179,11 +226,11 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
   return (
     <div className={`min-h-screen flex ${isDark ? 'bg-gray-900' : 'bg-rose-50'}`}>
       {/* Sidebar */}
-      <Sidebar onNavigate={onNavigate} activePage={currentPage} isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} profile={profile} />
+      <Sidebar onNavigate={onNavigate} activePage={currentPage} isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} profile={profile} draftTheme={draftTheme} draftLanguage={draftLanguage} draftTextSize={draftTextSize} />
 
       {/* Main content */}
-      <main className={`flex-1 p-10 ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
-        <h1 className={`text-4xl font-bold mb-10 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>{t('config_title')}</h1>
+      <main className={`flex-1 p-10 ${isDark ? 'text-gray-100' : 'text-gray-900'}`} style={{ fontSize: getDraftFontSize() }}>
+        <h1 className={`text-4xl font-bold mb-10 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>{getDraftt('config_title')}</h1>
 
         {/* Layout de dos columnas: Ajustes (izq) + Perfil (der) */}
         <div className="flex gap-8 items-start">
@@ -196,22 +243,22 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
                   <Moon size={28} weight="duotone" />
                 </span>
                 <div>
-                  <h2 className={`text-2xl font-bold mb-1 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>{t('config_theme_title')}</h2>
-                  <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{t('config_theme_desc')}</p>
+                  <h2 className={`text-2xl font-bold mb-1 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>{getDraftt('config_theme_title')}</h2>
+                  <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{getDraftt('config_theme_desc')}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                 {[
-                  { value: 'claro', label: t('config_theme_light'), description: t('config_theme_light_desc') },
-                  { value: 'oscuro', label: t('config_theme_dark'), description: t('config_theme_dark_desc') },
-                  { value: 'sistema', label: t('config_theme_system'), description: t('config_theme_system_desc') },
+                  { value: 'claro', label: getDraftt('config_theme_light'), description: getDraftt('config_theme_light_desc') },
+                  { value: 'oscuro', label: getDraftt('config_theme_dark'), description: getDraftt('config_theme_dark_desc') },
+                  { value: 'sistema', label: getDraftt('config_theme_system'), description: getDraftt('config_theme_system_desc') },
                 ].map((option) => (
                   <button
                     key={option.value}
-                    onClick={() => setTheme(option.value)}
+                    onClick={() => setDraftTheme(option.value)}
                     className={`p-4 rounded-xl border-2 transition-all duration-200 text-center ${
-                      theme === option.value
+                      draftTheme === option.value
                         ? isDark ? 'border-pink-400 bg-gray-700 shadow-md' : 'border-rose-400 bg-rose-50 shadow-md'
                         : isDark ? 'border-gray-600 bg-gray-800 hover:border-gray-500' : 'border-gray-200 bg-white hover:border-rose-200'
                     }`}
@@ -230,21 +277,21 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
                   <Globe size={28} weight="duotone" />
                 </span>
                 <div>
-                  <h2 className={`text-2xl font-bold mb-1 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>{t('config_language_title')}</h2>
-                  <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{t('config_language_desc')}</p>
+                  <h2 className={`text-2xl font-bold mb-1 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>{getDraftt('config_language_title')}</h2>
+                  <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{getDraftt('config_language_desc')}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { value: 'es', label: t('config_language_es'), description: t('config_language_es_desc') },
-                  { value: 'en', label: t('config_language_en'), description: t('config_language_en_desc') },
+                  { value: 'es', label: getDraftt('config_language_es'), description: getDraftt('config_language_es_desc') },
+                  { value: 'en', label: getDraftt('config_language_en'), description: getDraftt('config_language_en_desc') },
                 ].map((option) => (
                   <button
                     key={option.value}
-                    onClick={() => setLanguage(option.value)}
+                    onClick={() => setDraftLanguage(option.value)}
                     className={`p-4 rounded-xl border-2 transition-all duration-200 text-center ${
-                      language === option.value
+                      draftLanguage === option.value
                         ? isDark ? 'border-pink-400 bg-gray-700 shadow-md' : 'border-rose-400 bg-rose-50 shadow-md'
                         : isDark ? 'border-gray-600 bg-gray-800 hover:border-gray-500' : 'border-gray-200 bg-white hover:border-rose-200'
                     }`}
@@ -263,21 +310,21 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
                   <TextAa size={28} weight="duotone" />
                 </span>
                 <div>
-                  <h2 className={`text-2xl font-bold mb-1 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>{t('config_text_size_title')}</h2>
-                  <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{t('config_text_size_desc')}</p>
+                  <h2 className={`text-2xl font-bold mb-1 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>{getDraftt('config_text_size_title')}</h2>
+                  <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{getDraftt('config_text_size_desc')}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { value: 'normal', label: t('config_text_normal'), size: 'text-base' },
-                  { value: 'grande', label: t('config_text_large'), size: 'text-lg' },
+                  { value: 'normal', label: getDraftt('config_text_normal'), size: 'text-base' },
+                  { value: 'grande', label: getDraftt('config_text_large'), size: 'text-lg' },
                 ].map((option) => (
                   <button
                     key={option.value}
-                    onClick={() => setTextSize(option.value)}
+                    onClick={() => setDraftTextSize(option.value)}
                     className={`p-6 rounded-xl border-2 transition-all duration-200 text-center ${
-                      textSize === option.value
+                      draftTextSize === option.value
                         ? isDark ? 'border-pink-400 bg-gray-700 shadow-md' : 'border-rose-400 bg-rose-50 shadow-md'
                         : isDark ? 'border-gray-600 bg-gray-800 hover:border-gray-500' : 'border-gray-200 bg-white hover:border-rose-200'
                     }`}
@@ -286,7 +333,7 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
                       {option.label}
                     </div>
                     <div className={`${option.size} ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                      {t('config_text_preview')}
+                      {getDraftt('config_text_preview')}
                     </div>
                   </button>
                 ))}
@@ -300,13 +347,13 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
                   <FolderOpen size={28} weight="duotone" />
                 </span>
                 <div>
-                  <h2 className={`text-2xl font-bold mb-1 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>{t('config_import_title')}</h2>
-                  <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{t('config_import_desc')}</p>
+                  <h2 className={`text-2xl font-bold mb-1 ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>{getDraftt('config_import_title')}</h2>
+                  <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{getDraftt('config_import_desc')}</p>
                 </div>
               </div>
 
               <div className={`rounded-xl p-4 mb-4 text-sm ${isDark ? 'bg-amber-900/30 text-amber-300 border border-amber-700' : 'bg-amber-50 text-amber-800 border border-amber-200'}`}>
-                {t('config_import_warning')}
+                {getDraftt('config_import_warning')}
               </div>
 
               <button
@@ -319,24 +366,36 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
                     : 'border-gray-200 bg-white text-gray-700 hover:border-rose-300 hover:bg-rose-50'
                 } ${isImporting ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
               >
-                {isImporting ? '...' : t('config_import_btn')}
+                {isImporting ? '...' : getDraftt('config_import_btn')}
               </button>
             </div>
 
             {/* Botón Guardar */}
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-3">
+              {hasChanges && (
+                <button
+                  onClick={handleCancel}
+                  className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 border-2 ${
+                    isDark
+                      ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600 hover:border-gray-500'
+                      : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200 hover:border-gray-400'
+                  }`}
+                >
+                  {getDraftt('config_btn_cancel') || 'Descartar'}
+                </button>
+              )}
               <button
                 onClick={handleSave}
                 className={`px-8 py-3 rounded-xl font-semibold transition-all duration-300 transform ${
                   showSaved
                     ? 'bg-green-500 text-white shadow-lg scale-105'
-                    : isSaved
+                    : !hasChanges
                     ? isDark ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-gray-300 text-gray-600 cursor-not-allowed'
                     : isDark ? 'bg-pink-600 text-white shadow-lg hover:shadow-xl hover:scale-105 cursor-pointer' : 'bg-rose-500 text-white shadow-lg hover:shadow-xl hover:scale-105 cursor-pointer'
                 }`}
-                disabled={isSaved}
+                disabled={!hasChanges && !showSaved}
               >
-                {showSaved ? t('config_btn_saved_success') : isSaved ? t('config_btn_saved') : t('config_btn_save')}
+                {showSaved ? getDraftt('config_btn_saved_success') : !hasChanges ? getDraftt('config_btn_saved') : getDraftt('config_btn_save')}
               </button>
             </div>
           </div>
@@ -346,7 +405,7 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
             <div className={`rounded-2xl shadow-lg p-6 border ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-rose-100'}`}>
               <div className="flex items-center gap-3 mb-6">
                 <UserCircle size={24} weight="duotone" className={isDark ? 'text-pink-400' : 'text-rose-700'} />
-                <h2 className={`text-lg font-bold ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>{t('profile_title')}</h2>
+                <h2 className={`text-lg font-bold ${isDark ? 'text-pink-400' : 'text-rose-800'}`}>{getDraftt('profile_title')}</h2>
               </div>
 
               <div className="flex flex-col items-center gap-5">
@@ -383,7 +442,7 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
                     }`}
                   >
                     <Camera size={14} weight="duotone" />
-                    {profilePhotoPreview ? t('profile_photo_change') : t('profile_photo_upload')}
+                    {profilePhotoPreview ? getDraftt('profile_photo_change') : getDraftt('profile_photo_upload')}
                   </button>
                 </div>
 
@@ -391,13 +450,13 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
                 <div className="w-full space-y-3">
                   <div>
                     <label className={`block text-xs font-semibold mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      {t('profile_name_label')}
+                      {getDraftt('profile_name_label')}
                     </label>
                     <input
                       type="text"
                       value={profileName}
                       onChange={(e) => setProfileName(e.target.value)}
-                      placeholder={t('profile_name_placeholder')}
+                      placeholder={getDraftt('profile_name_placeholder')}
                       className={`w-full px-3 py-2.5 rounded-xl border-2 text-sm transition-all duration-200 outline-none ${
                         isDark
                           ? 'bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-500 focus:border-pink-400'
@@ -408,13 +467,13 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
 
                   <div>
                     <label className={`block text-xs font-semibold mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      {t('profile_role_label')}
+                      {getDraftt('profile_role_label')}
                     </label>
                     <input
                       type="text"
                       value={profileRole}
                       onChange={(e) => setProfileRole(e.target.value)}
-                      placeholder={t('profile_role_placeholder')}
+                      placeholder={getDraftt('profile_role_placeholder')}
                       className={`w-full px-3 py-2.5 rounded-xl border-2 text-sm transition-all duration-200 outline-none ${
                         isDark
                           ? 'bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-500 focus:border-pink-400'
@@ -437,13 +496,13 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
                         : 'bg-rose-500 text-white shadow-lg hover:shadow-xl hover:scale-[1.02] cursor-pointer'
                   }`}
                 >
-                  {isSavingProfile ? t('profile_btn_saving') : t('profile_btn_save')}
+                  {isSavingProfile ? getDraftt('profile_btn_saving') : getDraftt('profile_btn_save')}
                 </button>
               </div>
 
               {/* Descripción sutil */}
               <p className={`text-[11px] text-center mt-4 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
-                {t('profile_desc')}
+                {getDraftt('profile_desc')}
               </p>
             </div>
           </div>
@@ -473,14 +532,14 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
             <h3 className={`confirm-modal-title ${
               isDark ? 'text-gray-100' : 'text-gray-900'
             }`}>
-              {t('confirm_modal_title')}
+              {getDraftt('confirm_modal_title')}
             </h3>
 
             {/* Cuerpo */}
             <p className={`confirm-modal-body ${
               isDark ? 'text-gray-400' : 'text-gray-600'
             }`}>
-              {t('confirm_modal_body')}
+              {getDraftt('confirm_modal_body')}
             </p>
 
             {/* Detalle archivo */}
@@ -501,7 +560,7 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
                 ? 'bg-emerald-900/30 text-emerald-300 border-emerald-700'
                 : 'bg-emerald-50 text-emerald-700 border-emerald-200'
             }`}>
-              <ShieldCheck size={16} weight="duotone" /> {t('confirm_modal_safety_note')}
+              <ShieldCheck size={16} weight="duotone" /> {getDraftt('confirm_modal_safety_note')}
             </div>
 
             {/* Botones */}
@@ -515,14 +574,14 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                {t('confirm_modal_cancel')}
+                {getDraftt('confirm_modal_cancel')}
               </button>
               <button
                 type="button"
                 onClick={confirmImport}
                 className="confirm-modal-btn confirm-modal-btn-confirm"
               >
-                {t('confirm_modal_confirm')}
+                {getDraftt('confirm_modal_confirm')}
               </button>
             </div>
           </div>
