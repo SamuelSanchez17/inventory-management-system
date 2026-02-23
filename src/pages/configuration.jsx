@@ -5,10 +5,17 @@ import { invoke, isTauri } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
 import toast from 'react-hot-toast';
 import Sidebar from '../components/sidebar';
-import { Camera, FileText, FolderOpen, Globe, Moon, ShieldCheck, TextAa, UserCircle, Warning } from 'phosphor-react';
+import { Camera, FileText, FolderOpen, Globe, Moon, TextAa, UserCircle, Warning } from 'phosphor-react';
 import translations from '../translations';
 
-export default function Configuration({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar, profile, onProfileSaved }) {
+export default function Configuration({
+  onNavigate,
+  currentPage,
+  isSidebarCollapsed,
+  toggleSidebar,
+  profile,
+  onProfileSaved,
+}) {
   const { theme, setTheme, textSize, setTextSize, savePreferences, isSaved, getActiveTheme } = useContext(ThemeContext);
   const { language, setLanguage, t } = useContext(LanguageContext);
   const [showSaved, setShowSaved] = useState(false);
@@ -369,6 +376,7 @@ export default function Configuration({ onNavigate, currentPage, isSidebarCollap
                 {isImporting ? '...' : getDraftt('config_import_btn')}
               </button>
             </div>
+
 
             {/* Botón Guardar */}
             <div className="flex justify-end gap-3">

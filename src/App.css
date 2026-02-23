@@ -398,6 +398,344 @@ body, #root {
   color: #ffffff;
   box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
 }
+
+/* ── Update Modal ── */
+.update-modal-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 10000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: radial-gradient(circle at top, rgba(16, 24, 40, 0.55), rgba(15, 23, 42, 0.8));
+	backdrop-filter: blur(10px);
+	padding: 1.5rem;
+}
+
+.update-modal-card {
+	width: 100%;
+	max-width: 620px;
+	border-radius: 1.5rem;
+	padding: 2.2rem 2.2rem 1.8rem;
+	box-shadow: 0 35px 80px rgba(15, 23, 42, 0.45);
+	position: relative;
+	overflow: hidden;
+	font-family: 'Manrope', 'Segoe UI', sans-serif;
+}
+
+.update-card-light {
+	background: #fff7fb;
+	border: 1px solid rgba(251, 182, 206, 0.7);
+}
+
+.update-card-dark {
+	background: #0f172a;
+	border: 1px solid rgba(148, 163, 184, 0.2);
+	color: #e2e8f0;
+}
+
+.update-card-light::before,
+.update-card-dark::before {
+	content: '';
+	position: absolute;
+	inset: -60% -40% auto;
+	height: 260px;
+	background: radial-gradient(circle, rgba(244, 114, 182, 0.35), transparent 70%);
+	pointer-events: none;
+}
+
+.update-modal-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 1rem;
+}
+
+.update-pill {
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	font-weight: 700;
+	padding: 0.3rem 0.75rem;
+	border-radius: 999px;
+}
+
+.update-pill-light {
+	background: rgba(251, 113, 133, 0.15);
+	color: #be185d;
+}
+
+.update-pill-dark {
+	background: rgba(248, 113, 113, 0.15);
+	color: #fda4af;
+}
+
+.update-close {
+	border: none;
+	background: transparent;
+	font-size: 1.5rem;
+	color: inherit;
+	cursor: pointer;
+	opacity: 0.7;
+	transition: opacity 0.2s ease;
+}
+
+.update-close:hover {
+	opacity: 1;
+}
+
+.update-title {
+	font-size: 1.6rem;
+	font-weight: 700;
+	margin-bottom: 0.4rem;
+}
+
+.update-subtitle {
+	font-size: 0.95rem;
+	line-height: 1.5;
+	margin-bottom: 1.2rem;
+	color: inherit;
+	opacity: 0.8;
+}
+
+.update-version {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	justify-content: center;
+	border-radius: 999px;
+	padding: 0.5rem 1rem;
+	font-weight: 600;
+	margin-bottom: 1.2rem;
+}
+
+.update-version-light {
+	background: rgba(255, 255, 255, 0.7);
+	color: #9f1239;
+}
+
+.update-version-dark {
+	background: rgba(30, 41, 59, 0.6);
+	color: #f8fafc;
+}
+
+.update-version-arrow {
+	opacity: 0.7;
+}
+
+.update-version-new {
+	color: #be185d;
+}
+
+.update-meta {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0.75rem;
+	margin-bottom: 1.2rem;
+}
+
+.update-meta-card {
+	border-radius: 1rem;
+	padding: 0.75rem 1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+.update-meta-light {
+	background: rgba(251, 207, 232, 0.35);
+	border: 1px solid rgba(251, 182, 206, 0.6);
+	color: #9f1239;
+}
+
+.update-meta-dark {
+	background: rgba(15, 23, 42, 0.6);
+	border: 1px solid rgba(148, 163, 184, 0.2);
+	color: #e2e8f0;
+}
+
+.update-meta-label {
+	font-size: 0.7rem;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	opacity: 0.7;
+}
+
+.update-meta-value {
+	font-weight: 600;
+	font-size: 0.95rem;
+}
+
+.update-section-title {
+	font-size: 0.85rem;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	margin-bottom: 0.5rem;
+	opacity: 0.7;
+}
+
+.update-highlights ul,
+.update-notes ul {
+	padding-left: 1.1rem;
+	margin: 0;
+	display: grid;
+	gap: 0.35rem;
+	font-size: 0.95rem;
+}
+
+.update-empty {
+	font-size: 0.9rem;
+	opacity: 0.7;
+	margin: 0;
+}
+
+.update-details {
+	margin-top: 1.2rem;
+}
+
+.update-link {
+	border: none;
+	background: none;
+	color: inherit;
+	font-weight: 600;
+	font-size: 0.9rem;
+	cursor: pointer;
+	opacity: 0.8;
+	padding: 0;
+}
+
+.update-notes {
+	margin-top: 0.75rem;
+	padding: 0.9rem 1rem;
+	border-radius: 1rem;
+}
+
+.update-notes-light {
+	background: rgba(255, 255, 255, 0.7);
+	border: 1px solid rgba(251, 182, 206, 0.4);
+}
+
+.update-notes-dark {
+	background: rgba(30, 41, 59, 0.6);
+	border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.update-progress {
+	margin-top: 1.4rem;
+}
+
+.update-progress-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	font-size: 0.85rem;
+	margin-bottom: 0.4rem;
+	opacity: 0.8;
+}
+
+.update-progress-bar {
+	width: 100%;
+	height: 10px;
+	border-radius: 999px;
+	background: rgba(148, 163, 184, 0.25);
+	overflow: hidden;
+}
+
+.update-progress-fill {
+	height: 100%;
+	background: linear-gradient(90deg, #f472b6, #fb7185);
+	transition: width 0.2s ease;
+}
+
+.update-actions {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 0.75rem;
+	margin-top: 1.6rem;
+}
+
+.update-btn {
+	border: none;
+	border-radius: 0.85rem;
+	padding: 0.85rem 1rem;
+	font-weight: 700;
+	cursor: pointer;
+	transition: transform 0.15s ease, box-shadow 0.2s ease;
+}
+
+.update-btn:active {
+	transform: scale(0.98);
+}
+
+.update-btn-primary {
+	background: linear-gradient(135deg, #f472b6, #fb7185);
+	color: #fff;
+	box-shadow: 0 12px 28px rgba(244, 114, 182, 0.35);
+}
+
+.update-btn-secondary {
+	background: transparent;
+	border: 1px solid rgba(148, 163, 184, 0.45);
+	color: inherit;
+}
+
+.update-footnote {
+	margin-top: 0.9rem;
+	font-size: 0.8rem;
+	opacity: 0.65;
+}
+
+@media (max-width: 640px) {
+	.update-modal-card {
+		padding: 1.6rem;
+	}
+
+	.update-meta,
+	.update-actions {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* ── Patch Notes (post‑update) ── */
+.patch-icon-row {
+	display: flex;
+	justify-content: center;
+	margin-bottom: 1rem;
+}
+
+.patch-check-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	font-size: 1.6rem;
+	font-weight: 700;
+	background: linear-gradient(135deg, #34d399, #10b981);
+	color: #fff;
+	box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
+}
+
+.update-pill-success {
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	font-weight: 700;
+	padding: 0.3rem 0.75rem;
+	border-radius: 999px;
+}
+
+.update-pill-success-light {
+	background: rgba(16, 185, 129, 0.15);
+	color: #065f46;
+}
+
+.update-pill-success-dark {
+	background: rgba(52, 211, 153, 0.15);
+	color: #6ee7b7;
+}
+
 .confirm-modal-btn-confirm:hover {
   background: linear-gradient(135deg, #ef4444, #dc2626);
   box-shadow: 0 6px 20px rgba(220, 38, 38, 0.45);

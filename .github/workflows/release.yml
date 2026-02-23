@@ -41,6 +41,6 @@ jobs:
           tagName: app-v__VERSION__ #crea el tag automáticamente
           releaseName: "App v__VERSION__"
           includeUpdaterJson: true
-          releaseBody: "Novedades en esta versión."
+          releaseBody: "- Nuevo sistema de actualización automática con notificación visual\n- Modal profesional con notas del parche al actualizar\n- Descarga en segundo plano si eliges actualizar después\n- Instalación automática al cerrar la aplicación\n- Verificación de actualizaciones cada 8 horas"
           releaseDraft: false
           prerelease: false
