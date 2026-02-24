@@ -41,6 +41,6 @@ jobs:
           tagName: app-v__VERSION__ #crea el tag automáticamente
           releaseName: "App v__VERSION__"
           includeUpdaterJson: true
-          releaseBody: "- Nuevo sistema de actualización automática con notificación visual\n- Modal profesional con notas del parche al actualizar\n- Descarga en segundo plano si eliges actualizar después\n- Instalación automática al cerrar la aplicación\n- Verificación de actualizaciones cada 8 horas"
+          releaseBody: "- Nuevo sistema de actualización automática con notificación visual\n- Modal profesional con notas del parche al actualizar\n- Descarga en segundo plano si eliges actualizar después\n- Instalación automática al cerrar la aplicación\n- Verificación de actualizaciones cada 8 horas\n- Se modifica el nombre de la app a StockBeauty y se actualiza la versión a 1.0.1"
           releaseDraft: false
           prerelease: false
