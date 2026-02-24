@@ -169,14 +169,17 @@ function AppShell() {
       const { getCurrentWindow } = await import('@tauri-apps/api/window');
       const appWindow = getCurrentWindow();
 
-      unlisten = await appWindow.onCloseRequested(async () => {
+      unlisten = await appWindow.onCloseRequested(async (event) => {
+        // Solo prevenir cierre si hay update pendiente
         if (deferredUpdateRef.current) {
+          event.preventDefault();
           try {
             await deferredUpdateRef.current.install();
           } catch (err) {
             console.error('Install on close failed:', err);
           }
         }
+        // Si no hay update, dejar que cierre naturalmente (sin preventDefault)
       });
     })();
 

@@ -216,7 +216,7 @@ export default function Sidebar({ onNavigate, activePage, isCollapsed, toggleSid
               ? 'text-gray-500 border-t border-gray-700' 
               : 'text-rose-600/60 border-t border-rose-200/60'
           }`}>
-            <p>© 2026 InventarioMS</p>
+            <p>© 2026 StockBeauty</p>
           </div>
         )}
       </aside>
