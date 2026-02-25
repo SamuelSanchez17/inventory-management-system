@@ -222,4 +222,4 @@ This project was originally developed as a customized enterprise solution. The d
 
 ---
 
-**© 2026 StockBeauty. All rights reserved.**
+**© 2026 StockBeauty - Inventory Management System. All rights reserved.**
