@@ -1,30 +1,30 @@
-# StockBeauty - Sistema de Gestión de Inventario
+# StockBeauty - Inventory Management System
 
-> Una solución empresarial completa y performante para la gestión integral de inventario, ventas y reportes. Desarrollada como aplicación de escritorio moderna con Tauri y Rust en el backend.
-
----
-
-## 🎯 Descripción del Proyecto
-
-StockBeauty es un sistema profesional de gestión de inventario y punto de venta diseñado para optimizar operaciones comerciales. Combina una interfaz de usuario intuitiva con un backend robusto que garantiza seguridad, escalabilidad y rendimiento.
-
-Desarrollado inicialmente como solución para un cliente empresarial, este proyecto representa una arquitectura moderna y bien estructurada, demostrando capacidades en desarrollo full-stack, arquitectura de aplicaciones y mejores prácticas de ingeniería de software.
+> A complete and high-performance enterprise solution for comprehensive inventory management, sales processing, and reporting. Developed as a modern desktop application with Tauri and Rust in the backend.
 
 ---
 
-## 🏗️ Arquitectura General
+## 🎯 Project Overview
+
+StockBeauty is a professional inventory and point-of-sale management system designed to optimize commercial operations. It combines an intuitive user interface with a robust backend that guarantees security, scalability, and performance.
+
+Originally developed as a solution for an enterprise client, this project represents a modern and well-structured architecture, demonstrating full-stack development capabilities, application architecture expertise, and software engineering best practices.
+
+---
+
+## 🏗️ Architecture Overview
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│          CAPA DE PRESENTACIÓN (Frontend)            │
-│  React + Vite | Temas dinámicos | Multiidioma       │
+│       PRESENTATION LAYER (Frontend)                 │
+│  React + Vite | Dynamic Themes | Multi-language     │
 └────────────────────┬────────────────────────────────┘
                      │
           ┌──────────┴──────────┐
           ▼                     ▼
     ┌─────────────┐      ┌──────────────┐
-    │  Componentes│      │  Contextos   │
-    │  Modulares  │      │  Globales    │
+    │  Modular    │      │   Global     │
+    │  Components │      │   Context    │
     └─────────────┘      └──────────────┘
           │                     │
           └──────────┬──────────┘
@@ -34,23 +34,23 @@ Desarrollado inicialmente como solución para un cliente empresarial, este proye
      └───────────┬────────────────────┘
                  │
 ┌────────────────▼─────────────────────┐
-│      CAPA DE LÓGICA (Backend)        │
-│   Rust + Tauri + SQLite              │
+│       LOGIC LAYER (Backend)          │
+│       Rust + Tauri + SQLite          │
 ├──────────────────────────────────────┤
-│ • Servicios de Negocio               │
-│ • Repositorios de Datos              │
-│ • Validaciones y Reglas              │
-│ • Exportación de Reportes            │
+│ • Business Services                  │
+│ • Data Repositories                  │
+│ • Validations & Business Rules       │
+│ • Report Generation                  │
 └────────────────┬─────────────────────┘
                  │
      ┌───────────▼─────────────┐
-     │   Base de Datos SQLite  │
+     │     SQLite Database     │
      └─────────────────────────┘
 ```
 
 ---
 
-## 🛠️ Tecnologías Utilizadas
+## 🛠️ Technologies Used
 
 ### Frontend
 ![React](https://img.shields.io/badge/React-18-blue?style=for-the-badge&logo=react)
@@ -69,157 +69,157 @@ Desarrollado inicialmente como solución para un cliente empresarial, este proye
 
 ---
 
-## ✨ Características Principales
+## ✨ Key Features
 
-### Gestión de Inventario
-- **Control de Productos**: Crear, actualizar, eliminar y categorizar productos
-- **Niveles de Stock**: Monitoreo en tiempo real de inventario
-- **Categorización**: Organización jerárquica de producto por categorías
-- **Búsqueda Avanzada**: Filtros rápidos y precisos
+### Inventory Management
+- **Product Control**: Create, update, delete, and categorize products
+- **Stock Levels**: Real-time inventory monitoring
+- **Categorization**: Hierarchical product organization by categories
+- **Advanced Search**: Fast and precise filtering
 
-### Sistema de Ventas
-- **Procesamiento de Ventas**: Interfaz optimizada para transacciones rápidas
-- **Validaciones en Tiempo Real**: Verificación de disponibilidad instantánea
-- **Historial de Transacciones**: Trazabilidad completa de operaciones
-- **Perfil de Usuario**: El usuario puede adaptar la barra lateral y las herramientas visibles según su flujo de trabajo.
+### Sales System
+- **Sales Processing**: User interface optimized for fast transactions
+- **Real-Time Validations**: Instant availability verification
+- **Transaction History**: Complete traceability of operations
+- **User Profile**: Users can customize the sidebar and visible tools based on their workflow
 
-### Reportes y Analytics
-- **Dashboard Ejecutivo**: Visualización de KPIs principales
-- **Análisis de Ventas**: Reportes detallados y comparativos
-- **Exportación de Datos**: Generación de reportes en múltiples formatos
-- **Gráficos Interactivos**: Información visual y accesible
+### Reports & Analytics
+- **Executive Dashboard**: Key performance indicator visualization
+- **Sales Analysis**: Detailed and comparative reports
+- **Data Export**: Report generation in multiple formats
+- **Interactive Charts**: Visual and accessible information
 
-### Experiencia de Usuario
-- **Interfaz Responsiva**: Adaptación a diferentes tamaños de pantalla
-- **Temas Personalizables**: Modo claro/oscuro según preferencia
-- **Multiidioma**: Soporte para múltiples lenguajes (i18n)
-- **Navegación Intuitiva**: UX optimizada para productividad
+### User Experience
+- **Responsive Interface**: Adaptation to different screen sizes
+- **Customizable Themes**: Light/dark mode based on preference
+- **Multi-language Support**: Support for multiple languages (i18n)
+- **Intuitive Navigation**: UX optimized for productivity
 
 ---
 
-## 📊 Estructura del Proyecto
+## 📊 Project Structure
 
 ```
 src/
-├── components/          # Componentes React reutilizables
-│   ├── header.jsx      # Cabecera principal
-│   ├── sidebar.jsx     # Navegación lateral
-│   └── updateModal.jsx # Modal de actualizaciones
-├── pages/              # Vistas principales de la aplicación
-│   ├── dashboard.jsx   # Panel de control
-│   ├── products.jsx    # Gestión de productos
-│   ├── sales.jsx       # Procesamiento de ventas
-│   ├── reports.jsx     # Análisis y reportes
-│   └── configuration.jsx # Configuraciones
-├── context/            # Context API para estado global
+├── components/          # Reusable React components
+│   ├── header.jsx      # Main header
+│   ├── sidebar.jsx     # Side navigation
+│   └── updateModal.jsx # Update modal
+├── pages/              # Application main views
+│   ├── dashboard.jsx   # Control panel
+│   ├── products.jsx    # Product management
+│   ├── sales.jsx       # Sales processing
+│   ├── reports.jsx     # Analytics and reports
+│   └── configuration.jsx # Settings
+├── context/            # Context API for global state
 │   ├── LanguageContext.jsx
 │   └── ThemeContext.jsx
-├── services/           # Servicios y lógica
-├── styles/             # Estilos CSS por módulo
-├── translations.js     # Configuración multiidioma
-└── App.jsx            # Componente principal
+├── services/           # Services and business logic
+├── styles/             # CSS styles by module
+├── translations.js     # Multi-language configuration
+└── App.jsx            # Main component
 
 src-tauri/
 ├── src/
-│   ├── commands/       # Comandos IPC expuestos al frontend
+│   ├── commands/       # IPC commands exposed to frontend
 │   │   ├── products.rs
 │   │   ├── sales.rs
 │   │   ├── categories.rs
 │   │   └── export.rs
-│   ├── services/       # Lógica de negocio
+│   ├── services/       # Business logic
 │   │   ├── producto_service.rs
 │   │   ├── venta_service.rs
 │   │   └── categoria_service.rs
-│   ├── repos/          # Capa de acceso a datos
+│   ├── repos/          # Data access layer
 │   │   ├── producto_repo.rs
 │   │   ├── venta_repo.rs
 │   │   └── categoria_repo.rs
-│   ├── models.rs       # Estructuras de datos
-│   ├── database.rs     # Conexión y gestión BD
-│   └── main.rs         # Punto de entrada
+│   ├── models.rs       # Data structures
+│   ├── database.rs     # DB connection & management
+│   └── main.rs         # Entry point
 
-esquemaDB.sql          # Esquema de base de datos
+esquemaDB.sql          # Database schema
 ```
 
 ---
 
-## 🎨 Interfaz y UX
+## 🎨 Interface & UX
 
-### Módulos Principales
+### Main Modules
 
 **Dashboard**
-- Indicadores clave de desempeño (KPIs)
-- Gráficos de tendencias de ventas
-- Alertas de bajo inventario
-- Accesos rápidos a funciones comunes
+- Key Performance Indicators (KPIs)
+- Sales trend charts
+- Low inventory alerts
+- Quick access to common functions
 
-**Gestión de Productos**
-- Tabla interactiva con paginación
-- Búsqueda y filtros avanzados
-- Edición en línea con validaciones
-- Importación/Exportación de datos
+**Product Management**
+- Interactive table with pagination
+- Advanced search and filters
+- Inline editing with validations
+- Data import/export
 
-**Punto de Venta**
-- Interfaz optimizada para transacciones rápidas
-- Carrito de compras dinámico
-- Cálculos automáticos
-- Generación de recibos
+**Point of Sale**
+- Interface optimized for fast transactions
+- Dynamic shopping cart
+- Automatic calculations
+- Receipt generation
 
-**Reportes**
-- Múltiples vistas de análisis
-- Filtros por período, categoría, vendedor
-- Gráficos comparativos
-- Exportación en PDF/Excel
-
----
-
-## 🔐 Características Técnicas Destacadas
-
-### Backend Robusto
-- Arquitectura en capas: Commands → Services → Repositories
-- Validación de datos en múltiples niveles
-- Manejo seguro de operaciones de base de datos
-- Serialización eficiente de datos con Serde
-
-### Rendimiento
-- Aplicación de escritorio nativa (Tauri)
-- Compilación a código máquina (Rust)
-- IPC de bajo overhead
-- Consultas optimizadas a base de datos
-
-### Mantenibilidad
-- Código modular y bien estructurado
-- Separación clara de responsabilidades
-- Patrones establecidos (Service Pattern, Repository Pattern)
-- Fácil extensibilidad para nuevas funcionalidades
+**Reports**
+- Multiple analysis views
+- Filters by period, category, salesperson
+- Comparative charts
+- PDF/Excel export
 
 ---
 
-## 📸 Galería de Pantallas
+## 🔐 Highlighted Technical Features
 
-> [Las capturas de pantalla serán añadidas próximamente, mostrando la interfaz del dashboard, gestión de productos y reportes]
+### Robust Backend
+- Layered architecture: Commands → Services → Repositories
+- Multi-level data validation
+- Secure database operation handling
+- Efficient data serialization with Serde
 
----
+### Performance
+- Native desktop application (Tauri)
+- Compilation to machine code (Rust)
+- Low-overhead IPC
+- Optimized database queries
 
-## 📝 Notas
-
-Este proyecto fue desarrollado originalmente como solución empresarial personalizada. La decisión de compartir esta arquitectura busca demostrar:
-
-- Dominio de arquitecturas full-stack
-- Implementación de patrones de diseño profesionales
-- Capacidad de integración entre tecnologías complementarias
-- Atención al detalle en UX/UI
-- Escritura de código limpio y escalable
-
----
-
-## 👨‍💻 Acerca Del Proyecto
-
-**Desarrollador**: Samuel Sánchez Guzmán  
-**Tipo**: Aplicación Desktop  
-**Estado**: Producción  
-**Última Actualización**: Febrero 2026  
+### Maintainability
+- Modular and well-structured code
+- Clear separation of concerns
+- Established patterns (Service Pattern, Repository Pattern)
+- Easy extensibility for new features
 
 ---
 
-**© 2026 StockBeauty. Todos los derechos reservados.**
+## 📸 Screenshots Gallery
+
+> [Screenshots will be added soon, showcasing the dashboard interface, product management, and reports]
+
+---
+
+## 📝 Notes
+
+This project was originally developed as a customized enterprise solution. The decision to share this architecture aims to demonstrate:
+
+- Mastery of full-stack architectures
+- Implementation of professional design patterns
+- Ability to integrate complementary technologies
+- Attention to detail in UX/UI
+- Clean and scalable code writing
+
+---
+
+## 👨‍💻 About This Project
+
+**Developer**: Samuel Sánchez Guzmán  
+**Type**: Desktop Application  
+**Status**: Production  
+**Last Updated**: February 2026  
+
+---
+
+**© 2026 StockBeauty. All rights reserved.**
