@@ -1,6 +1,13 @@
 # StockBeauty - Inventory Management System
 
-**[🇬🇧 English](README.md) | [🇪🇸 Español](README_ES.md)**
+<div align="center">
+
+| [🇬🇧 English](README.md) | [🇪🇸 Español](README_ES.md) |
+|:---:|:---:|
+
+</div>
+
+---
 
 > A complete and high-performance enterprise solution for comprehensive inventory management, sales processing, and reporting. Developed as a modern desktop application with Tauri and Rust in the backend.
 

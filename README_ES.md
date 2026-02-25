@@ -1,6 +1,13 @@
 # StockBeauty - Sistema de Gestión de Inventario
 
-**[🇬🇧 English](README.md) | [🇪🇸 Español](README_ES.md)**
+<div align="center">
+
+| [🇬🇧 English](README.md) | [🇪🇸 Español](README_ES.md) |
+|:---:|:---:|
+
+</div>
+
+---
 
 > Una solución empresarial completa y performante para la gestión integral de inventario, ventas y reportes. Desarrollada como aplicación de escritorio moderna con Tauri y Rust en el backend.
 
