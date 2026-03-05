@@ -8,10 +8,57 @@
   min-height: 100vh;
   font-family: 'Manrope', 'Segoe UI', sans-serif;
   color: var(--products-text);
+  /* Default products theme variables (light mode) */
+  --products-bg: radial-gradient(circle at top left, #171a20 0%, #f7f8fb 50%, #fefefe 100%);
+  --products-card: #ffffff;
+  --products-text: #111827;
+  --products-muted: #64748b;
+  --products-border: #e2e8f0;
+  --products-accent: #0f4c81;
+  --products-accent-strong: #0b3a62;
+  --products-accent-soft: #e6f0fb;
+  --products-danger: #e53e3e;
+  --products-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+  /* Default dashboard theme variables for header (light mode) */
+  --dashboard-bg: #f6f7fb;
+  --dashboard-card: #ffffff;
+  --dashboard-text: #111827;
+  --dashboard-muted: #64748b;
+  --dashboard-border: #e2e8f0;
+  --dashboard-accent: #0f4c81;
+  --dashboard-accent-strong: #0b3a62;
+  --dashboard-accent-soft: #e6f0fb;
+  --dashboard-primary: #0f4c81;
+  --dashboard-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
 }
 
 .products-dark {
   background: radial-gradient(circle at top left, #0f172a 0%, #111827 45%, #0b1020 100%);
+}
+
+/* Dark mode variables for products container (applies to both products and header elements) */
+.products-container.products-dark {
+  --products-bg: radial-gradient(circle at top left, #0f172a 0%, #111827 45%, #0b1020 100%);
+  --products-card: #1e293b;
+  --products-text: #f8fafc;
+  --products-muted: #94a3b8;
+  --products-border: rgba(148, 163, 184, 0.25);
+  --products-accent: #38bdf8;
+  --products-accent-strong: #0ea5e9;
+  --products-accent-soft: rgba(56, 189, 248, 0.12);
+  --products-danger: #f87171;
+  --products-shadow: 0 24px 50px rgba(0, 0, 0, 0.45);
+  /* Dashboard variables for header search input */
+  --dashboard-bg: #0f172a;
+  --dashboard-card: #1e293b;
+  --dashboard-text: #f8fafc;
+  --dashboard-muted: #94a3b8;
+  --dashboard-border: rgba(148, 163, 184, 0.25);
+  --dashboard-accent: #38bdf8;
+  --dashboard-accent-strong: #0ea5e9;
+  --dashboard-accent-soft: rgba(56, 189, 248, 0.12);
+  --dashboard-primary: #38bdf8;
+  --dashboard-shadow: 0 24px 50px rgba(0, 0, 0, 0.45);
 }
 
 .products-container h1 {
@@ -240,7 +287,7 @@
 
 /* Sección de productos (derecha) - Tabla de productos */
 .products-table-container {
-  background: var(--products-card, #ffffff);
+  background: var(--products-card, #0e1642);
   border-radius: 16px;
   padding: 24px;
   box-shadow: var(--products-shadow, 0 16px 40px rgba(15, 23, 42, 0.08));
@@ -296,10 +343,12 @@
   width: 100%;
   border-collapse: collapse;
   table-layout: auto;
+  background-color: inherit;
 }
 
 .products-table thead tr {
   border-bottom: 2px solid var(--products-border, #e2e8f0);
+  background-color: inherit;
 }
 
 .products-table th {
@@ -310,11 +359,13 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--products-muted, #64748b);
+  background-color: inherit;
 }
 
 .products-table tbody tr {
   border-bottom: 1px solid var(--products-border, #e2e8f0);
   transition: background-color 0.2s ease;
+  background-color: inherit;
 }
 
 .products-table tbody tr:hover {
@@ -330,6 +381,7 @@
   font-size: 0.95rem;
   color: var(--products-text, #111827);
   vertical-align: middle;
+  background-color: inherit;
 }
 
 .products-table th:nth-child(3),
@@ -377,6 +429,12 @@
 .product-name {
   font-weight: 600;
   color: var(--products-text, #111827);
+}
+
+.products-container.products-dark .products-table td,
+.products-container.products-dark .product-name,
+.products-container.products-dark .table-cell-category {
+  color: #f8fafc;
 }
 
 .table-cell-category {
@@ -461,7 +519,7 @@
   padding: 6px 10px;
   border: 1px solid var(--products-border, #e2e8f0);
   border-radius: 8px;
-  background: transparent;
+  background-color: inherit;
   color: var(--products-text, #111827);
   font-size: 0.85rem;
   cursor: pointer;
@@ -487,7 +545,7 @@
   padding: 6px 12px;
   border: 1px solid var(--products-border, #e2e8f0);
   border-radius: 8px;
-  background: transparent;
+  background-color: inherit;
   color: var(--products-text, #111827);
   font-weight: 600;
   cursor: pointer;
@@ -517,22 +575,24 @@
   justify-content: center;
   z-index: 60;
   padding: 24px;
+  overflow: hidden;
 }
 
 .products-modal {
   background: var(--products-card, #ffffff);
   color: var(--products-text, #111827);
   border-radius: 18px;
-  padding: 24px;
-  width: min(440px, 92vw);
-  max-height: 90vh;
+  padding: 28px 32px;
+  width: min(520px, 92vw);
+  max-height: 85vh;
   overflow-y: auto;
+  overflow-x: hidden;
   box-shadow: var(--products-shadow, 0 16px 40px rgba(15, 23, 42, 0.08));
   border: 1px solid var(--products-border, #e2e8f0);
 }
 
 .products-modal-dark {
-  background: #111827;
+  background: #1e293b;
   color: #f8fafc;
   border-color: rgba(148, 163, 184, 0.25);
 }
@@ -642,7 +702,7 @@
   padding: 10px 12px;
   border-radius: 12px;
   border: 1px solid var(--products-border, #e2e8f0);
-  background: transparent;
+  background-color: inherit;
   color: var(--products-text, #111827);
   font-size: 0.9rem;
 }
@@ -677,7 +737,7 @@
 }
 
 .products-modal-secondary {
-  background: transparent;
+  background-color: inherit;
   color: var(--products-text, #111827);
   border-color: var(--products-border, #e2e8f0);
 }
@@ -794,7 +854,7 @@
 
 [data-theme='dark'] {
   --products-bg: radial-gradient(circle at top left, #0f172a 0%, #111827 45%, #0b1020 100%);
-  --products-card: #111827;
+  --products-card: #1e293b;
   --products-text: #f8fafc;
   --products-muted: #94a3b8;
   --products-border: rgba(148, 163, 184, 0.25);
@@ -902,4 +962,90 @@
 
 .lista-categorias::-webkit-scrollbar-thumb {
   background: rgba(148, 163, 184, 0.6) !important;
+}
+
+/* ═══════════════════════════════════════════ */
+/* Explicit dark mode overrides               */
+/* ═══════════════════════════════════════════ */
+.products-container.products-dark .section-categoria {
+  background: #1e293b !important;
+}
+
+.products-container.products-dark .products-table-container {
+  background: #1e293b !important;
+}
+
+.products-container.products-dark .categoria-item {
+  background: linear-gradient(150deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95)) !important;
+  color: #cbd5e1 !important;
+}
+
+.products-container.products-dark .crear-categoria h3 {
+  color: #f8fafc !important;
+}
+
+.products-container.products-dark .categoria-seleccionada p {
+  color: #f8fafc !important;
+}
+
+.products-container.products-dark .products-modal-field input,
+.products-container.products-dark .products-modal-field select,
+.products-modal-dark .products-modal-field input,
+.products-modal-dark .products-modal-field select {
+  color: #f8fafc !important;
+  background: rgba(30, 41, 59, 0.6) !important;
+  border-color: rgba(148, 163, 184, 0.3) !important;
+}
+
+.products-container.products-dark .products-modal-field select option,
+.products-modal-dark .products-modal-field select option {
+  background: #1e293b;
+  color: #f8fafc;
+}
+
+/* ── Tabla: fondo y texto en dark mode ── */
+.products-container.products-dark .products-table thead tr {
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.products-container.products-dark .products-table th {
+  color: #94a3b8;
+}
+
+.products-container.products-dark .products-table tbody tr {
+  border-color: rgba(148, 163, 184, 0.15);
+}
+
+.products-container.products-dark .products-table td {
+  color: #f8fafc !important;
+}
+
+/* Paginación en dark */
+.products-container.products-dark .products-pagination {
+  color: #94a3b8;
+}
+
+.products-container.products-dark .products-pagination .items-per-page select,
+.products-container.products-dark .products-pagination .pagination-buttons button {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+  border-color: rgba(148, 163, 184, 0.25) !important;
+}
+
+/* Sección categorías en dark */
+.products-container.products-dark .input-group input {
+  color: #f8fafc !important;
+  -webkit-text-fill-color: #f8fafc !important;
+  border-color: rgba(148, 163, 184, 0.25) !important;
+}
+
+.products-container.products-dark .input-group input::placeholder {
+  color: #64748b !important;
+  -webkit-text-fill-color: #64748b !important;
+}
+
+.products-container.products-dark .categoria-edit-input {
+  background: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: rgba(148, 163, 184, 0.25) !important;
 }
