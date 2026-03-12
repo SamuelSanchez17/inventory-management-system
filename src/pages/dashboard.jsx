@@ -20,7 +20,7 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
   const [salesMonth, setSalesMonth] = useState(0);
   const [topProductos, setTopProductos] = useState([]);
   const [lowStockPage, setLowStockPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState('');
+
 
   // Carga de datos desde el backend
   useEffect(() => {
@@ -114,11 +114,7 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
       <Sidebar onNavigate={onNavigate} activePage={currentPage} isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} profile={profile} />
 
       <main className="dashboard-page">
-        <Header
-          onNavigate={onNavigate}
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-        />
+        <Header onNavigate={onNavigate} subtitle={t('dashboard_subtitle')} />
 
         {/* Métricas */}
         <div className="dashboard-metrics">

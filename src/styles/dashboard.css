@@ -55,6 +55,13 @@
   font-size: 1.9rem;
   font-weight: 700;
   font-family: 'Space Grotesk', 'Manrope', sans-serif;
+  margin: 0 0 6px;
+}
+
+.dashboard-subtitle {
+  margin: 0;
+  color: var(--dashboard-muted);
+  font-size: 0.95rem;
 }
 
 .dashboard-search {

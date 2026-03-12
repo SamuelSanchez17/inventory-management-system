@@ -475,7 +475,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
       <Sidebar onNavigate={onNavigate} activePage={currentPage} isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} profile={profile} />
 
       <main className={`products-container ${isDark ? 'products-dark' : ''}`}>
-        <Header onNavigate={onNavigate} searchTerm={searchTerm} onSearchChange={setSearchTerm} title={t('sidebar_products')} />
+        <Header onNavigate={onNavigate} searchTerm={searchTerm} onSearchChange={setSearchTerm} title={t('sidebar_products')} subtitle={t('products_subtitle')} />
 
         <div className="products-layout">
           {/* ── Categorías (izquierda) ── */}

@@ -62,10 +62,9 @@
 }
 
 .products-container h1 {
-  color: #1a1a1a;
   margin-bottom: 30px;
-  font-size: 28px;
-  font-weight: 600;
+  font-size: 1.9rem;
+  font-weight: 700;
   font-family: 'Space Grotesk', 'Manrope', sans-serif;
 }
 

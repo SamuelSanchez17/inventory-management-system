@@ -13,6 +13,7 @@ const translations = {
 
     // ── Header / Dashboard ──
     dashboard_title: 'Menu Principal',
+    dashboard_subtitle: 'Resumen general de inventario, métricas y productos destacados.',
     dashboard_search_placeholder: 'Buscar producto...',
     dashboard_metric_total: 'Total Productos',
     dashboard_metric_low_stock: 'Productos con Stock Bajo',
@@ -64,6 +65,7 @@ const translations = {
 
     // ── Products page ──
     products_title: 'Agregar Productos',
+    products_subtitle: 'Gestiona categorías, agrega y edita tus productos.',
     products_new_category: 'Nueva Categoría',
     products_category_placeholder: 'Ej. Calzado',
     products_btn_add: 'Añadir',
@@ -346,6 +348,7 @@ const translations = {
 
     // ── Header / Dashboard ──
     dashboard_title: 'Main Menu',
+    dashboard_subtitle: 'General overview of inventory, metrics and featured products.',
     dashboard_search_placeholder: 'Search product...',
     dashboard_metric_total: 'Total Products',
     dashboard_metric_low_stock: 'Low Stock Products',
@@ -397,6 +400,7 @@ const translations = {
 
     // ── Products page ──
     products_title: 'Add Products',
+    products_subtitle: 'Manage categories, add and edit your products.',
     products_new_category: 'New Category',
     products_category_placeholder: 'E.g. Footwear',
     products_btn_add: 'Add',
