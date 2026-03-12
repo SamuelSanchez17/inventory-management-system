@@ -1,14 +1,14 @@
 import { useContext } from 'react';
 import { LanguageContext } from '../context/LanguageContext';
 
-export default function Header({ searchTerm, onSearchChange })
+export default function Header({ searchTerm, onSearchChange, title })
 {
     const { t } = useContext(LanguageContext);
 
     return(
 
         <div className="dashboard-header">
-          <h1 className="dashboard-title">{t('dashboard_title')}</h1>
+          <h1 className="dashboard-title">{title ?? t('dashboard_title')}</h1>
           <div className="dashboard-search">
             <input
               className="dashboard-search-input"

@@ -54,7 +54,6 @@
 .dashboard-title {
   font-size: 1.9rem;
   font-weight: 700;
-  color: var(--dashboard-text);
   font-family: 'Space Grotesk', 'Manrope', sans-serif;
 }
 
