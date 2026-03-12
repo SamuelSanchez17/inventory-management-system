@@ -41,6 +41,6 @@ jobs:
           tagName: app-v__VERSION__ #crea el tag automáticamente
           releaseName: "App v__VERSION__"
           includeUpdaterJson: true
-          releaseBody: "- Nuevo sistema de actualización automática con notificación visual\n- Modal profesional con notas del parche al actualizar\n- Descarga en segundo plano si eliges actualizar después\n- Instalación automática al cerrar la aplicación\n- Verificación de actualizaciones cada 8 horas\n- Se modifica el nombre de la app a StockBeauty y se actualiza la versión a 1.0.1\n- Se soluciona el error cerrar correctamente la aplicación en windows"
+          releaseBody: "- Reorganización visual del sistema para una navegación más clara entre módulos\n- La tabla de productos se integra en la sección Products para centralizar su gestión\n- Dashboard (Main Menu) optimizado: se elimina contenido no esencial para dejar una vista principal más limpia\n- Corrección de títulos en páginas principales (Dashboard, Products, Sales y Reports) para mantener consistencia tipográfica\n- Ajuste de encabezados y subtítulos para mejorar jerarquía visual y lectura entre pantallas\n- Mejoras generales de coherencia visual durante la paginación y el cambio de secciones"
           releaseDraft: false
           prerelease: false
