@@ -13,6 +13,7 @@ const translations = {
 
     // ── Header / Dashboard ──
     dashboard_title: 'Menu Principal',
+    dashboard_subtitle: 'Resumen general de inventario, métricas y productos destacados.',
     dashboard_search_placeholder: 'Buscar producto...',
     dashboard_metric_total: 'Total Productos',
     dashboard_metric_low_stock: 'Productos con Stock Bajo',
@@ -29,6 +30,7 @@ const translations = {
     dashboard_btn_delete: 'Eliminar',
     dashboard_pagination_show: 'Mostrar',
     dashboard_low_stock_title: 'Productos con Stock Bajo',
+    dashboard_low_stock_empty: 'No hay productos con stock bajo.',
     dashboard_top5_title: 'Top 5 Productos Más Vendidos',
     dashboard_top5_empty: 'Aún no hay ventas registradas.',
     dashboard_top5_revenue: 'Ingreso',
@@ -63,9 +65,12 @@ const translations = {
 
     // ── Products page ──
     products_title: 'Agregar Productos',
+    products_subtitle: 'Gestiona categorías, agrega y edita tus productos.',
     products_new_category: 'Nueva Categoría',
     products_category_placeholder: 'Ej. Calzado',
     products_btn_add: 'Añadir',
+    products_btn_add_product: 'Agregar Producto',
+    products_table_empty: 'Aún no hay productos registrados.',
     products_register_title: 'Registrar Nuevo Producto',
     products_image_section: 'Imagen del Producto',
     products_image_load: 'Cargar imagen',
@@ -343,6 +348,7 @@ const translations = {
 
     // ── Header / Dashboard ──
     dashboard_title: 'Main Menu',
+    dashboard_subtitle: 'General overview of inventory, metrics and featured products.',
     dashboard_search_placeholder: 'Search product...',
     dashboard_metric_total: 'Total Products',
     dashboard_metric_low_stock: 'Low Stock Products',
@@ -359,6 +365,7 @@ const translations = {
     dashboard_btn_delete: 'Delete',
     dashboard_pagination_show: 'Show',
     dashboard_low_stock_title: 'Low Stock Products',
+    dashboard_low_stock_empty: 'No low stock products found.',
     dashboard_top5_title: 'Top 5 Best-Selling Products',
     dashboard_top5_empty: 'No sales registered yet.',
     dashboard_top5_revenue: 'Revenue',
@@ -393,9 +400,12 @@ const translations = {
 
     // ── Products page ──
     products_title: 'Add Products',
+    products_subtitle: 'Manage categories, add and edit your products.',
     products_new_category: 'New Category',
     products_category_placeholder: 'E.g. Footwear',
     products_btn_add: 'Add',
+    products_btn_add_product: 'Add Product',
+    products_table_empty: 'No products registered yet.',
     products_register_title: 'Register New Product',
     products_image_section: 'Product Image',
     products_image_load: 'Upload image',

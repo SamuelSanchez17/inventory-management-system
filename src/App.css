@@ -89,7 +89,11 @@ body, #root {
 .dashboard-header h1 {
 	font-size: 2rem;
 	font-weight: bold;
-	color: #be185d;
+	color: #000;
+}
+
+.dashboard-dark .dashboard-header h1 {
+	color: #fff;
 }
 .dashboard-header .actions {
 	display: flex;
