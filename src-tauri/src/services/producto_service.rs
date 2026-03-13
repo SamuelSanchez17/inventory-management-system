@@ -43,5 +43,12 @@ impl <'a> ProductoService<'a>
     repo.delete(id)
    }
 
+   pub fn get_total_inventory_value(&self) -> Result<f64>
+   {
+    let products = self.list_productos()?;
+    let total = products.iter().fold(0.0_f64, |acc, p| acc + (p.stock as f64 * p.precio));
+    Ok(total)
+   }
+
 
 }
