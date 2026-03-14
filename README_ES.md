@@ -227,7 +227,7 @@ Este proyecto fue desarrollado originalmente como solución empresarial personal
 **Desarrollador**: Samuel Sánchez Guzmán  
 **Tipo**: Aplicación Desktop  
 **Estado**: Producción  
-**Última Actualización**: Febrero 2026  
+**Última Actualización**: Marzo 2026  
 
 ---
 
