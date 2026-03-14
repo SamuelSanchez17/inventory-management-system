@@ -227,7 +227,7 @@ This project was originally developed as a customized enterprise solution. The d
 **Developer**: Samuel Sánchez Guzmán  
 **Type**: Desktop Application  
 **Status**: Production  
-**Last Updated**: February 2026  
+**Last Updated**: March 2026  
 
 ---
 
