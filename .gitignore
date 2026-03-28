@@ -25,3 +25,6 @@ dist-ssr
 .atl/
 
 /skills
+
+/openspec
+/openspec/changes

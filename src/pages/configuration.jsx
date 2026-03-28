@@ -4,8 +4,9 @@ import { LanguageContext } from '../context/LanguageContext';
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { open } from '@tauri-apps/plugin-dialog';
 import toast from 'react-hot-toast';
+import Cropper from 'react-easy-crop';
 import Sidebar from '../components/sidebar';
-import { Camera, FileText, FolderOpen, Globe, Moon, TextAa, UserCircle, Warning } from 'phosphor-react';
+import { Camera, FileText, FolderOpen, Globe, Moon, ShieldCheck, TextAa, UserCircle, Warning } from 'phosphor-react';
 import translations from '../translations';
 
 export default function Configuration({
@@ -16,7 +17,7 @@ export default function Configuration({
   profile,
   onProfileSaved,
 }) {
-  const { theme, setTheme, textSize, setTextSize, savePreferences, isSaved, getActiveTheme } = useContext(ThemeContext);
+  const { theme, setTheme, textSize, setTextSize, savePreferences } = useContext(ThemeContext);
   const { language, setLanguage, t } = useContext(LanguageContext);
   const [showSaved, setShowSaved] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -62,6 +63,11 @@ export default function Configuration({
   const [profilePhotoFile, setProfilePhotoFile] = useState(null);
   const [profileMiniatura, setProfileMiniatura] = useState(null);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const profilePhotoRef = useRef(null);
 
   // Cargar perfil al montar
@@ -97,18 +103,109 @@ export default function Configuration({
       reader.readAsDataURL(file);
     });
 
-  const handleProfilePhotoUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setProfilePhotoFile(file);
-      makeProfileThumbnail(file)
-        .then((base64) => setProfileMiniatura(base64))
-        .catch(() => setProfileMiniatura(null));
+  const readFileAsDataURL = (file) =>
+    new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = (event) => {
-        setProfilePhotoPreview(event.target.result);
-      };
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
       reader.readAsDataURL(file);
+    });
+
+  const createImageElement = (src) =>
+    new Promise((resolve, reject) => {
+      const img = new window.Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = src;
+    });
+
+  const getCircularCroppedImage = async (imageSrc, areaPixels) => {
+    const image = await createImageElement(imageSrc);
+    const size = Math.round(Math.min(areaPixels.width, areaPixels.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+
+    ctx.clearRect(0, 0, size, size);
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+    ctx.closePath();
+    ctx.clip();
+
+    ctx.drawImage(
+      image,
+      areaPixels.x,
+      areaPixels.y,
+      areaPixels.width,
+      areaPixels.height,
+      0,
+      0,
+      size,
+      size
+    );
+    ctx.restore();
+
+    const blob = await new Promise((resolve, reject) => {
+      canvas.toBlob((value) => {
+        if (!value) {
+          reject(new Error('No se pudo generar la imagen recortada'));
+          return;
+        }
+        resolve(value);
+      }, 'image/jpeg', 0.9);
+    });
+
+    const file = new File([blob], `profile-crop-${Date.now()}.jpg`, { type: 'image/jpeg' });
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    return { file, dataUrl };
+  };
+
+  const handleProfilePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if (!file) {
+      return;
+    }
+
+    try {
+      const nextSrc = await readFileAsDataURL(file);
+      setCropImageSrc(nextSrc);
+      setCrop({ x: 0, y: 0 });
+      setZoom(1);
+      setCroppedAreaPixels(null);
+      setIsCropModalOpen(true);
+    } catch (error) {
+      console.error('Error al preparar imagen para recorte:', error);
+      toast.error(t('toast_profile_error'));
+    }
+  };
+
+  const handleCancelCrop = () => {
+    setIsCropModalOpen(false);
+    setCropImageSrc(null);
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedAreaPixels(null);
+  };
+
+  const handleConfirmCrop = async () => {
+    if (!cropImageSrc || !croppedAreaPixels) {
+      return;
+    }
+
+    try {
+      const { file, dataUrl } = await getCircularCroppedImage(cropImageSrc, croppedAreaPixels);
+      setProfilePhotoFile(file);
+      setProfilePhotoPreview(dataUrl);
+
+      const base64 = await makeProfileThumbnail(file);
+      setProfileMiniatura(base64);
+      handleCancelCrop();
+    } catch (error) {
+      console.error('Error al recortar imagen:', error);
+      toast.error(t('toast_profile_error'));
     }
   };
 
@@ -590,6 +687,72 @@ export default function Configuration({
                 className="confirm-modal-btn confirm-modal-btn-confirm"
               >
                 {getDraftt('confirm_modal_confirm')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isCropModalOpen && (
+        <div className="cropper-modal-overlay" onClick={handleCancelCrop}>
+          <div
+            className={`cropper-modal-content ${isDark ? 'cropper-modal-dark' : 'cropper-modal-light'}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className={`cropper-modal-title ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>
+              {getDraftt('profile_crop_title')}
+            </h3>
+            <p className={`cropper-modal-subtitle ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              {getDraftt('profile_crop_subtitle')}
+            </p>
+
+            <div className="cropper-modal-stage">
+              <Cropper
+                image={cropImageSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape="round"
+                showGrid={false}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={(_, pixels) => setCroppedAreaPixels(pixels)}
+              />
+            </div>
+
+            <div className="cropper-modal-controls">
+              <label className={`${isDark ? 'text-gray-300' : 'text-gray-700'}`} htmlFor="profile-crop-zoom">
+                {getDraftt('profile_crop_zoom_label')}
+              </label>
+              <input
+                id="profile-crop-zoom"
+                type="range"
+                min={1}
+                max={3}
+                step={0.1}
+                value={zoom}
+                onChange={(event) => setZoom(Number(event.target.value))}
+              />
+            </div>
+
+            <div className="cropper-modal-actions">
+              <button
+                type="button"
+                onClick={handleCancelCrop}
+                className={`cropper-modal-btn cropper-modal-btn-cancel ${
+                  isDark ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                {getDraftt('profile_crop_cancel')}
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmCrop}
+                className={`cropper-modal-btn cropper-modal-btn-confirm ${
+                  isDark ? 'bg-pink-600 hover:bg-pink-500' : 'bg-rose-500 hover:bg-rose-600'
+                }`}
+              >
+                {getDraftt('profile_crop_apply')}
               </button>
             </div>
           </div>
