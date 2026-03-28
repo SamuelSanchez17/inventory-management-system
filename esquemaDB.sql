@@ -28,6 +28,7 @@ CREATE TABLE ventas (
   id_venta INTEGER PRIMARY KEY AUTOINCREMENT,
   fecha TEXT DEFAULT (datetime('now','localtime')),
   nombre_clienta TEXT NOT NULL,
+  apellido_clienta TEXT NOT NULL DEFAULT '',
   total_venta REAL NOT NULL,
   tipo_pago TEXT NOT NULL CHECK (tipo_pago IN ('Abono', 'De Contado')) DEFAULT 'De Contado'
 );

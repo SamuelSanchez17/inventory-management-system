@@ -26,10 +26,10 @@ impl <'a> VentaService<'a> {
         repo.get(id)
     }
 
-    pub fn create_venta(&self, fecha: &str, nombre_clienta: &str, total_venta: f64, tipo_pago: &TipoPago) -> Result<i64> 
+    pub fn create_venta(&self, fecha: &str, nombre_clienta: &str, apellido_clienta: &str, total_venta: f64, tipo_pago: &TipoPago) -> Result<i64> 
     {
         let repo = VentaRepo { conn: self.conn};
-        repo.create(fecha, nombre_clienta, total_venta, tipo_pago)
+        repo.create(fecha, nombre_clienta, apellido_clienta, total_venta, tipo_pago)
     }
 
     pub fn update_venta(&self, venta: &Venta) -> Result<()> 

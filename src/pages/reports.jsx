@@ -129,6 +129,7 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
     const [editForm, setEditForm] = useState({
         fecha: '',
         nombre_clienta: '',
+        apellido_clienta: '',
         tipo_pago: 'Contado',
         total_venta: 0,
     });
@@ -192,6 +193,7 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
         setEditForm({
             fecha: toInputDateTime(venta.fecha),
             nombre_clienta: venta.nombre_clienta ?? '',
+            apellido_clienta: venta.apellido_clienta ?? '',
             tipo_pago: venta.tipo_pago ?? 'Contado',
             total_venta: venta.total_venta ?? 0,
         });
@@ -221,10 +223,17 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
             return;
         }
 
+        const apellido_clienta = editForm.apellido_clienta.trim();
+        if (!apellido_clienta) {
+            toast.error(t('reports_edit_lastname_required'));
+            return;
+        }
+
         const updatedSale = {
             id_venta: activeSale.id_venta,
             fecha: fromInputDateTime(editForm.fecha),
             nombre_clienta,
+            apellido_clienta,
             total_venta: activeSale.total_venta,
             tipo_pago: editForm.tipo_pago,
         };
@@ -412,6 +421,7 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                     id_venta: activeSale.id_venta,
                     fecha: activeSale.fecha,
                     nombre_clienta: activeSale.nombre_clienta,
+                    apellido_clienta: activeSale.apellido_clienta ?? '',
                     total_venta: newTotal,
                     tipo_pago: activeSale.tipo_pago,
                 },
@@ -654,6 +664,14 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                                     />
                                 </label>
                                 <label className="reports-modal-field">
+                                    {t('reports_edit_lastname')}
+                                    <input
+                                        type="text"
+                                        value={editForm.apellido_clienta}
+                                        onChange={(event) => setEditForm((prev) => ({ ...prev, apellido_clienta: event.target.value }))}
+                                    />
+                                </label>
+                                <label className="reports-modal-field">
                                     {t('reports_edit_payment')}
                                     <select
                                         value={editForm.tipo_pago}
@@ -813,6 +831,7 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
 function SaleRow({ venta, saleProducts, isExpanded, onToggle, onEditSale, onDeleteSale, onEditItems, formatDate, formatMoney, t }) {
     const saleId = venta.id_venta;
     const totalQty = saleProducts.reduce((sum, p) => sum + p.cantidad, 0);
+    const clientFullName = `${venta.nombre_clienta || ''} ${venta.apellido_clienta || ''}`.trim();
 
     return (
         <>
@@ -839,7 +858,7 @@ function SaleRow({ venta, saleProducts, isExpanded, onToggle, onEditSale, onDele
                     </span>
                 </td>
                 <td>{formatDate(venta.fecha)}</td>
-                <td>{venta.nombre_clienta}</td>
+                <td>{clientFullName}</td>
                 <td>
                     <span className="reports-product-count">
                         {saleProducts.length} {saleProducts.length === 1 ? t('reports_product_singular') : t('reports_product_plural')}
@@ -880,7 +899,7 @@ function SaleRow({ venta, saleProducts, isExpanded, onToggle, onEditSale, onDele
                                             <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
                                             <circle cx="12" cy="7" r="4" />
                                         </svg>
-                                        {venta.nombre_clienta}
+                                        {clientFullName}
                                     </span>
                                 </div>
                                 <div className="reports-detail-actions">

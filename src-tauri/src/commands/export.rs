@@ -24,7 +24,7 @@ pub fn export_all_xlsx(
     // Número de columnas por tabla
     const CAT_COLS: u16 = 2;
     const PROD_COLS: u16 = 8;
-    const VENT_COLS: u16 = 5;
+    const VENT_COLS: u16 = 6;
     const PV_COLS: u16 = 6;
 
     // Columnas de inicio de cada tabla (con 1 columna gap entre cada una)
@@ -94,26 +94,27 @@ pub fn export_all_xlsx(
 
     // Ventas
     let vent_headers = [
-        "id_venta", "fecha", "nombre_clienta", "total_venta", "tipo_pago",
+        "id_venta", "fecha", "nombre_clienta", "apellido_clienta", "total_venta", "tipo_pago",
     ];
     let mut vent_rows: Vec<Vec<String>> = Vec::new();
     {
         let mut stmt = conn
             .prepare(
-                "SELECT id_venta, fecha, nombre_clienta, total_venta, tipo_pago \
+                "SELECT id_venta, fecha, nombre_clienta, apellido_clienta, total_venta, tipo_pago \
                  FROM ventas ORDER BY id_venta",
             )
             .map_err(|e| e.to_string())?;
         let rows = stmt
             .query_map([], |row| {
-                let total: f64 = row.get(3)?;
+                let total: f64 = row.get(4)?;
                 let fecha_raw: String = row.get(1)?;
                 Ok(vec![
                     row.get::<_, i64>(0)?.to_string(),
                     normalize_fecha(&fecha_raw),
                     row.get::<_, String>(2)?,
+                    row.get::<_, String>(3)?,
                     if total.fract() == 0.0 { format!("{}", total as i64) } else { format!("{}", total) },
-                    row.get::<_, String>(4)?,
+                    row.get::<_, String>(5)?,
                 ])
             })
             .map_err(|e| e.to_string())?;

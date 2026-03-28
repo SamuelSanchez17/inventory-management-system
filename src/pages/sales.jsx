@@ -23,6 +23,7 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
   const [searchTerm, setSearchTerm] = useState('');
   const [cartItems, setCartItems] = useState([]);
   const [clienteName, setClienteName] = useState('');
+  const [clienteLastName, setClienteLastName] = useState('');
   const [saleDate, setSaleDate] = useState(() => {
     const today = new Date();
     return today.toISOString().split('T')[0];
@@ -221,6 +222,11 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
       return;
     }
 
+    if (!clienteLastName.trim()) {
+      toast.error(t('toast_client_lastname_required'));
+      return;
+    }
+
     if (cartItems.length === 0) {
       toast.error(t('toast_cart_empty'));
       return;
@@ -241,6 +247,7 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
     const input = {
       fecha: new Date(saleDate).toISOString(),
       nombre_clienta: clienteName.trim(),
+      apellido_clienta: clienteLastName.trim(),
       tipo_pago: tipoPago,
       productos: cartItems.map((item) => ({
         id_producto: item.id_producto,
@@ -256,6 +263,7 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
       toast.success(`${t('toast_sale_registered')} (#${result.id_venta})`);
       setCartItems([]);
       setClienteName('');
+      setClienteLastName('');
       setSaleDate(() => {
         const today = new Date();
         return today.toISOString().split('T')[0];
@@ -433,6 +441,15 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
                   placeholder={t('sales_client_placeholder')}
                   value={clienteName}
                   onChange={(event) => setClienteName(event.target.value)}
+                />
+              </label>
+              <label>
+                {t('sales_client_lastname_label')}
+                <input
+                  type="text"
+                  placeholder={t('sales_client_lastname_placeholder')}
+                  value={clienteLastName}
+                  onChange={(event) => setClienteLastName(event.target.value)}
                 />
               </label>
               <label>
