@@ -190,7 +190,7 @@ const translations = {
     reports_export_csv_desc: 'Descarga todos tus datos en un archivo Excel (.xlsx).',
     reports_backup_btn: '💾 Crear Respaldo',
     reports_backup_desc: 'Guarda una copia de seguridad completa de la aplicación.',
-    reports_edit_action: 'Editar',
+    reports_edit_action: 'Editar venta',
     reports_delete_action: 'Eliminar',
     reports_items_action: 'Editar productos',
     reports_edit_title: 'Editar venta',
