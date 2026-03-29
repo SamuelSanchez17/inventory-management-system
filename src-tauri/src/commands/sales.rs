@@ -30,7 +30,7 @@ pub fn create_venta(fecha: String, nombre_clienta: String, total_venta: f64, tip
     let db_path: &PathBuf = db_path.inner();
     let conn = database::init_db(db_path).map_err(|e| e.to_string())?;
     let service = VentaService::new(&conn);
-    service.create_venta(&fecha, &nombre_clienta, total_venta, &tipo_pago).map_err(|e| e.to_string())
+    service.create_venta(&fecha, &nombre_clienta, "", total_venta, &tipo_pago).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -66,6 +66,16 @@ pub fn create_venta_completa(
         return Err("Debe agregar al menos un producto a la venta".to_string());
     }
 
+    let nombre = input.nombre_clienta.trim();
+    if nombre.is_empty() {
+        return Err("Debe ingresar el nombre de la clienta".to_string());
+    }
+
+    let apellido = input.apellido_clienta.trim();
+    if apellido.is_empty() {
+        return Err("Debe ingresar el apellido de la clienta".to_string());
+    }
+
     // Calcula el total de la venta
     let mut total_venta = 0.0;
     for item in &input.productos {
@@ -93,7 +103,7 @@ pub fn create_venta_completa(
     // Inserta la venta en la tabla de ventas
     let venta_service = VentaService::new(&tx);
     let id_venta = venta_service
-        .create_venta(&input.fecha, &input.nombre_clienta, total_venta, &input.tipo_pago)
+        .create_venta(&input.fecha, nombre, apellido, total_venta, &input.tipo_pago)
         .map_err(|e| format!("Error al crear venta: {}", e))?;
 
     // Inserta cada producto(item) vendido

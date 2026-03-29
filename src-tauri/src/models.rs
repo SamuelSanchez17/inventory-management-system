@@ -44,6 +44,8 @@ pub struct Venta
     pub id_venta: i64,
     pub fecha: String,
     pub nombre_clienta: String,
+    #[serde(default)]
+    pub apellido_clienta: String,
     pub total_venta: f64,
     pub tipo_pago: TipoPago,
     
@@ -77,6 +79,8 @@ pub struct VentaCompletaInput
 {
     pub fecha: String,
     pub nombre_clienta: String,
+    #[serde(default)]
+    pub apellido_clienta: String,
     pub tipo_pago: TipoPago,
     pub productos: Vec<ItemVenta>,
 }

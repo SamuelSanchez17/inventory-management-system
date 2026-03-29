@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.atl/
+
+/skills
+
+/openspec
+/openspec/changes

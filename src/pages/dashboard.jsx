@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { ThemeContext } from '../context/ThemeContext';
 import { LanguageContext } from '../context/LanguageContext';
 import { invoke, isTauri } from '@tauri-apps/api/core';
-import { CurrencyDollar, Package, TrendUp, Warning } from 'phosphor-react';
+import { CurrencyDollar, Package, TrendUp, Warning, Storefront } from 'phosphor-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import '../styles/dashboard.css';
 
@@ -19,6 +19,7 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
   const [salesToday, setSalesToday] = useState(0);
   const [salesMonth, setSalesMonth] = useState(0);
   const [topProductos, setTopProductos] = useState([]);
+  const [totalInventoryValue, setTotalInventoryValue] = useState(0);
   const [lowStockPage, setLowStockPage] = useState(1);
 
 
@@ -26,18 +27,20 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
   useEffect(() => {
     const loadData = async () => {
       if (!isTauri()) return;
-      const [productsData, categoriesData, salesTodayData, salesMonthData, topProductosData] = await Promise.all([
+      const [productsData, categoriesData, salesTodayData, salesMonthData, topProductosData, inventoryValueData] = await Promise.all([
         invoke('list_productos'),
         invoke('list_categorias'),
         invoke('get_sales_today'),
         invoke('get_sales_month'),
-        invoke('get_top_productos')
+        invoke('get_top_productos'),
+        invoke('get_total_inventory_value')
       ]);
       setProducts(productsData);
       setCategories(categoriesData);
       setSalesToday(salesTodayData);
       setSalesMonth(salesMonthData);
       setTopProductos(topProductosData);
+      setTotalInventoryValue(inventoryValueData);
     };
     loadData();
   }, []);
@@ -107,6 +110,12 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
       icon: <TrendUp size={28} weight="duotone" />,
       color: "bg-sky-100 text-sky-700",
     },
+    {
+      label: t('dashboard_metric_inventory_value'),
+      value: new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(totalInventoryValue),
+      icon: <Storefront size={28} weight="duotone" />,
+      color: "bg-teal-100 text-teal-700",
+    },
   ];
 
   return (
@@ -119,7 +128,7 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
         {/* Métricas */}
         <div className="dashboard-metrics">
           {metrics.map((m, idx) => (
-            <div key={m.label} className="dashboard-metric-card" data-metric-type={idx === 0 ? 'products' : idx === 1 ? 'lowstock' : idx === 2 ? 'sales-today' : 'sales-month'}>
+            <div key={m.label} className="dashboard-metric-card" data-metric-type={idx === 0 ? 'products' : idx === 1 ? 'lowstock' : idx === 2 ? 'sales-today' : idx === 3 ? 'sales-month' : 'inventory-value'}>
               <span className="metric-icon">{m.icon}</span>
               <div className="metric-content">
                 <div className="metric-value">{m.value}</div>

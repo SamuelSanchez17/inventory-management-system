@@ -118,3 +118,12 @@ pub fn delete_producto(id: i64, db_path: State<'_, PathBuf>) -> Result<(), Strin
     let service = ProductoService::new(&conn);
     service.delete_producto(id).map_err(|e| e.to_string())
 }
+
+#[tauri::command]
+pub fn get_total_inventory_value(db_path: State<'_, PathBuf>) -> Result<f64, String>
+{
+    let db_path: &PathBuf = db_path.inner();
+    let conn = database::init_db(db_path).map_err(|e| e.to_string())?;
+    let service = ProductoService::new(&conn);
+    service.get_total_inventory_value().map_err(|e| e.to_string())
+}

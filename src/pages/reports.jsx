@@ -129,6 +129,7 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
     const [editForm, setEditForm] = useState({
         fecha: '',
         nombre_clienta: '',
+        apellido_clienta: '',
         tipo_pago: 'Contado',
         total_venta: 0,
     });
@@ -192,6 +193,7 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
         setEditForm({
             fecha: toInputDateTime(venta.fecha),
             nombre_clienta: venta.nombre_clienta ?? '',
+            apellido_clienta: venta.apellido_clienta ?? '',
             tipo_pago: venta.tipo_pago ?? 'Contado',
             total_venta: venta.total_venta ?? 0,
         });
@@ -221,10 +223,17 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
             return;
         }
 
+        const apellido_clienta = editForm.apellido_clienta.trim();
+        if (!apellido_clienta) {
+            toast.error(t('reports_edit_lastname_required'));
+            return;
+        }
+
         const updatedSale = {
             id_venta: activeSale.id_venta,
             fecha: fromInputDateTime(editForm.fecha),
             nombre_clienta,
+            apellido_clienta,
             total_venta: activeSale.total_venta,
             tipo_pago: editForm.tipo_pago,
         };
@@ -412,6 +421,7 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                     id_venta: activeSale.id_venta,
                     fecha: activeSale.fecha,
                     nombre_clienta: activeSale.nombre_clienta,
+                    apellido_clienta: activeSale.apellido_clienta ?? '',
                     total_venta: newTotal,
                     tipo_pago: activeSale.tipo_pago,
                 },
@@ -654,6 +664,14 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                                     />
                                 </label>
                                 <label className="reports-modal-field">
+                                    {t('reports_edit_lastname')}
+                                    <input
+                                        type="text"
+                                        value={editForm.apellido_clienta}
+                                        onChange={(event) => setEditForm((prev) => ({ ...prev, apellido_clienta: event.target.value }))}
+                                    />
+                                </label>
+                                <label className="reports-modal-field">
                                     {t('reports_edit_payment')}
                                     <select
                                         value={editForm.tipo_pago}
@@ -813,6 +831,7 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
 function SaleRow({ venta, saleProducts, isExpanded, onToggle, onEditSale, onDeleteSale, onEditItems, formatDate, formatMoney, t }) {
     const saleId = venta.id_venta;
     const totalQty = saleProducts.reduce((sum, p) => sum + p.cantidad, 0);
+    const clientFullName = `${venta.nombre_clienta || ''} ${venta.apellido_clienta || ''}`.trim();
 
     return (
         <>
@@ -839,7 +858,7 @@ function SaleRow({ venta, saleProducts, isExpanded, onToggle, onEditSale, onDele
                     </span>
                 </td>
                 <td>{formatDate(venta.fecha)}</td>
-                <td>{venta.nombre_clienta}</td>
+                <td>{clientFullName}</td>
                 <td>
                     <span className="reports-product-count">
                         {saleProducts.length} {saleProducts.length === 1 ? t('reports_product_singular') : t('reports_product_plural')}
@@ -865,105 +884,88 @@ function SaleRow({ venta, saleProducts, isExpanded, onToggle, onEditSale, onDele
                                     </svg>
                                     <span>{t('reports_detail_breakdown')}</span>
                                 </div>
-                                <div className="reports-detail-meta">
-                                    <span className="detail-meta-item">
-                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                                            <line x1="16" y1="2" x2="16" y2="6" />
-                                            <line x1="8" y1="2" x2="8" y2="6" />
-                                            <line x1="3" y1="10" x2="21" y2="10" />
-                                        </svg>
-                                        {formatDate(venta.fecha)}
-                                    </span>
-                                    <span className="detail-meta-item">
-                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                                            <circle cx="12" cy="7" r="4" />
-                                        </svg>
-                                        {venta.nombre_clienta}
-                                    </span>
-                                </div>
-                                <div className="reports-detail-actions">
-                                    <button
-                                        type="button"
-                                        className="reports-detail-action"
-                                        onClick={(event) => {
-                                            event.stopPropagation();
-                                            onEditItems(venta);
-                                        }}
-                                    >
-                                        {t('reports_items_action')}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="reports-detail-action edit"
-                                        onClick={(event) => {
-                                            event.stopPropagation();
-                                            onEditSale(venta);
-                                        }}
-                                    >
-                                        {t('reports_edit_action')}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="reports-detail-action delete"
-                                        onClick={(event) => {
-                                            event.stopPropagation();
-                                            onDeleteSale(venta);
-                                        }}
-                                    >
-                                        {t('reports_delete_action')}
-                                    </button>
+                                <span className="reports-detail-sale-tag">#{saleId}</span>
+                            </div>
+
+                            <div className="reports-detail-refined">
+                                <div className="reports-detail-summary-line">
+                                    <span className="summary-label">{t('reports_col_payment')}:</span>
+                                    <span className="summary-value">{venta.tipo_pago}</span>
+                                    <span className="summary-separator">|</span>
+                                    <span className="summary-label">{t('reports_col_total')}:</span>
+                                    <span className="summary-value">{formatMoney(venta.total_venta)}</span>
                                 </div>
                             </div>
 
-                            <table className="reports-detail-table">
-                                <thead>
-                                    <tr>
-                                        <th className="dt-col-num">#</th>
-                                        <th className="dt-col-product">{t('reports_detail_product')}</th>
-                                        <th className="dt-col-qty">{t('reports_detail_qty')}</th>
-                                        <th className="dt-col-price">{t('reports_detail_unit_price')}</th>
-                                        <th className="dt-col-subtotal">{t('reports_detail_subtotal')}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {saleProducts.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={5} className="reports-empty">{t('reports_detail_no_products')}</td>
-                                        </tr>
-                                    ) : (
-                                        saleProducts.map((item, idx) => {
+                            <div className="reports-products-panel">
+                                <div className="reports-products-head">
+                                    <span className="col-index">#</span>
+                                    <span className="col-product">{t('reports_detail_product')}</span>
+                                    <span className="col-qty">{t('reports_detail_qty')}</span>
+                                    <span className="col-unit">{t('reports_detail_unit_price')}</span>
+                                    <span className="col-subtotal">{t('reports_detail_subtotal')}</span>
+                                </div>
+
+                                {saleProducts.length === 0 ? (
+                                    <div className="reports-empty reports-products-empty">{t('reports_detail_no_products')}</div>
+                                ) : (
+                                    <ul className="reports-products-list">
+                                        {saleProducts.map((item, idx) => {
                                             const name = item.nombre_producto_snapshot || `ID ${item.id_producto}`;
                                             return (
-                                                <tr key={item.id_producto_vendido ?? `${item.id_venta}-${item.id_producto}`}>
-                                                    <td className="dt-col-num">{idx + 1}</td>
-                                                    <td className="dt-col-product">
-                                                        <span className="detail-product-name">{name}</span>
-                                                    </td>
-                                                    <td className="dt-col-qty">
-                                                        <span className="detail-qty-badge">{item.cantidad}</span>
-                                                    </td>
-                                                    <td className="dt-col-price">{formatMoney(item.precio_unitario)}</td>
-                                                    <td className="dt-col-subtotal">{formatMoney(item.subtotal)}</td>
-                                                </tr>
+                                                <li key={item.id_producto_vendido ?? `${item.id_venta}-${item.id_producto}`} className="reports-product-row">
+                                                    <span className="col-index">{idx + 1}</span>
+                                                    <span className="col-product">{name}</span>
+                                                    <span className="col-qty"><span className="detail-qty-badge">{item.cantidad}</span></span>
+                                                    <span className="col-unit">{formatMoney(item.precio_unitario)}</span>
+                                                    <span className="col-subtotal">{formatMoney(item.subtotal)}</span>
+                                                </li>
                                             );
-                                        })
-                                    )}
-                                </tbody>
-                                {saleProducts.length > 0 && (
-                                    <tfoot>
-                                        <tr className="reports-detail-footer">
-                                            <td colSpan={2} className="dt-footer-label">{t('reports_detail_sale_total')}</td>
-                                            <td className="dt-col-qty">
-                                                <span className="detail-qty-badge total">{totalQty}</span>
-                                            </td>
-                                            <td></td>
-                                            <td className="dt-col-subtotal dt-footer-total">{formatMoney(venta.total_venta)}</td>
-                                        </tr>
-                                    </tfoot>
+                                        })}
+                                    </ul>
                                 )}
-                            </table>
+
+                                {saleProducts.length > 0 && (
+                                    <div className="reports-products-footer">
+                                        <div className="reports-products-footer-label">{t('reports_detail_sale_total')}</div>
+                                        <div className="reports-products-footer-qty"><span className="detail-qty-badge total">{totalQty}</span></div>
+                                        <div className="reports-products-footer-total">{formatMoney(venta.total_venta)}</div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="reports-detail-actions">
+                                <button
+                                    type="button"
+                                    className="btn-edit-outline"
+                                    onClick={(event) => {
+                                        event.stopPropagation();
+                                        onEditItems(venta);
+                                    }}
+                                >
+                                    {t('reports_items_action')}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn-edit-outline"
+                                    onClick={(event) => {
+                                        event.stopPropagation();
+                                        onEditSale(venta);
+                                    }}
+                                >
+                                    {t('reports_edit_action')}
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn-delete-solid"
+                                    onClick={(event) => {
+                                        event.stopPropagation();
+                                        onDeleteSale(venta);
+                                    }}
+                                >
+                                    {t('reports_delete_action')}
+                                </button>
+                            </div>
                         </div>
                     </td>
                 </tr>

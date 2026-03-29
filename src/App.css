@@ -359,6 +359,102 @@ body, #root {
   text-overflow: ellipsis;
 }
 
+/* ── Profile Cropper Modal ── */
+.cropper-modal-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 10000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0, 0, 0, 0.6);
+	backdrop-filter: blur(8px);
+}
+
+.cropper-modal-content {
+	width: min(92vw, 560px);
+	border-radius: 1.25rem;
+	padding: 1.25rem;
+	box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.cropper-modal-light {
+	background: #ffffff;
+	border: 1px solid #e5e7eb;
+}
+
+.cropper-modal-dark {
+	background: #1f2937;
+	border: 1px solid rgba(148, 163, 184, 0.22);
+}
+
+.cropper-modal-title {
+	margin: 0;
+	font-size: 1.15rem;
+	font-weight: 700;
+}
+
+.cropper-modal-subtitle {
+	margin: 0.35rem 0 0.9rem;
+	font-size: 0.9rem;
+}
+
+.cropper-modal-stage {
+	position: relative;
+	width: 100%;
+	height: 320px;
+	border-radius: 0.9rem;
+	overflow: hidden;
+	background: #111827;
+}
+
+.cropper-modal-controls {
+	margin-top: 1rem;
+}
+
+.cropper-modal-controls label {
+	display: block;
+	font-size: 0.85rem;
+	font-weight: 600;
+	margin-bottom: 0.5rem;
+}
+
+.cropper-modal-controls input[type='range'] {
+	width: 100%;
+	accent-color: #ec4899;
+}
+
+.cropper-modal-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.65rem;
+	margin-top: 1rem;
+}
+
+.cropper-modal-btn {
+	border: none;
+	border-radius: 0.65rem;
+	padding: 0.55rem 1rem;
+	font-size: 0.85rem;
+	font-weight: 600;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.cropper-modal-btn-confirm {
+	color: #ffffff;
+}
+
+@media (max-width: 640px) {
+	.cropper-modal-content {
+		padding: 1rem;
+	}
+
+	.cropper-modal-stage {
+		height: 280px;
+	}
+}
+
 .confirm-modal-note {
   width: 100%;
   font-size: 0.825rem;

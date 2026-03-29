@@ -50,6 +50,7 @@ pub fn run() {
       products::create_producto,
       products::update_producto,
       products::delete_producto,
+      products::get_total_inventory_value,
 
       categories::list_categorias,
       categories::get_categoria,
