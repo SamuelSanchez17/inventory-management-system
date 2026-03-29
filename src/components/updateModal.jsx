@@ -35,6 +35,7 @@ export default function UpdateModal({
   t,
 }) {
   const [showDetails, setShowDetails] = useState(false);
+  const detailsPanelId = 'update-modal-full-notes';
   const noteItems = useMemo(() => parseNotes(notes), [notes]);
   const highlights = noteItems.slice(0, 3);
   const hasDetails = noteItems.length > 3;
@@ -75,29 +76,35 @@ export default function UpdateModal({
               <p className="update-empty">{t('update_modal_no_notes')}</p>
             ) : (
               <>
-                <ul>
-                  {highlights.map((item, index) => (
-                    <li key={`${item}-${index}`}>{item}</li>
-                  ))}
-                </ul>
+                {!showDetails ? (
+                  <ul>
+                    {highlights.map((item, index) => (
+                      <li key={`${item}-${index}`}>{item}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div
+                    id="patch-notes-extra-details"
+                    className={`update-notes ${isDark ? 'update-notes-dark' : 'update-notes-light'}`}
+                  >
+                    <ul>
+                      {noteItems.map((item, index) => (
+                        <li key={`full-${item}-${index}`}>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 {hasDetails && (
                   <div className="update-details" style={{ marginTop: '0.75rem' }}>
                     <button
                       type="button"
-                      className="update-link"
+                      className="update-details-toggle"
                       onClick={() => setShowDetails((prev) => !prev)}
+                      aria-expanded={showDetails}
+                      aria-controls="patch-notes-extra-details"
                     >
                       {showDetails ? t('update_modal_hide_details') : t('update_modal_show_details')}
                     </button>
-                    {showDetails && (
-                      <div className={`update-notes ${isDark ? 'update-notes-dark' : 'update-notes-light'}`}>
-                        <ul>
-                          {noteItems.slice(3).map((item, index) => (
-                            <li key={`rest-${item}-${index}`}>{item}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
                   </div>
                 )}
               </>
@@ -169,13 +176,21 @@ export default function UpdateModal({
         <div className="update-details">
           <button
             type="button"
-            className="update-link"
+            className="update-details-toggle"
             onClick={() => setShowDetails((prev) => !prev)}
+            aria-expanded={showDetails}
+            aria-controls={detailsPanelId}
           >
             {showDetails ? t('update_modal_hide_details') : t('update_modal_show_details')}
           </button>
+          {!isBusy && (
+            <p className="update-details-next-step">{t('update_modal_details_next_step')}</p>
+          )}
           {showDetails && (
-            <div className={`update-notes ${isDark ? 'update-notes-dark' : 'update-notes-light'}`}>
+            <div
+              id={detailsPanelId}
+              className={`update-notes ${isDark ? 'update-notes-dark' : 'update-notes-light'}`}
+            >
               <div className="update-section-title">{t('update_modal_full_notes')}</div>
               {noteItems.length === 0 ? (
                 <p className="update-empty">{t('update_modal_no_notes')}</p>
