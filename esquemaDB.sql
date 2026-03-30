@@ -33,6 +33,20 @@ CREATE TABLE ventas (
   tipo_pago TEXT NOT NULL CHECK (tipo_pago IN ('Abono', 'De Contado')) DEFAULT 'De Contado'
 );
 
+-- Abonos por venta (1 venta -> N abonos)
+CREATE TABLE IF NOT EXISTS abonos_venta (
+  id_abono INTEGER PRIMARY KEY AUTOINCREMENT,
+  id_venta INTEGER NOT NULL REFERENCES ventas(id_venta) ON DELETE CASCADE,
+  monto_abono REAL NOT NULL CHECK (monto_abono > 0),
+  fecha_abono TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+  metodo_registro TEXT NOT NULL DEFAULT 'manual',
+  observacion TEXT NOT NULL DEFAULT '',
+  creado_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_abonos_venta_id_venta ON abonos_venta(id_venta);
+CREATE INDEX IF NOT EXISTS idx_abonos_venta_fecha ON abonos_venta(fecha_abono);
+
 -- Productos vendidos / items de venta
 CREATE TABLE productos_vendidos (
   id_producto_vendido INTEGER PRIMARY KEY AUTOINCREMENT,
