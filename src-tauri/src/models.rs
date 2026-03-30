@@ -51,6 +51,53 @@ pub struct Venta
     
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AbonoVenta
+{
+    pub id_abono: i64,
+    pub id_venta: i64,
+    pub monto_abono: f64,
+    pub fecha_abono: String,
+    pub metodo_registro: String,
+    pub observacion: String,
+    pub creado_at: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub enum EstadoPago
+{
+    #[serde(rename = "Pendiente")]
+    Pendiente,
+    #[serde(rename = "Parcial")]
+    Parcial,
+    #[serde(rename = "Liquidada")]
+    Liquidada,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct RegistrarAbonoInput
+{
+    pub id_venta: i64,
+    pub monto_abono: f64,
+    pub fecha_abono: Option<String>,
+    pub metodo_registro: Option<String>,
+    pub observacion: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct VentaCobranzaView
+{
+    pub id_venta: i64,
+    pub fecha: String,
+    pub nombre_clienta: String,
+    pub apellido_clienta: String,
+    pub total_venta: f64,
+    pub tipo_pago: TipoPago,
+    pub total_abonado: f64,
+    pub saldo_pendiente: f64,
+    pub estado_pago: EstadoPago,
+}
+
  
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ProductoVendido
