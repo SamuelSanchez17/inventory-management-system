@@ -1,7 +1,18 @@
 use std::path::PathBuf;
 use tauri::State;
 use crate::database;
-use crate::models::{Venta, TipoPago, VentaCompletaInput, VentaCompletaOutput, TopProducto};
+use crate::models::{
+    AbonoVenta,
+    RegistrarAbonoInput,
+    TipoPago,
+    TopProducto,
+    Venta,
+    VentaCobranzaView,
+    VentaCompletaInput,
+    VentaCompletaOutput,
+};
+use crate::repos::venta_repo::VentaRepo;
+use crate::services::abono_venta_service::AbonoVentaService;
 use crate::services::venta_service::VentaService;
 use crate::services::producto_vendido_service::ProductoVendidoService;
 use crate::services::producto_service::ProductoService;
@@ -56,6 +67,7 @@ pub fn delete_venta(id: i64, db_path: State<'_, PathBuf>) -> Result<(), String>
 #[tauri::command]
 pub fn create_venta_completa(
     input: VentaCompletaInput,
+    abono_inicial: Option<f64>,
     db_path: State<'_, PathBuf>,
 ) -> Result<VentaCompletaOutput, String> {
     let db_path: &PathBuf = db_path.inner();
@@ -103,7 +115,14 @@ pub fn create_venta_completa(
     // Inserta la venta en la tabla de ventas
     let venta_service = VentaService::new(&tx);
     let id_venta = venta_service
-        .create_venta(&input.fecha, nombre, apellido, total_venta, &input.tipo_pago)
+        .create_venta_with_initial_abono(
+            &input.fecha,
+            nombre,
+            apellido,
+            total_venta,
+            &input.tipo_pago,
+            abono_inicial,
+        )
         .map_err(|e| format!("Error al crear venta: {}", e))?;
 
     // Inserta cada producto(item) vendido
@@ -187,4 +206,51 @@ pub fn get_sales_month(db_path: State<'_, PathBuf>) -> Result<f64, String> {
         [],
         |row| row.get(0)
     ).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn registrar_abono_venta(
+    input: RegistrarAbonoInput,
+    db_path: State<'_, PathBuf>,
+) -> Result<i64, String> {
+    let db_path: &PathBuf = db_path.inner();
+    let conn = database::init_db(db_path).map_err(|e| e.to_string())?;
+    let service = AbonoVentaService::new(&conn);
+    service.registrar_abono(&input).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn list_abonos_por_venta(
+    id_venta: i64,
+    db_path: State<'_, PathBuf>,
+) -> Result<Vec<AbonoVenta>, String> {
+    let db_path: &PathBuf = db_path.inner();
+    let conn = database::init_db(db_path).map_err(|e| e.to_string())?;
+    let service = AbonoVentaService::new(&conn);
+    service
+        .listar_abonos_por_venta(id_venta)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn get_cobranza_summary(
+    id_venta: i64,
+    db_path: State<'_, PathBuf>,
+) -> Result<VentaCobranzaView, String> {
+    let db_path: &PathBuf = db_path.inner();
+    let conn = database::init_db(db_path).map_err(|e| e.to_string())?;
+    let service = VentaService::new(&conn);
+    service
+        .get_cobranza_summary(id_venta)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn list_ventas_con_cobranza(
+    db_path: State<'_, PathBuf>,
+) -> Result<Vec<VentaCobranzaView>, String> {
+    let db_path: &PathBuf = db_path.inner();
+    let conn = database::init_db(db_path).map_err(|e| e.to_string())?;
+    let repo = VentaRepo { conn: &conn };
+    repo.list_with_cobranza().map_err(|e| e.to_string())
 }
