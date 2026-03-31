@@ -29,6 +29,7 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
     return today.toISOString().split('T')[0];
   });
   const [tipoPago, setTipoPago] = useState('Contado');
+  const [abonoInicial, setAbonoInicial] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const maxDate = new Date().toISOString().split('T')[0];
@@ -164,6 +165,22 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
     [cartItems]
   );
 
+  const normalizeMoney = (value) => Math.round((Number(value) || 0) * 100) / 100;
+  const formatCurrency = (value) => `$${normalizeMoney(value).toFixed(2)}`;
+  const isAbonoPayment = tipoPago === 'Abono';
+
+  const abonoInicialAmount = useMemo(() => {
+    if (!abonoInicial.trim()) return 0;
+    const parsed = Number(abonoInicial);
+    return Number.isFinite(parsed) ? normalizeMoney(parsed) : NaN;
+  }, [abonoInicial]);
+
+  const saldoProyectado = useMemo(() => {
+    if (!Number.isFinite(abonoInicialAmount)) return normalizeMoney(subtotal);
+    const clamped = Math.min(normalizeMoney(subtotal), Math.max(0, abonoInicialAmount));
+    return normalizeMoney(Math.max(0, normalizeMoney(subtotal) - clamped));
+  }, [subtotal, abonoInicialAmount]);
+
   const handleAddToCart = (product) => {
     if (Number(product.stock) <= 0) {
       toast.error(t('sales_no_stock'));
@@ -244,6 +261,17 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
       return;
     }
 
+    if (isAbonoPayment && abonoInicial.trim()) {
+      if (!Number.isFinite(abonoInicialAmount) || abonoInicialAmount < 0) {
+        toast.error(t('toast_abono_invalid_amount'));
+        return;
+      }
+      if (abonoInicialAmount > normalizeMoney(subtotal)) {
+        toast.error(t('toast_abono_initial_exceeds_total'));
+        return;
+      }
+    }
+
     const input = {
       fecha: new Date(saleDate).toISOString(),
       nombre_clienta: clienteName.trim(),
@@ -259,8 +287,13 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
 
     try {
       setIsSubmitting(true);
-      const result = await invoke('create_venta_completa', { input });
+      const abonoInicialPayload = isAbonoPayment && abonoInicial.trim()
+        ? normalizeMoney(abonoInicialAmount)
+        : null;
+
+      const result = await invoke('create_venta_completa', { input, abonoInicial: abonoInicialPayload });
       toast.success(`${t('toast_sale_registered')} (#${result.id_venta})`);
+
       setCartItems([]);
       setClienteName('');
       setClienteLastName('');
@@ -269,6 +302,7 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
         return today.toISOString().split('T')[0];
       });
       setTipoPago('Contado');
+      setAbonoInicial('');
     } catch (error) {
       console.error('Error al registrar venta:', error);
       toast.error(t('toast_sale_error'));
@@ -475,6 +509,38 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
                   ))}
                 </select>
               </label>
+
+              {isAbonoPayment && (
+                <div className="sales-abono-panel">
+                  <div className="sales-abono-panel-head">{t('sales_abono_panel_title')}</div>
+                  <label>
+                    {t('sales_abono_initial_label')}
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      placeholder={t('sales_abono_initial_placeholder')}
+                      value={abonoInicial}
+                      onChange={(event) => setAbonoInicial(event.target.value)}
+                    />
+                  </label>
+                  <div className="sales-abono-summary-grid">
+                    <div>
+                      <span>{t('sales_abono_total_sale')}</span>
+                      <strong>{formatCurrency(subtotal)}</strong>
+                    </div>
+                    <div>
+                      <span>{t('sales_abono_initial_value')}</span>
+                      <strong>{formatCurrency(Number.isFinite(abonoInicialAmount) ? Math.max(0, abonoInicialAmount) : 0)}</strong>
+                    </div>
+                    <div>
+                      <span>{t('sales_abono_projected_pending')}</span>
+                      <strong>{formatCurrency(saldoProyectado)}</strong>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <button
                 type="button"
                 className="sales-pay"
