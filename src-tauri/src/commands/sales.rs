@@ -17,6 +17,38 @@ use crate::services::venta_service::VentaService;
 use crate::services::producto_vendido_service::ProductoVendidoService;
 use crate::services::producto_service::ProductoService;
 
+pub fn get_sales_total_between_dates(
+    conn: &rusqlite::Connection,
+    start_date: &str,
+    end_date: &str,
+) -> rusqlite::Result<f64> {
+    conn.query_row(
+        "SELECT 
+            COALESCE(
+                (
+                    SELECT SUM(v.total_venta)
+                    FROM ventas v
+                    WHERE v.tipo_pago = 'De Contado'
+                      AND DATE(v.fecha) BETWEEN DATE(?1) AND DATE(?2)
+                ),
+                0.0
+            )
+            +
+            COALESCE(
+                (
+                    SELECT SUM(a.monto_abono)
+                    FROM abonos_venta a
+                    INNER JOIN ventas v ON v.id_venta = a.id_venta
+                    WHERE v.tipo_pago = 'Abono'
+                      AND DATE(a.fecha_abono) BETWEEN DATE(?1) AND DATE(?2)
+                ),
+                0.0
+            )",
+        [start_date, end_date],
+        |row| row.get(0),
+    )
+}
+
 #[tauri::command]
 pub fn list_ventas(db_path: State<'_, PathBuf>) -> Result<Vec<Venta>, String> 
 {
@@ -187,32 +219,15 @@ pub fn get_top_productos(db_path: State<'_, PathBuf>) -> Result<Vec<TopProducto>
 pub fn get_sales_today(db_path: State<'_, PathBuf>) -> Result<f64, String> {
     let db_path: &PathBuf = db_path.inner();
     let conn = database::init_db(db_path).map_err(|e| e.to_string())?;
-    
-    conn.query_row(
-        "SELECT 
-            COALESCE(
-                (
-                    SELECT SUM(v.total_venta)
-                    FROM ventas v
-                    WHERE v.tipo_pago = 'De Contado'
-                      AND DATE(v.fecha) BETWEEN DATE('now', '-6 days') AND DATE('now')
-                ),
-                0.0
-            )
-            +
-            COALESCE(
-                (
-                    SELECT SUM(a.monto_abono)
-                    FROM abonos_venta a
-                    INNER JOIN ventas v ON v.id_venta = a.id_venta
-                    WHERE v.tipo_pago = 'Abono'
-                      AND DATE(a.fecha_abono) BETWEEN DATE('now', '-6 days') AND DATE('now')
-                ),
-                0.0
-            )",
-        [],
-        |row| row.get(0)
-    ).map_err(|e| e.to_string())
+
+    let today: String = conn
+        .query_row("SELECT DATE('now')", [], |row| row.get(0))
+        .map_err(|e| e.to_string())?;
+    let start_date: String = conn
+        .query_row("SELECT DATE('now', '-6 days')", [], |row| row.get(0))
+        .map_err(|e| e.to_string())?;
+
+    get_sales_total_between_dates(&conn, &start_date, &today).map_err(|e| e.to_string())
 }
 
 //Comando tauri para obtener el total de ventas en los últimos 30 días
@@ -220,32 +235,15 @@ pub fn get_sales_today(db_path: State<'_, PathBuf>) -> Result<f64, String> {
 pub fn get_sales_month(db_path: State<'_, PathBuf>) -> Result<f64, String> {
     let db_path: &PathBuf = db_path.inner();
     let conn = database::init_db(db_path).map_err(|e| e.to_string())?;
-    
-    conn.query_row(
-        "SELECT 
-            COALESCE(
-                (
-                    SELECT SUM(v.total_venta)
-                    FROM ventas v
-                    WHERE v.tipo_pago = 'De Contado'
-                      AND DATE(v.fecha) BETWEEN DATE('now', '-30 days') AND DATE('now')
-                ),
-                0.0
-            )
-            +
-            COALESCE(
-                (
-                    SELECT SUM(a.monto_abono)
-                    FROM abonos_venta a
-                    INNER JOIN ventas v ON v.id_venta = a.id_venta
-                    WHERE v.tipo_pago = 'Abono'
-                      AND DATE(a.fecha_abono) BETWEEN DATE('now', '-30 days') AND DATE('now')
-                ),
-                0.0
-            )",
-        [],
-        |row| row.get(0)
-    ).map_err(|e| e.to_string())
+
+    let today: String = conn
+        .query_row("SELECT DATE('now')", [], |row| row.get(0))
+        .map_err(|e| e.to_string())?;
+    let start_date: String = conn
+        .query_row("SELECT DATE('now', '-30 days')", [], |row| row.get(0))
+        .map_err(|e| e.to_string())?;
+
+    get_sales_total_between_dates(&conn, &start_date, &today).map_err(|e| e.to_string())
 }
 
 #[tauri::command]

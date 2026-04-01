@@ -8,11 +8,11 @@ use commands::sold_products;
 use commands::export;
 use commands::profile;
 
-mod database; //para manejo de la base de datos
-mod models; //definicion de modelo de datos
-mod repos; //repositorios para acceso a datos
-mod services; //lógica de negocio
-mod commands; //comandos expuestos a la interfaz
+pub mod database; //para manejo de la base de datos
+pub mod models; //definicion de modelo de datos
+pub mod repos; //repositorios para acceso a datos
+pub mod services; //lógica de negocio
+pub mod commands; //comandos expuestos a la interfaz
 
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
