@@ -26,5 +26,5 @@ dist-ssr
 
 /skills
 
-/openspec
-/openspec/changes
+openspec/
+openspec/**
