@@ -1,5 +1,5 @@
 use rusqlite::{Connection, Error, Result};
-use crate::models::{AbonoVenta, EstadoPago, RegistrarAbonoInput};
+use crate::models::{AbonoVenta, EstadoPago, RegistrarAbonoInput, TipoPago};
 use crate::repos::abono_venta_repo::AbonoVentaRepo;
 use crate::repos::venta_repo::VentaRepo;
 
@@ -58,6 +58,10 @@ impl<'a> AbonoVentaService<'a>
             }
             Err(err) => return Err(err),
         };
+
+        if !matches!(venta.tipo_pago, TipoPago::Abono) {
+            return Err(Self::business_error("Solo se pueden registrar abonos en ventas con tipo de pago Abono"));
+        }
 
         let total_venta = Self::normalize_money(venta.total_venta);
         let total_abonado_actual = self.obtener_total_abonado_por_venta(input.id_venta)?;

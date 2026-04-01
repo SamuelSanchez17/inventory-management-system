@@ -45,15 +45,21 @@ impl<'a> VentaRepo<'a>
             };
 
             let total_venta: f64 = row.get(4)?;
-            let total_abonado: f64 = row.get(6)?;
-            let saldo_pendiente: f64 = row.get(7)?;
+            let total_abonado_db: f64 = row.get(6)?;
+            let saldo_pendiente_db: f64 = row.get(7)?;
 
-            let estado_pago = if total_abonado <= 0.0 {
-                EstadoPago::Pendiente
-            } else if total_abonado >= total_venta {
-                EstadoPago::Liquidada
-            } else {
-                EstadoPago::Parcial
+            let (total_abonado, saldo_pendiente, estado_pago) = match tipo_pago {
+                TipoPago::Contado => (total_venta, 0.0, EstadoPago::Liquidada),
+                TipoPago::Abono => {
+                    let estado = if total_abonado_db <= 0.0 {
+                        EstadoPago::Pendiente
+                    } else if total_abonado_db >= total_venta {
+                        EstadoPago::Liquidada
+                    } else {
+                        EstadoPago::Parcial
+                    };
+                    (total_abonado_db, saldo_pendiente_db, estado)
+                }
             };
 
             Ok(VentaCobranzaView {

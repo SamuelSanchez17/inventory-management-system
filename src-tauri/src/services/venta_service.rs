@@ -93,10 +93,15 @@ impl <'a> VentaService<'a> {
         let venta = venta_repo.get(id_venta)?;
 
         let total_venta = AbonoVentaService::normalize_money(venta.total_venta);
-        let abono_service = AbonoVentaService::new(self.conn);
-        let total_abonado = abono_service.obtener_total_abonado_por_venta(id_venta)?;
-        let saldo_pendiente = AbonoVentaService::calculate_outstanding_balance(total_venta, total_abonado);
-        let estado_pago: EstadoPago = AbonoVentaService::calculate_payment_status(total_abonado, total_venta);
+        let (total_abonado, saldo_pendiente, estado_pago): (f64, f64, EstadoPago) = if matches!(venta.tipo_pago, TipoPago::Contado) {
+            (total_venta, 0.0, EstadoPago::Liquidada)
+        } else {
+            let abono_service = AbonoVentaService::new(self.conn);
+            let total_abonado = abono_service.obtener_total_abonado_por_venta(id_venta)?;
+            let saldo_pendiente = AbonoVentaService::calculate_outstanding_balance(total_venta, total_abonado);
+            let estado_pago = AbonoVentaService::calculate_payment_status(total_abonado, total_venta);
+            (total_abonado, saldo_pendiente, estado_pago)
+        };
 
         Ok(VentaCobranzaView {
             id_venta: venta.id_venta,

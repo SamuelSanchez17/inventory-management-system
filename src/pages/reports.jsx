@@ -26,7 +26,7 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
 
         try {
             const [salesData, soldData, productsData] = await Promise.all([
-                invoke('list_ventas'),
+                invoke('list_ventas_con_cobranza'),
                 invoke('list_productos_vendidos'),
                 invoke('list_productos'),
             ]);
@@ -135,6 +135,24 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
     });
     const [editItems, setEditItems] = useState([]);
     const [deletedItemIds, setDeletedItemIds] = useState([]);
+    const [editAbonos, setEditAbonos] = useState([]);
+    const [isLoadingEditAbonos, setIsLoadingEditAbonos] = useState(false);
+    const [nuevoAbonoEdit, setNuevoAbonoEdit] = useState('');
+    const [isSavingEditAbono, setIsSavingEditAbono] = useState(false);
+
+    const fetchAbonosBySale = useCallback(async (saleId) => {
+        if (!isTauri()) {
+            return [];
+        }
+
+        try {
+            const abonos = await invoke('list_abonos_por_venta', { idVenta: saleId });
+            return Array.isArray(abonos) ? abonos : [];
+        } catch (error) {
+            console.error(`Error loading abonos for sale #${saleId}:`, error);
+            return [];
+        }
+    }, []);
 
     const handleExportXLSX = async () => {
         if (!isTauri()) return;
@@ -197,12 +215,29 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
             tipo_pago: venta.tipo_pago ?? 'Contado',
             total_venta: venta.total_venta ?? 0,
         });
+        setEditAbonos([]);
+        setNuevoAbonoEdit('');
         setIsEditModalOpen(true);
+
+        if (venta.tipo_pago !== 'Abono') {
+            return;
+        }
+
+        setIsLoadingEditAbonos(true);
+        fetchAbonosBySale(venta.id_venta)
+            .then((abonos) => {
+                setEditAbonos(abonos);
+            })
+            .finally(() => {
+                setIsLoadingEditAbonos(false);
+            });
     };
 
     const handleCloseEditSale = () => {
         setIsEditModalOpen(false);
         setActiveSale(null);
+        setEditAbonos([]);
+        setNuevoAbonoEdit('');
     };
 
     const handleOpenDeleteSale = (venta) => {
@@ -241,8 +276,25 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
         try {
             setIsUpdatingSale(true);
             await invoke('update_venta', { venta: updatedSale });
+
+            let cobranzaPatch;
+            if (updatedSale.tipo_pago === 'Contado') {
+                cobranzaPatch = {
+                    total_abonado: Number(updatedSale.total_venta || 0),
+                    saldo_pendiente: 0,
+                    estado_pago: 'Liquidada',
+                };
+            } else {
+                const summary = await invoke('get_cobranza_summary', { idVenta: activeSale.id_venta });
+                cobranzaPatch = {
+                    total_abonado: Number(summary?.total_abonado || 0),
+                    saldo_pendiente: Number(summary?.saldo_pendiente || 0),
+                    estado_pago: summary?.estado_pago || 'Pendiente',
+                };
+            }
+
             setSales((prev) => prev.map((s) => (
-                s.id_venta === activeSale.id_venta ? { ...s, ...updatedSale } : s
+                s.id_venta === activeSale.id_venta ? { ...s, ...updatedSale, ...cobranzaPatch } : s
             )));
             toast.success(t('toast_sale_updated'));
             handleCloseEditSale();
@@ -438,6 +490,56 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
         }
     };
 
+    const handleRegistrarAbonoDesdeModal = async () => {
+        if (!activeSale || !isTauri()) return;
+
+        const monto = Number(nuevoAbonoEdit);
+        if (!Number.isFinite(monto) || monto <= 0) {
+            toast.error(t('reports_abono_invalid_amount'));
+            return;
+        }
+
+        try {
+            setIsSavingEditAbono(true);
+            await invoke('registrar_abono_venta', {
+                input: {
+                    id_venta: activeSale.id_venta,
+                    monto_abono: monto,
+                    fecha_abono: null,
+                    metodo_registro: 'reportes-modal-edicion',
+                    observacion: '',
+                },
+            });
+
+            const [summary, abonos] = await Promise.all([
+                invoke('get_cobranza_summary', { idVenta: activeSale.id_venta }),
+                fetchAbonosBySale(activeSale.id_venta),
+            ]);
+
+            const normalizedSummary = {
+                total_abonado: Number(summary?.total_abonado || 0),
+                saldo_pendiente: Number(summary?.saldo_pendiente || 0),
+                estado_pago: summary?.estado_pago || 'Pendiente',
+            };
+
+            setSales((prev) => prev.map((sale) => (
+                sale.id_venta === activeSale.id_venta
+                    ? { ...sale, ...normalizedSummary }
+                    : sale
+            )));
+
+            setActiveSale((prev) => (prev ? { ...prev, ...normalizedSummary } : prev));
+            setEditAbonos(abonos);
+            setNuevoAbonoEdit('');
+            toast.success(t('reports_abono_add_success'));
+        } catch (error) {
+            console.error('Error registering payment from edit modal:', error);
+            toast.error(t('reports_abono_add_error'));
+        } finally {
+            setIsSavingEditAbono(false);
+        }
+    };
+
     const totalItems = sales.length;
     const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
     const safePageIndex = Math.min(pageIndex, totalPages);
@@ -455,6 +557,24 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
             setPageIndex(safePageIndex);
         }
     }, [pageIndex, safePageIndex]);
+
+    const modalIsAbono = editForm.tipo_pago === 'Abono';
+    const modalTotalVenta = Number(activeSale?.total_venta ?? editForm.total_venta ?? 0);
+    const modalTotalAbonado = modalIsAbono
+        ? Number(activeSale?.total_abonado ?? 0)
+        : modalTotalVenta;
+    const modalSaldoPendiente = modalIsAbono
+        ? Math.max(0, Number(activeSale?.saldo_pendiente ?? (modalTotalVenta - modalTotalAbonado)))
+        : 0;
+    const modalEstadoPago = modalIsAbono
+        ? (activeSale?.estado_pago || (modalSaldoPendiente <= 0 ? 'Liquidada' : 'Pendiente'))
+        : 'Liquidada';
+    const modalEstadoClass =
+        modalEstadoPago === 'Liquidada'
+            ? 'estado-liquidada'
+            : modalEstadoPago === 'Parcial'
+                ? 'estado-parcial'
+                : 'estado-pendiente';
 
     return (
         <div className={`min-h-screen flex ${isDark ? 'reports-dark' : ''}`}>
@@ -516,13 +636,15 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                                         <th>{t('reports_col_client')}</th>
                                         <th>{t('reports_col_products')}</th>
                                         <th>{t('reports_col_payment')}</th>
+                                        <th>{t('reports_col_status')}</th>
+                                        <th>{t('reports_col_pending')}</th>
                                         <th className="col-total">{t('reports_col_total')}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {pagedSales.length === 0 ? (
                                         <tr>
-                                            <td colSpan={7} className="reports-empty">{t('reports_no_sales')}</td>
+                                            <td colSpan={9} className="reports-empty">{t('reports_no_sales')}</td>
                                         </tr>
                                     ) : (
                                         pagedSales.map((venta) => {
@@ -685,6 +807,72 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                                     {t('reports_edit_total')}
                                     <div className="reports-modal-readonly">{formatMoney(editForm.total_venta)}</div>
                                 </div>
+
+                                {modalIsAbono && (
+                                    <div className="reports-modal-abonos">
+                                        <div className="reports-modal-abonos-header">
+                                            <h4>{t('reports_abono_modal_title')}</h4>
+                                            <p>{t('reports_abono_modal_desc')}</p>
+                                        </div>
+
+                                        <div className="reports-detail-summary reports-cobranza-summary reports-modal-cobranza-summary">
+                                            <div className="reports-summary-pill">
+                                                <span className="reports-summary-label">{t('reports_abono_total_paid')}</span>
+                                                <span className="reports-summary-value">{formatMoney(modalTotalAbonado)}</span>
+                                            </div>
+                                            <div className="reports-summary-pill">
+                                                <span className="reports-summary-label">{t('reports_abono_pending')}</span>
+                                                <span className="reports-summary-value">{formatMoney(modalSaldoPendiente)}</span>
+                                            </div>
+                                            <div className="reports-summary-pill">
+                                                <span className="reports-summary-label">{t('reports_abono_status')}</span>
+                                                <span className="reports-summary-value">
+                                                    <span className={`reports-status-badge ${modalEstadoClass}`}>{modalEstadoPago}</span>
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="reports-modal-abonos-add">
+                                            <label className="reports-modal-field">
+                                                {t('reports_abono_add_label')}
+                                                <input
+                                                    type="number"
+                                                    min="0.01"
+                                                    step="0.01"
+                                                    placeholder={t('reports_abono_add_placeholder')}
+                                                    value={nuevoAbonoEdit}
+                                                    onChange={(event) => setNuevoAbonoEdit(event.target.value)}
+                                                />
+                                            </label>
+                                            <button
+                                                type="button"
+                                                className="reports-abono-add-btn"
+                                                onClick={handleRegistrarAbonoDesdeModal}
+                                                disabled={isSavingEditAbono || modalEstadoPago === 'Liquidada'}
+                                            >
+                                                {isSavingEditAbono ? t('reports_abono_add_saving') : t('reports_abono_add_btn')}
+                                            </button>
+                                        </div>
+
+                                        <div className="reports-modal-abonos-history">
+                                            <div className="reports-abonos-history-head">{t('reports_abono_history_title')}</div>
+                                            {isLoadingEditAbonos ? (
+                                                <div className="reports-abonos-empty">{t('reports_abono_loading')}</div>
+                                            ) : editAbonos.length === 0 ? (
+                                                <div className="reports-abonos-empty">{t('reports_abono_history_empty')}</div>
+                                            ) : (
+                                                <ul className="reports-abonos-list">
+                                                    {editAbonos.map((abono) => (
+                                                        <li key={abono.id_abono} className="reports-abono-row">
+                                                            <span className="reports-abono-date">{formatDate(abono.fecha_abono)}</span>
+                                                            <span className="reports-abono-amount">{formatMoney(abono.monto_abono)}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                             <div className="reports-modal-actions">
                                 <button type="button" className="reports-modal-button reports-modal-secondary" onClick={handleCloseEditSale}>
@@ -832,6 +1020,16 @@ function SaleRow({ venta, saleProducts, isExpanded, onToggle, onEditSale, onDele
     const saleId = venta.id_venta;
     const totalQty = saleProducts.reduce((sum, p) => sum + p.cantidad, 0);
     const clientFullName = `${venta.nombre_clienta || ''} ${venta.apellido_clienta || ''}`.trim();
+    const isAbono = venta.tipo_pago === 'Abono';
+    const totalAbonado = isAbono ? Number(venta.total_abonado || 0) : Number(venta.total_venta || 0);
+    const saldoPendiente = isAbono ? Math.max(0, Number(venta.saldo_pendiente || 0)) : 0;
+    const estadoPago = isAbono ? (venta.estado_pago || (saldoPendiente <= 0 ? 'Liquidada' : 'Pendiente')) : 'Liquidada';
+    const estadoClass =
+        estadoPago === 'Liquidada'
+            ? 'estado-liquidada'
+            : estadoPago === 'Parcial'
+                ? 'estado-parcial'
+                : 'estado-pendiente';
 
     return (
         <>
@@ -869,12 +1067,16 @@ function SaleRow({ venta, saleProducts, isExpanded, onToggle, onEditSale, onDele
                         {venta.tipo_pago}
                     </span>
                 </td>
+                <td>
+                    <span className={`reports-status-badge ${estadoClass}`}>{estadoPago}</span>
+                </td>
+                <td>{formatMoney(saldoPendiente)}</td>
                 <td className="col-total">{formatMoney(venta.total_venta)}</td>
             </tr>
 
             {isExpanded && (
                 <tr className="reports-detail-row">
-                    <td colSpan={7}>
+                    <td colSpan={9}>
                         <div className="reports-detail-container">
                             <div className="reports-detail-header">
                                 <div className="reports-detail-title">
@@ -894,6 +1096,23 @@ function SaleRow({ venta, saleProducts, isExpanded, onToggle, onEditSale, onDele
                                     <span className="summary-separator">|</span>
                                     <span className="summary-label">{t('reports_col_total')}:</span>
                                     <span className="summary-value">{formatMoney(venta.total_venta)}</span>
+                                </div>
+
+                                <div className="reports-detail-summary reports-cobranza-summary">
+                                    <div className="reports-summary-pill">
+                                        <span className="reports-summary-label">{t('reports_abono_total_paid')}</span>
+                                        <span className="reports-summary-value">{formatMoney(totalAbonado)}</span>
+                                    </div>
+                                    <div className="reports-summary-pill">
+                                        <span className="reports-summary-label">{t('reports_abono_pending')}</span>
+                                        <span className="reports-summary-value">{formatMoney(saldoPendiente)}</span>
+                                    </div>
+                                    <div className="reports-summary-pill">
+                                        <span className="reports-summary-label">{t('reports_abono_status')}</span>
+                                        <span className="reports-summary-value">
+                                            <span className={`reports-status-badge ${estadoClass}`}>{estadoPago}</span>
+                                        </span>
+                                    </div>
                                 </div>
                             </div>
 
