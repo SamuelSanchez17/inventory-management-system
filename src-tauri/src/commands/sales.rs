@@ -189,7 +189,27 @@ pub fn get_sales_today(db_path: State<'_, PathBuf>) -> Result<f64, String> {
     let conn = database::init_db(db_path).map_err(|e| e.to_string())?;
     
     conn.query_row(
-        "SELECT COALESCE(SUM(total_venta), 0.0) FROM ventas WHERE DATE(fecha) BETWEEN DATE('now', '-6 days') AND DATE('now')",
+        "SELECT 
+            COALESCE(
+                (
+                    SELECT SUM(v.total_venta)
+                    FROM ventas v
+                    WHERE v.tipo_pago = 'De Contado'
+                      AND DATE(v.fecha) BETWEEN DATE('now', '-6 days') AND DATE('now')
+                ),
+                0.0
+            )
+            +
+            COALESCE(
+                (
+                    SELECT SUM(a.monto_abono)
+                    FROM abonos_venta a
+                    INNER JOIN ventas v ON v.id_venta = a.id_venta
+                    WHERE v.tipo_pago = 'Abono'
+                      AND DATE(a.fecha_abono) BETWEEN DATE('now', '-6 days') AND DATE('now')
+                ),
+                0.0
+            )",
         [],
         |row| row.get(0)
     ).map_err(|e| e.to_string())
@@ -202,7 +222,27 @@ pub fn get_sales_month(db_path: State<'_, PathBuf>) -> Result<f64, String> {
     let conn = database::init_db(db_path).map_err(|e| e.to_string())?;
     
     conn.query_row(
-        "SELECT COALESCE(SUM(total_venta), 0.0) FROM ventas WHERE DATE(fecha) BETWEEN DATE('now', '-30 days') AND DATE('now')",
+        "SELECT 
+            COALESCE(
+                (
+                    SELECT SUM(v.total_venta)
+                    FROM ventas v
+                    WHERE v.tipo_pago = 'De Contado'
+                      AND DATE(v.fecha) BETWEEN DATE('now', '-30 days') AND DATE('now')
+                ),
+                0.0
+            )
+            +
+            COALESCE(
+                (
+                    SELECT SUM(a.monto_abono)
+                    FROM abonos_venta a
+                    INNER JOIN ventas v ON v.id_venta = a.id_venta
+                    WHERE v.tipo_pago = 'Abono'
+                      AND DATE(a.fecha_abono) BETWEEN DATE('now', '-30 days') AND DATE('now')
+                ),
+                0.0
+            )",
         [],
         |row| row.get(0)
     ).map_err(|e| e.to_string())

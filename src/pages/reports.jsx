@@ -550,7 +550,15 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
         [sales, startIndex, endIndex]
     );
 
-    const totalProductos = soldProducts.length;
+    const totalVendido = useMemo(
+        () => sales.reduce((sum, sale) => sum + Number(sale.total_venta || 0), 0),
+        [sales]
+    );
+
+    const totalCobrado = useMemo(
+        () => sales.reduce((sum, sale) => sum + Number(sale.total_abonado || 0), 0),
+        [sales]
+    );
 
     useEffect(() => {
         if (pageIndex !== safePageIndex) {
@@ -594,12 +602,12 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                     </div>
                     <div className="reports-summary">
                         <div className="reports-chip">
-                            <span className="chip-label">{t('reports_chip_sales')}</span>
-                            <span className="chip-value">{totalItems}</span>
+                            <span className="chip-label">{t('reports_chip_total_sold')}</span>
+                            <span className="chip-value">{formatMoney(totalVendido)}</span>
                         </div>
                         <div className="reports-chip">
-                            <span className="chip-label">{t('reports_chip_products')}</span>
-                            <span className="chip-value">{totalProductos}</span>
+                            <span className="chip-label">{t('reports_chip_total_collected')}</span>
+                            <span className="chip-value">{formatMoney(totalCobrado)}</span>
                         </div>
                     </div>
                 </header>
