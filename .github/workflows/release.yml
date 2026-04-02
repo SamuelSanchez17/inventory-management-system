@@ -41,6 +41,6 @@ jobs:
           tagName: app-v__VERSION__ #crea el tag automáticamente
           releaseName: "App v__VERSION__"
           includeUpdaterJson: true
-          releaseBody: "- Nueva edición de perfil con recorte de foto para ajustar tu imagen antes de guardarla\n- En ventas, ahora puedes registrar y ver también el apellido del cliente para identificar mejor cada operación\n- Se mejoró la visualización de reportes con un acordeón más ordenado, limpio y consistente\n- Ajustes en botones y espaciados dentro de reportes y modales para una experiencia más clara\n- Mejoras generales de estabilidad y consistencia visual en la aplicación"
+          releaseBody: "- Abonos múltiples y variables por venta: registra pagos en partes con control de total cobrado y saldo pendiente\n- Acordeón de reportes rediseñado con mejor jerarquía visual, espaciado optimizado y separación más clara de la información\n- Visualización mejorada de productos en el detalle expandido de reportes\n- La gestión de abonos ahora se centraliza en el modal de edición de venta para una interfaz más limpia\n- Correcciones en modales y botones: mejor comportamiento del selector de productos con mucho inventario y ajustes de visibilidad en el botón de detalles\n- Mejoras generales de estabilidad y consistencia visual en la aplicación"
           releaseDraft: false
           prerelease: false
