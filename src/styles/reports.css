@@ -571,6 +571,158 @@
 	color: #fbbf24;
 }
 
+.reports-status-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 3px 10px;
+	border-radius: 999px;
+	font-weight: 700;
+	font-size: 0.75rem;
+	letter-spacing: 0.02em;
+}
+
+.estado-pendiente {
+	background: rgba(239, 68, 68, 0.12);
+	color: #dc2626;
+}
+
+.estado-parcial {
+	background: rgba(245, 158, 11, 0.14);
+	color: #d97706;
+}
+
+.estado-liquidada {
+	background: rgba(16, 185, 129, 0.14);
+	color: #059669;
+}
+
+.reports-dark .estado-pendiente {
+	background: rgba(239, 68, 68, 0.22);
+	color: #fca5a5;
+}
+
+.reports-dark .estado-parcial {
+	background: rgba(245, 158, 11, 0.22);
+	color: #fcd34d;
+}
+
+.reports-dark .estado-liquidada {
+	background: rgba(16, 185, 129, 0.22);
+	color: #6ee7b7;
+}
+
+.reports-status-na {
+	color: var(--reports-muted);
+}
+
+.reports-cobranza-summary {
+	margin-top: 10px;
+}
+
+.reports-abonos-history {
+	margin: 0 20px 14px;
+	border: 1px solid var(--reports-detail-border);
+	border-radius: 12px;
+	background: var(--reports-card);
+	overflow: hidden;
+}
+
+.reports-abonos-history-head {
+	padding: 10px 12px;
+	font-size: 0.8rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--reports-accent);
+	border-bottom: 1px solid var(--reports-border);
+	background: var(--reports-accent-soft);
+}
+
+.reports-abonos-add-panel {
+	display: flex;
+	gap: 10px;
+	align-items: flex-end;
+	padding: 10px 12px;
+	border-bottom: 1px solid var(--reports-border);
+}
+
+.reports-abonos-add-panel label {
+	flex: 1;
+	font-size: 0.8rem;
+	color: var(--reports-muted);
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+
+.reports-abonos-add-panel input {
+	width: 100%;
+	border: 1px solid var(--reports-border);
+	border-radius: 10px;
+	padding: 9px 10px;
+	background: var(--reports-card);
+	color: var(--reports-text);
+	font-family: inherit;
+}
+
+.reports-abono-add-btn {
+	border: 1px solid var(--reports-accent);
+	background: transparent;
+	color: var(--reports-accent);
+	border-radius: 10px;
+	padding: 9px 12px;
+	font-size: 0.82rem;
+	font-weight: 700;
+	cursor: pointer;
+	transition: background 0.2s ease, color 0.2s ease;
+}
+
+.reports-abono-add-btn:hover:not(:disabled) {
+	background: var(--reports-accent);
+	color: #fff;
+}
+
+.reports-abono-add-btn:disabled {
+	opacity: 0.65;
+	cursor: not-allowed;
+}
+
+.reports-abonos-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+}
+
+.reports-abono-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 9px 12px;
+	border-bottom: 1px solid var(--reports-border);
+	font-size: 0.86rem;
+}
+
+.reports-abono-row:last-child {
+	border-bottom: none;
+}
+
+.reports-abono-date {
+	color: var(--reports-muted);
+}
+
+.reports-abono-amount {
+	font-weight: 700;
+	color: var(--reports-text);
+}
+
+.reports-abonos-empty {
+	padding: 12px;
+	font-size: 0.86rem;
+	color: var(--reports-muted);
+}
+
 /* --- Product count badge --- */
 
 .reports-product-count {
@@ -1113,6 +1265,47 @@ select {
 	color: var(--reports-text);
 }
 
+.reports-modal-abonos {
+	margin-top: 4px;
+	padding: 14px;
+	border: 1px solid var(--reports-border);
+	border-radius: 14px;
+	background: var(--reports-bg);
+	display: grid;
+	gap: 12px;
+}
+
+.reports-modal-abonos-header h4 {
+	margin: 0;
+	font-size: 0.95rem;
+	font-family: 'Space Grotesk', 'Manrope', sans-serif;
+	color: var(--reports-text);
+}
+
+.reports-modal-abonos-header p {
+	margin: 4px 0 0;
+	font-size: 0.82rem;
+	color: var(--reports-muted);
+}
+
+.reports-modal-cobranza-summary {
+	margin-top: 2px;
+}
+
+.reports-modal-abonos-add {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	gap: 10px;
+	align-items: end;
+}
+
+.reports-modal-abonos-history {
+	border: 1px solid var(--reports-border);
+	border-radius: 12px;
+	background: var(--reports-card);
+	overflow: hidden;
+}
+
 .reports-modal-text {
 	margin: 0;
 	color: var(--reports-text);
@@ -1297,5 +1490,9 @@ select {
 	.reports-items-price,
 	.reports-items-subtotal {
 		text-align: left;
+	}
+
+	.reports-modal-abonos-add {
+		grid-template-columns: 1fr;
 	}
 }

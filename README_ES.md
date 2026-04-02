@@ -106,6 +106,25 @@ Desarrollado inicialmente como solución para un cliente empresarial, este proye
 
 ---
 
+## 💳 Flujo de Ventas con Abonos Múltiples
+
+- **Flujo de ventas con abonos múltiples**: Una venta puede crearse como `Abono` y pagarse en montos parciales variables hasta quedar liquidada.
+- **Dónde se registra el abono inicial**: En el checkout de Ventas al crear la venta con `tipo_pago = Abono`.
+- **Dónde se agregan abonos posteriores**: En Reportes, desde el modal de Editar Venta, registrando abonos adicionales de la venta seleccionada.
+- **Significado de KPI (`Vendido` vs `Cobrado`)**: `Vendido` es la suma de totales de venta del período seleccionado; `Cobrado` es la suma de abonos efectivamente cobrados en ese período (incluye cobros posteriores de ventas anteriores).
+
+### Checklist de Validación Manual
+
+1. Crea una venta con `tipo_pago = Abono` e ingresa un abono inicial válido.
+2. Confirma que la venta quede con saldo pendiente y estado `Parcial` (o `Pendiente` si el abono inicial es `0.00`).
+3. Abre Reportes y verifica que la venta muestre `total_venta`, `total_abonado`, `saldo_pendiente` y `estado_pago`.
+4. Desde el modal Editar Venta en Reportes, registra un abono adicional válido.
+5. Verifica que `total_abonado` aumente y `saldo_pendiente` disminuya tras el nuevo abono.
+6. Registra un último abono hasta cubrir el saldo y confirma que el estado cambie a `Liquidada`.
+7. Compara KPIs y confirma que `Cobrado` puede diferir de `Vendido` cuando existen saldos pendientes o cobros tardíos.
+
+---
+
 ## 📊 Estructura del Proyecto
 
 ```
@@ -227,7 +246,7 @@ Este proyecto fue desarrollado originalmente como solución empresarial personal
 **Desarrollador**: Samuel Sánchez Guzmán  
 **Tipo**: Aplicación Desktop  
 **Estado**: Producción  
-**Última Actualización**: Marzo 2026  
+**Última Actualización**: Abril 2026  
 
 ---
 

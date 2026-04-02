@@ -1,10 +1,53 @@
 use std::path::PathBuf;
 use tauri::State;
 use crate::database;
-use crate::models::{Venta, TipoPago, VentaCompletaInput, VentaCompletaOutput, TopProducto};
+use crate::models::{
+    AbonoVenta,
+    RegistrarAbonoInput,
+    TipoPago,
+    TopProducto,
+    Venta,
+    VentaCobranzaView,
+    VentaCompletaInput,
+    VentaCompletaOutput,
+};
+use crate::repos::venta_repo::VentaRepo;
+use crate::services::abono_venta_service::AbonoVentaService;
 use crate::services::venta_service::VentaService;
 use crate::services::producto_vendido_service::ProductoVendidoService;
 use crate::services::producto_service::ProductoService;
+
+pub fn get_sales_total_between_dates(
+    conn: &rusqlite::Connection,
+    start_date: &str,
+    end_date: &str,
+) -> rusqlite::Result<f64> {
+    conn.query_row(
+        "SELECT 
+            COALESCE(
+                (
+                    SELECT SUM(v.total_venta)
+                    FROM ventas v
+                    WHERE v.tipo_pago = 'De Contado'
+                      AND DATE(v.fecha) BETWEEN DATE(?1) AND DATE(?2)
+                ),
+                0.0
+            )
+            +
+            COALESCE(
+                (
+                    SELECT SUM(a.monto_abono)
+                    FROM abonos_venta a
+                    INNER JOIN ventas v ON v.id_venta = a.id_venta
+                    WHERE v.tipo_pago = 'Abono'
+                      AND DATE(a.fecha_abono) BETWEEN DATE(?1) AND DATE(?2)
+                ),
+                0.0
+            )",
+        [start_date, end_date],
+        |row| row.get(0),
+    )
+}
 
 #[tauri::command]
 pub fn list_ventas(db_path: State<'_, PathBuf>) -> Result<Vec<Venta>, String> 
@@ -56,6 +99,7 @@ pub fn delete_venta(id: i64, db_path: State<'_, PathBuf>) -> Result<(), String>
 #[tauri::command]
 pub fn create_venta_completa(
     input: VentaCompletaInput,
+    abono_inicial: Option<f64>,
     db_path: State<'_, PathBuf>,
 ) -> Result<VentaCompletaOutput, String> {
     let db_path: &PathBuf = db_path.inner();
@@ -103,7 +147,14 @@ pub fn create_venta_completa(
     // Inserta la venta en la tabla de ventas
     let venta_service = VentaService::new(&tx);
     let id_venta = venta_service
-        .create_venta(&input.fecha, nombre, apellido, total_venta, &input.tipo_pago)
+        .create_venta_with_initial_abono(
+            &input.fecha,
+            nombre,
+            apellido,
+            total_venta,
+            &input.tipo_pago,
+            abono_inicial,
+        )
         .map_err(|e| format!("Error al crear venta: {}", e))?;
 
     // Inserta cada producto(item) vendido
@@ -168,12 +219,15 @@ pub fn get_top_productos(db_path: State<'_, PathBuf>) -> Result<Vec<TopProducto>
 pub fn get_sales_today(db_path: State<'_, PathBuf>) -> Result<f64, String> {
     let db_path: &PathBuf = db_path.inner();
     let conn = database::init_db(db_path).map_err(|e| e.to_string())?;
-    
-    conn.query_row(
-        "SELECT COALESCE(SUM(total_venta), 0.0) FROM ventas WHERE DATE(fecha) BETWEEN DATE('now', '-6 days') AND DATE('now')",
-        [],
-        |row| row.get(0)
-    ).map_err(|e| e.to_string())
+
+    let today: String = conn
+        .query_row("SELECT DATE('now')", [], |row| row.get(0))
+        .map_err(|e| e.to_string())?;
+    let start_date: String = conn
+        .query_row("SELECT DATE('now', '-6 days')", [], |row| row.get(0))
+        .map_err(|e| e.to_string())?;
+
+    get_sales_total_between_dates(&conn, &start_date, &today).map_err(|e| e.to_string())
 }
 
 //Comando tauri para obtener el total de ventas en los últimos 30 días
@@ -181,10 +235,60 @@ pub fn get_sales_today(db_path: State<'_, PathBuf>) -> Result<f64, String> {
 pub fn get_sales_month(db_path: State<'_, PathBuf>) -> Result<f64, String> {
     let db_path: &PathBuf = db_path.inner();
     let conn = database::init_db(db_path).map_err(|e| e.to_string())?;
-    
-    conn.query_row(
-        "SELECT COALESCE(SUM(total_venta), 0.0) FROM ventas WHERE DATE(fecha) BETWEEN DATE('now', '-30 days') AND DATE('now')",
-        [],
-        |row| row.get(0)
-    ).map_err(|e| e.to_string())
+
+    let today: String = conn
+        .query_row("SELECT DATE('now')", [], |row| row.get(0))
+        .map_err(|e| e.to_string())?;
+    let start_date: String = conn
+        .query_row("SELECT DATE('now', '-30 days')", [], |row| row.get(0))
+        .map_err(|e| e.to_string())?;
+
+    get_sales_total_between_dates(&conn, &start_date, &today).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn registrar_abono_venta(
+    input: RegistrarAbonoInput,
+    db_path: State<'_, PathBuf>,
+) -> Result<i64, String> {
+    let db_path: &PathBuf = db_path.inner();
+    let conn = database::init_db(db_path).map_err(|e| e.to_string())?;
+    let service = AbonoVentaService::new(&conn);
+    service.registrar_abono(&input).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn list_abonos_por_venta(
+    id_venta: i64,
+    db_path: State<'_, PathBuf>,
+) -> Result<Vec<AbonoVenta>, String> {
+    let db_path: &PathBuf = db_path.inner();
+    let conn = database::init_db(db_path).map_err(|e| e.to_string())?;
+    let service = AbonoVentaService::new(&conn);
+    service
+        .listar_abonos_por_venta(id_venta)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn get_cobranza_summary(
+    id_venta: i64,
+    db_path: State<'_, PathBuf>,
+) -> Result<VentaCobranzaView, String> {
+    let db_path: &PathBuf = db_path.inner();
+    let conn = database::init_db(db_path).map_err(|e| e.to_string())?;
+    let service = VentaService::new(&conn);
+    service
+        .get_cobranza_summary(id_venta)
+        .map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+pub fn list_ventas_con_cobranza(
+    db_path: State<'_, PathBuf>,
+) -> Result<Vec<VentaCobranzaView>, String> {
+    let db_path: &PathBuf = db_path.inner();
+    let conn = database::init_db(db_path).map_err(|e| e.to_string())?;
+    let repo = VentaRepo { conn: &conn };
+    repo.list_with_cobranza().map_err(|e| e.to_string())
 }

@@ -8,11 +8,11 @@ use commands::sold_products;
 use commands::export;
 use commands::profile;
 
-mod database; //para manejo de la base de datos
-mod models; //definicion de modelo de datos
-mod repos; //repositorios para acceso a datos
-mod services; //lógica de negocio
-mod commands; //comandos expuestos a la interfaz
+pub mod database; //para manejo de la base de datos
+pub mod models; //definicion de modelo de datos
+pub mod repos; //repositorios para acceso a datos
+pub mod services; //lógica de negocio
+pub mod commands; //comandos expuestos a la interfaz
 
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -64,6 +64,10 @@ pub fn run() {
       sales::update_venta,
       sales::delete_venta,
       sales::create_venta_completa,
+      sales::registrar_abono_venta,
+      sales::list_abonos_por_venta,
+      sales::get_cobranza_summary,
+      sales::list_ventas_con_cobranza,
       sales::get_sales_today,
       sales::get_sales_month,
       sales::get_top_productos,
