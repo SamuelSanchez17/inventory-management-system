@@ -106,6 +106,25 @@ Originally developed as a solution for an enterprise client, this project repres
 
 ---
 
+## 💳 Installment Sales Flow (Multiple Payments)
+
+- **Sales flow with multiple payments**: A sale can be created as `Abono` (installment mode), and then paid in variable partial amounts until fully settled.
+- **Where the initial payment is recorded**: In the Sales checkout flow when creating the sale with `tipo_pago = Abono`.
+- **Where later payments are added**: In Reports, from the Edit Sale modal, where additional payments are registered for the selected sale.
+- **KPI meaning (`Sold` vs `Collected`)**: `Sold` is the sum of sales totals in the selected period; `Collected` is the sum of payments actually collected in the selected period (including later payments from previous sales).
+
+### Manual Validation Checklist
+
+1. Create a sale with `tipo_pago = Abono` and enter a valid initial payment.
+2. Confirm the sale shows a pending balance and state `Parcial` (or `Pendiente` if initial payment is `0.00`).
+3. Open Reports and verify the sale displays `total_venta`, `total_abonado`, `saldo_pendiente`, and `estado_pago`.
+4. From the Edit Sale modal in Reports, register an additional valid payment.
+5. Verify `total_abonado` increases and `saldo_pendiente` decreases after the new payment.
+6. Register final payment up to the remaining balance and confirm state changes to `Liquidada`.
+7. Compare KPIs and confirm `Collected` can differ from `Sold` when there are pending balances or late collections.
+
+---
+
 ## 📊 Project Structure
 
 ```
@@ -227,7 +246,7 @@ This project was originally developed as a customized enterprise solution. The d
 **Developer**: Samuel Sánchez Guzmán  
 **Type**: Desktop Application  
 **Status**: Production  
-**Last Updated**: February 2026  
+**Last Updated**: April 2026  
 
 ---
 
