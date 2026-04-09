@@ -18,6 +18,7 @@ pub fn init_db<P: AsRef<Path>> (db_path: P) -> Result<Connection> {
         conn.execute_batch(schema)?;
     }
 
+    migrate_add_dual_prices(&conn)?;
     migrate_add_miniatura(&conn)?;
     migrate_add_nombre_producto_snapshot(&conn)?;
     migrate_add_activo(&conn)?;
@@ -53,6 +54,27 @@ fn migrate_add_miniatura(conn: &rusqlite::Connection) -> rusqlite::Result<()>
     {
         conn.execute("ALTER TABLE productos ADD COLUMN miniatura_base64 TEXT", [])?;
     }
+    Ok(())
+}
+
+fn migrate_add_dual_prices(conn: &rusqlite::Connection) -> rusqlite::Result<()>
+{
+    if !ensure_column_exists(conn, "productos", "precio_consultora")?
+    {
+        conn.execute(
+            "ALTER TABLE productos ADD COLUMN precio_consultora REAL NOT NULL DEFAULT 0.0",
+            [],
+        )?;
+    }
+
+    if !ensure_column_exists(conn, "productos", "precio_publico")?
+    {
+        conn.execute(
+            "ALTER TABLE productos ADD COLUMN precio_publico REAL NOT NULL DEFAULT 0.0",
+            [],
+        )?;
+    }
+
     Ok(())
 }
 
