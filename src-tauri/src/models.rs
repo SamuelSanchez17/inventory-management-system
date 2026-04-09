@@ -1,7 +1,7 @@
 //clase para las definiciones de los modelos de la base de datos
 use serde::{Serialize, Deserialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Producto 
 {
     pub id_producto: i64,

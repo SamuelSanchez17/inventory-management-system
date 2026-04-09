@@ -58,11 +58,43 @@ impl<'a> ProductoRepo<'a> {
         )
     }
 
-    //create
+    //create legacy-compatible (same value for all price fields)
     pub fn create(&self, nombre_producto: &str, id_categoria: Option<i64>, ruta_imagen: Option<&str>, miniatura_base64: Option<&str>, stock: i64, precio: f64) -> rusqlite::Result<i64> {
+        self.create_with_prices(
+            nombre_producto,
+            id_categoria,
+            ruta_imagen,
+            miniatura_base64,
+            stock,
+            precio,
+            precio,
+            precio,
+        )
+    }
+
+    pub fn create_with_prices(
+        &self,
+        nombre_producto: &str,
+        id_categoria: Option<i64>,
+        ruta_imagen: Option<&str>,
+        miniatura_base64: Option<&str>,
+        stock: i64,
+        precio: f64,
+        precio_consultora: f64,
+        precio_publico: f64,
+    ) -> rusqlite::Result<i64> {
         self.conn.execute(
-            "INSERT INTO productos (nombre_producto, id_categoria, ruta_imagen, miniatura_base64, stock, precio, precio_consultora, precio_publico, creado_at, actualizado_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?6, ?6, datetime('now'), datetime('now'))",
-            params![nombre_producto, id_categoria, ruta_imagen, miniatura_base64, stock, precio],
+            "INSERT INTO productos (nombre_producto, id_categoria, ruta_imagen, miniatura_base64, stock, precio, precio_consultora, precio_publico, creado_at, actualizado_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, datetime('now'), datetime('now'))",
+            params![
+                nombre_producto,
+                id_categoria,
+                ruta_imagen,
+                miniatura_base64,
+                stock,
+                precio,
+                precio_consultora,
+                precio_publico,
+            ],
         )?;
         Ok(self.conn.last_insert_rowid())
     }
