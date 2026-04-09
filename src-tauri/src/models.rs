@@ -11,10 +11,24 @@ pub struct Producto
     pub miniatura_base64: Option<String>,
     pub stock: i64,
     pub precio: f64,
+    #[serde(default)]
+    pub precio_consultora: f64,
+    #[serde(default)]
+    pub precio_publico: f64,
     pub creado_at: Option<String>,
     pub actualizado_at: Option<String>,
     #[serde(default = "default_activo")]
     pub activo: i64,
+}
+
+impl Producto {
+    pub fn margen_porcentaje(&self) -> f64 {
+        if self.precio_consultora <= 0.0 {
+            return 0.0;
+        }
+
+        ((self.precio_publico - self.precio_consultora) / self.precio_consultora) * 100.0
+    }
 }
 
 fn default_activo() -> i64 {
