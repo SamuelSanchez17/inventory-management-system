@@ -38,7 +38,8 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
     nombre_producto: '',
     id_categoria: '',
     stock: '',
-    precio: '',
+    precio_consultora: '',
+    precio_publico: '',
     ruta_imagen: null
   });
 
@@ -273,7 +274,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
   // Create Product (modal)
   // ══════════════════════════════════════════
   const openCreateModal = () => {
-    setFormData({ nombre_producto: '', id_categoria: '', stock: '', precio: '', ruta_imagen: null });
+    setFormData({ nombre_producto: '', id_categoria: '', stock: '', precio_consultora: '', precio_publico: '', ruta_imagen: null });
     setImageFile(null);
     setMiniaturaBase64(null);
     setIsCreateModalOpen(true);
@@ -307,7 +308,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
 
   const handleSubmitProduct = async (e) => {
     e.preventDefault();
-    if (!formData.nombre_producto || !formData.id_categoria || !formData.stock || !formData.precio) {
+    if (!formData.nombre_producto || !formData.id_categoria || !formData.stock || !formData.precio_consultora || !formData.precio_publico) {
       toast.error(t('products_fields_required'));
       return;
     }
@@ -315,7 +316,18 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
 
     const idCategoria = formData.id_categoria ? Number(formData.id_categoria) : null;
     const stock = Number(formData.stock);
-    const precio = Number(formData.precio);
+    const precioConsultora = Number(formData.precio_consultora);
+    const precioPublico = Number(formData.precio_publico);
+
+    if (Number.isNaN(precioConsultora) || Number.isNaN(precioPublico)) {
+      toast.error(t('products_fields_required'));
+      return;
+    }
+
+    if (precioPublico < precioConsultora) {
+      toast.error('El precio público debe ser mayor o igual al precio consultora.');
+      return;
+    }
 
     let imageBytes = null;
     let imageExt = null;
@@ -333,7 +345,9 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
         imageExt,
         miniaturaBase64,
         stock,
-        precio
+        precio: precioPublico,
+        precioConsultora,
+        precioPublico
       });
 
       const newProduct = {
@@ -343,7 +357,9 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
         ruta_imagen: formData.ruta_imagen,
         miniatura_base64: miniaturaBase64,
         stock,
-        precio
+        precio: precioPublico,
+        precio_consultora: precioConsultora,
+        precio_publico: precioPublico
       };
 
       setProducts([...products, newProduct]);
@@ -683,15 +699,22 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
                 </select>
               </label>
 
-              {/* Stock & Precio */}
+              {/* Stock & Precios */}
               <div className="products-modal-row">
                 <label className="products-modal-field">
                   <span>{t('products_stock_label')}</span>
                   <input type="number" name="stock" value={formData.stock} onChange={handleInputChange} placeholder={t('products_stock_placeholder')} min="0" required />
                 </label>
                 <label className="products-modal-field">
-                  <span>{t('products_price_label')}</span>
-                  <input type="number" name="precio" value={formData.precio} onChange={handleInputChange} placeholder={t('products_price_placeholder')} step="0.01" min="0" required />
+                  <span>{t('products_price_consultora_label')}</span>
+                  <input type="number" name="precio_consultora" value={formData.precio_consultora} onChange={handleInputChange} placeholder={t('products_price_consultora_placeholder')} step="0.01" min="0" required />
+                </label>
+              </div>
+
+              <div className="products-modal-row">
+                <label className="products-modal-field">
+                  <span>{t('products_price_publico_label')}</span>
+                  <input type="number" name="precio_publico" value={formData.precio_publico} onChange={handleInputChange} placeholder={t('products_price_publico_placeholder')} step="0.01" min="0" required />
                 </label>
               </div>
 
