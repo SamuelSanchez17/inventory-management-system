@@ -82,6 +82,8 @@ pub fn update_producto(
     image_bytes: Option<Vec<u8>>,
     image_ext: Option<String>,
     miniatura_base64: Option<String>,
+    precio_consultora: Option<f64>,
+    precio_publico: Option<f64>,
     db_path: State<'_, PathBuf>) 
     -> Result<(), String> 
 {
@@ -120,6 +122,17 @@ pub fn update_producto(
     {
         updated.miniatura_base64 = Some(mini);
     }
+
+    if let Some(consultora) = precio_consultora {
+        updated.precio_consultora = consultora;
+    }
+
+    if let Some(publico) = precio_publico {
+        updated.precio_publico = publico;
+        // Keep legacy field aligned while migration is in progress.
+        updated.precio = publico;
+    }
+
     service.update_producto(&updated).map_err(|e| e.to_string())
 }
 
