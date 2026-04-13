@@ -591,14 +591,15 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
                   <th>{t('dashboard_col_name')}</th>
                   <th>{t('dashboard_col_category')}</th>
                   <th>{t('dashboard_col_stock')}</th>
-                  <th>{t('dashboard_col_price')}</th>
+                  <th>{t('products_col_price_consultora')}</th>
+                  <th>{t('products_col_price_publico')}</th>
                   <th>{t('dashboard_col_actions')}</th>
                 </tr>
               </thead>
               <tbody>
                 {pagedProducts.length === 0 ? (
                   <tr>
-                    <td colSpan="5">
+                    <td colSpan="6">
                       <div className="products-table-empty">{t('products_table_empty')}</div>
                     </td>
                   </tr>
@@ -624,7 +625,8 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
                         </td>
                         <td className="table-cell-category" title={categoryName}>{categoryName}</td>
                         <td>{p.stock}</td>
-                        <td>${p.precio}</td>
+                        <td className="table-cell-price">${Number(p.precio_consultora ?? p.precio ?? 0).toFixed(2)}</td>
+                        <td className="table-cell-price table-cell-price-public">${Number(p.precio_publico ?? p.precio ?? 0).toFixed(2)}</td>
                         <td>
                           <div className="products-table-actions">
                             <button type="button" className="products-action-button products-action-edit" onClick={() => openEditModal(p)}>
