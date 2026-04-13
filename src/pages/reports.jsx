@@ -69,12 +69,43 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
         return date.toLocaleDateString(language === 'en' ? 'en-US' : 'es-ES');
     };
 
+    const moneyFormatter = useMemo(
+        () => new Intl.NumberFormat('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }),
+        []
+    );
+
     const formatMoney = (value) => {
         const numberValue = Number(value);
         if (Number.isNaN(numberValue)) {
             return '$0.00';
         }
-        return `$${numberValue.toFixed(2)}`;
+        return `$${moneyFormatter.format(numberValue)}`;
+    };
+
+    const getPublicPrice = (product) => {
+        const parsedPublic = Number(product?.precio_publico);
+        if (Number.isFinite(parsedPublic) && parsedPublic >= 0) {
+            return parsedPublic;
+        }
+
+        const parsedLegacy = Number(product?.precio);
+        if (Number.isFinite(parsedLegacy) && parsedLegacy >= 0) {
+            return parsedLegacy;
+        }
+
+        return 0;
+    };
+
+    const getConsultoraPrice = (product) => {
+        const parsedConsultora = Number(product?.precio_consultora);
+        if (Number.isFinite(parsedConsultora) && parsedConsultora >= 0) {
+            return parsedConsultora;
+        }
+
+        return getPublicPrice(product);
     };
 
     const toInputDateTime = (value) => {
@@ -391,7 +422,7 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
         const product = productsById.get(Number(productId));
         setEditItems((prev) => prev.map((row, i) => {
             if (i !== index) return row;
-            const precio_unitario = product?.precio ?? 0;
+            const precio_unitario = getPublicPrice(product);
             return {
                 ...row,
                 id_producto: product?.id_producto ?? null,
@@ -560,6 +591,11 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
         [sales]
     );
 
+    const totalInventarioConsultora = useMemo(
+        () => products.reduce((sum, product) => sum + (Number(product.stock || 0) * getConsultoraPrice(product)), 0),
+        [products]
+    );
+
     useEffect(() => {
         if (pageIndex !== safePageIndex) {
             setPageIndex(safePageIndex);
@@ -602,12 +638,16 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                     </div>
                     <div className="reports-summary">
                         <div className="reports-chip">
-                            <span className="chip-label">{t('reports_chip_total_sold')}</span>
+                            <span className="chip-label">{t('reports_chip_total_sold_public')}</span>
                             <span className="chip-value">{formatMoney(totalVendido)}</span>
                         </div>
                         <div className="reports-chip">
-                            <span className="chip-label">{t('reports_chip_total_collected')}</span>
+                            <span className="chip-label">{t('reports_chip_total_collected_public')}</span>
                             <span className="chip-value">{formatMoney(totalCobrado)}</span>
+                        </div>
+                        <div className="reports-chip">
+                            <span className="chip-label">{t('reports_chip_inventory_consultora')}</span>
+                            <span className="chip-value">{formatMoney(totalInventarioConsultora)}</span>
                         </div>
                     </div>
                 </header>
