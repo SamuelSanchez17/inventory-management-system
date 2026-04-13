@@ -181,11 +181,27 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
     return normalizeMoney(Math.max(0, normalizeMoney(subtotal) - clamped));
   }, [subtotal, abonoInicialAmount]);
 
+  const getPublicPrice = (product) => {
+    const parsedPublic = Number(product?.precio_publico);
+    if (Number.isFinite(parsedPublic) && parsedPublic >= 0) {
+      return parsedPublic;
+    }
+
+    const parsedLegacy = Number(product?.precio);
+    if (Number.isFinite(parsedLegacy) && parsedLegacy >= 0) {
+      return parsedLegacy;
+    }
+
+    return 0;
+  };
+
   const handleAddToCart = (product) => {
     if (Number(product.stock) <= 0) {
       toast.error(t('sales_no_stock'));
       return;
     }
+
+    const precioPublico = getPublicPrice(product);
 
     setCartItems((prev) => {
       const existing = prev.find((item) => item.id_producto === product.id_producto);
@@ -203,7 +219,9 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
           nombre_producto: product.nombre_producto,
           cantidad: 1,
           stock: Number(product.stock),
-          precio_unitario: Number(product.precio),
+          precio_unitario: precioPublico,
+          precio_publico: precioPublico,
+          precio_consultora: Number(product.precio_consultora ?? 0),
           miniatura_base64: product.miniatura_base64,
           ruta_imagen: product.ruta_imagen,
         },
@@ -281,7 +299,7 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
         id_producto: item.id_producto,
         nombre_producto: item.nombre_producto,
         cantidad: item.cantidad,
-        precio_unitario: item.precio_unitario,
+        precio_unitario: item.precio_publico,
       })),
     };
 
@@ -366,6 +384,7 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
               </div>
               <div className="sales-catalog-grid">
                 {filteredProducts.map((product) => {
+                  const precioPublico = getPublicPrice(product);
                   const imageSrc = product.miniatura_base64
                     ? `data:image/jpeg;base64,${product.miniatura_base64}`
                     : product.ruta_imagen
@@ -388,7 +407,7 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
                           <p>{t('sales_code')} #{product.id_producto}</p>
                         </div>
                         <div className="sales-product-meta">
-                          <span className="sales-price">${Number(product.precio).toFixed(2)}</span>
+                          <span className="sales-price">${precioPublico.toFixed(2)}</span>
                           <span className={`sales-stock ${Number(product.stock) <= 3 ? 'low' : ''}`}>
                             {t('sales_stock')}: {product.stock}
                           </span>
