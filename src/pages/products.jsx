@@ -50,7 +50,8 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
     nombre_producto: '',
     id_categoria: '',
     stock: '',
-    precio: ''
+    precio_consultora: '',
+    precio_publico: ''
   });
   const [editImageFile, setEditImageFile] = useState(null);
   const [editImagePreview, setEditImagePreview] = useState(null);
@@ -380,7 +381,8 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
       nombre_producto: product.nombre_producto ?? '',
       id_categoria: product.id_categoria ?? '',
       stock: product.stock ?? '',
-      precio: product.precio ?? ''
+      precio_consultora: product.precio_consultora ?? product.precio ?? '',
+      precio_publico: product.precio_publico ?? product.precio ?? ''
     });
     const initialPreview = product.miniatura_base64
       ? `data:image/jpeg;base64,${product.miniatura_base64}`
@@ -426,14 +428,27 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
 
     const id_categoria = editForm.id_categoria === '' ? null : Number(editForm.id_categoria);
     const stock = Number(editForm.stock);
-    const precio = Number(editForm.precio);
+    const precio_consultora = Number(editForm.precio_consultora);
+    const precio_publico = Number(editForm.precio_publico);
+
+    if (Number.isNaN(stock) || Number.isNaN(precio_consultora) || Number.isNaN(precio_publico)) {
+      toast.error(t('products_fields_required'));
+      return;
+    }
+
+    if (precio_publico < precio_consultora) {
+      toast.error('El precio publico debe ser mayor o igual al precio consultora.');
+      return;
+    }
 
     const updatedProduct = {
       ...selectedProduct,
       nombre_producto,
       id_categoria,
       stock,
-      precio,
+      precio: precio_publico,
+      precio_consultora,
+      precio_publico,
       miniatura_base64: editMiniaturaBase64 ?? selectedProduct.miniatura_base64
     };
 
@@ -446,7 +461,14 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
     }
 
     try {
-      await invoke('update_producto', { producto: updatedProduct, imageBytes, imageExt, miniaturaBase64: editMiniaturaBase64 });
+      await invoke('update_producto', {
+        producto: updatedProduct,
+        imageBytes,
+        imageExt,
+        miniaturaBase64: editMiniaturaBase64,
+        precioConsultora: precio_consultora,
+        precioPublico: precio_publico
+      });
       setProducts((prev) => prev.map((p) => p.id_producto === updatedProduct.id_producto ? updatedProduct : p));
       closeEditModal();
       toast.success(t('toast_product_updated'));
@@ -773,8 +795,12 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
                 <input name="stock" value={editForm.stock} onChange={handleEditInputChange} type="number" min="0" />
               </label>
               <label className="products-modal-field">
-                <span>{t('dashboard_edit_price')}</span>
-                <input name="precio" value={editForm.precio} onChange={handleEditInputChange} type="number" min="0" step="0.01" />
+                <span>{t('products_price_consultora_label')}</span>
+                <input name="precio_consultora" value={editForm.precio_consultora} onChange={handleEditInputChange} type="number" min="0" step="0.01" />
+              </label>
+              <label className="products-modal-field">
+                <span>{t('products_price_publico_label')}</span>
+                <input name="precio_publico" value={editForm.precio_publico} onChange={handleEditInputChange} type="number" min="0" step="0.01" />
               </label>
             </div>
             <div className="products-modal-actions">
