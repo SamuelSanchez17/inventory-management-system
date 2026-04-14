@@ -18,6 +18,9 @@ pub fn init_db<P: AsRef<Path>> (db_path: P) -> Result<Connection> {
         conn.execute_batch(schema)?;
     }
 
+    migrate_add_dual_prices(&conn)?;
+    migrate_backfill_dual_prices_from_legacy(&conn)?;
+    migrate_normalize_dual_prices(&conn)?;
     migrate_add_miniatura(&conn)?;
     migrate_add_nombre_producto_snapshot(&conn)?;
     migrate_add_activo(&conn)?;
@@ -53,6 +56,76 @@ fn migrate_add_miniatura(conn: &rusqlite::Connection) -> rusqlite::Result<()>
     {
         conn.execute("ALTER TABLE productos ADD COLUMN miniatura_base64 TEXT", [])?;
     }
+    Ok(())
+}
+
+fn migrate_add_dual_prices(conn: &rusqlite::Connection) -> rusqlite::Result<()>
+{
+    if !ensure_column_exists(conn, "productos", "precio_consultora")?
+    {
+        conn.execute(
+            "ALTER TABLE productos ADD COLUMN precio_consultora REAL NOT NULL DEFAULT 0.0",
+            [],
+        )?;
+    }
+
+    if !ensure_column_exists(conn, "productos", "precio_publico")?
+    {
+        conn.execute(
+            "ALTER TABLE productos ADD COLUMN precio_publico REAL NOT NULL DEFAULT 0.0",
+            [],
+        )?;
+    }
+
+    Ok(())
+}
+
+fn migrate_backfill_dual_prices_from_legacy(conn: &rusqlite::Connection) -> rusqlite::Result<()>
+{
+    // Fill only missing values so the migration can run safely multiple times.
+    conn.execute(
+        "UPDATE productos
+         SET precio_publico = precio
+         WHERE precio_publico = 0.0
+           AND precio > 0.0",
+        [],
+    )?;
+
+    conn.execute(
+        "UPDATE productos
+         SET precio_consultora = precio_publico
+         WHERE precio_consultora = 0.0
+           AND precio_publico > 0.0",
+        [],
+    )?;
+
+    Ok(())
+}
+
+fn migrate_normalize_dual_prices(conn: &rusqlite::Connection) -> rusqlite::Result<()>
+{
+    // Keep stored values consistent on existing databases that do not have CHECK constraints.
+    conn.execute(
+        "UPDATE productos
+         SET precio_consultora = 0.0
+         WHERE precio_consultora < 0.0",
+        [],
+    )?;
+
+    conn.execute(
+        "UPDATE productos
+         SET precio_publico = 0.0
+         WHERE precio_publico < 0.0",
+        [],
+    )?;
+
+    conn.execute(
+        "UPDATE productos
+         SET precio_publico = precio_consultora
+         WHERE precio_publico < precio_consultora",
+        [],
+    )?;
+
     Ok(())
 }
 

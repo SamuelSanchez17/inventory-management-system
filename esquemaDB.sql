@@ -15,6 +15,8 @@ CREATE TABLE productos (
   ruta_imagen TEXT,
   stock INTEGER NOT NULL DEFAULT 0 CHECK (stock >= 0),
   precio REAL NOT NULL DEFAULT 0.0,
+  precio_consultora REAL NOT NULL DEFAULT 0.0 CHECK (precio_consultora >= 0),
+  precio_publico REAL NOT NULL DEFAULT 0.0 CHECK (precio_publico >= 0 AND precio_publico >= precio_consultora),
   activo INTEGER NOT NULL DEFAULT 1,
   creado_at TEXT DEFAULT (datetime('now','localtime')),
   actualizado_at TEXT DEFAULT (datetime('now','localtime'))

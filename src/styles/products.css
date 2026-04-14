@@ -390,11 +390,16 @@
 
 .products-table th:nth-child(4),
 .products-table td:nth-child(4) {
-  width: 120px;
+  width: 130px;
 }
 
 .products-table th:nth-child(5),
 .products-table td:nth-child(5) {
+  width: 130px;
+}
+
+.products-table th:nth-child(6),
+.products-table td:nth-child(6) {
   width: 160px;
 }
 
@@ -441,6 +446,15 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.table-cell-price {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.table-cell-price-public {
+  font-weight: 700;
 }
 
 .products-table-actions {

@@ -38,7 +38,8 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
     nombre_producto: '',
     id_categoria: '',
     stock: '',
-    precio: '',
+    precio_consultora: '',
+    precio_publico: '',
     ruta_imagen: null
   });
 
@@ -49,7 +50,8 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
     nombre_producto: '',
     id_categoria: '',
     stock: '',
-    precio: ''
+    precio_consultora: '',
+    precio_publico: ''
   });
   const [editImageFile, setEditImageFile] = useState(null);
   const [editImagePreview, setEditImagePreview] = useState(null);
@@ -273,7 +275,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
   // Create Product (modal)
   // ══════════════════════════════════════════
   const openCreateModal = () => {
-    setFormData({ nombre_producto: '', id_categoria: '', stock: '', precio: '', ruta_imagen: null });
+    setFormData({ nombre_producto: '', id_categoria: '', stock: '', precio_consultora: '', precio_publico: '', ruta_imagen: null });
     setImageFile(null);
     setMiniaturaBase64(null);
     setIsCreateModalOpen(true);
@@ -307,7 +309,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
 
   const handleSubmitProduct = async (e) => {
     e.preventDefault();
-    if (!formData.nombre_producto || !formData.id_categoria || !formData.stock || !formData.precio) {
+    if (!formData.nombre_producto || !formData.id_categoria || !formData.stock || !formData.precio_consultora || !formData.precio_publico) {
       toast.error(t('products_fields_required'));
       return;
     }
@@ -315,7 +317,18 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
 
     const idCategoria = formData.id_categoria ? Number(formData.id_categoria) : null;
     const stock = Number(formData.stock);
-    const precio = Number(formData.precio);
+    const precioConsultora = Number(formData.precio_consultora);
+    const precioPublico = Number(formData.precio_publico);
+
+    if (Number.isNaN(precioConsultora) || Number.isNaN(precioPublico)) {
+      toast.error(t('products_fields_required'));
+      return;
+    }
+
+    if (precioPublico < precioConsultora) {
+      toast.error('El precio público debe ser mayor o igual al precio consultora.');
+      return;
+    }
 
     let imageBytes = null;
     let imageExt = null;
@@ -333,7 +346,9 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
         imageExt,
         miniaturaBase64,
         stock,
-        precio
+        precio: precioPublico,
+        precioConsultora,
+        precioPublico
       });
 
       const newProduct = {
@@ -343,7 +358,9 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
         ruta_imagen: formData.ruta_imagen,
         miniatura_base64: miniaturaBase64,
         stock,
-        precio
+        precio: precioPublico,
+        precio_consultora: precioConsultora,
+        precio_publico: precioPublico
       };
 
       setProducts([...products, newProduct]);
@@ -364,7 +381,8 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
       nombre_producto: product.nombre_producto ?? '',
       id_categoria: product.id_categoria ?? '',
       stock: product.stock ?? '',
-      precio: product.precio ?? ''
+      precio_consultora: product.precio_consultora ?? product.precio ?? '',
+      precio_publico: product.precio_publico ?? product.precio ?? ''
     });
     const initialPreview = product.miniatura_base64
       ? `data:image/jpeg;base64,${product.miniatura_base64}`
@@ -410,14 +428,27 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
 
     const id_categoria = editForm.id_categoria === '' ? null : Number(editForm.id_categoria);
     const stock = Number(editForm.stock);
-    const precio = Number(editForm.precio);
+    const precio_consultora = Number(editForm.precio_consultora);
+    const precio_publico = Number(editForm.precio_publico);
+
+    if (Number.isNaN(stock) || Number.isNaN(precio_consultora) || Number.isNaN(precio_publico)) {
+      toast.error(t('products_fields_required'));
+      return;
+    }
+
+    if (precio_publico < precio_consultora) {
+      toast.error('El precio publico debe ser mayor o igual al precio consultora.');
+      return;
+    }
 
     const updatedProduct = {
       ...selectedProduct,
       nombre_producto,
       id_categoria,
       stock,
-      precio,
+      precio: precio_publico,
+      precio_consultora,
+      precio_publico,
       miniatura_base64: editMiniaturaBase64 ?? selectedProduct.miniatura_base64
     };
 
@@ -430,7 +461,14 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
     }
 
     try {
-      await invoke('update_producto', { producto: updatedProduct, imageBytes, imageExt, miniaturaBase64: editMiniaturaBase64 });
+      await invoke('update_producto', {
+        producto: updatedProduct,
+        imageBytes,
+        imageExt,
+        miniaturaBase64: editMiniaturaBase64,
+        precioConsultora: precio_consultora,
+        precioPublico: precio_publico
+      });
       setProducts((prev) => prev.map((p) => p.id_producto === updatedProduct.id_producto ? updatedProduct : p));
       closeEditModal();
       toast.success(t('toast_product_updated'));
@@ -553,14 +591,15 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
                   <th>{t('dashboard_col_name')}</th>
                   <th>{t('dashboard_col_category')}</th>
                   <th>{t('dashboard_col_stock')}</th>
-                  <th>{t('dashboard_col_price')}</th>
+                  <th>{t('products_col_price_consultora')}</th>
+                  <th>{t('products_col_price_publico')}</th>
                   <th>{t('dashboard_col_actions')}</th>
                 </tr>
               </thead>
               <tbody>
                 {pagedProducts.length === 0 ? (
                   <tr>
-                    <td colSpan="5">
+                    <td colSpan="6">
                       <div className="products-table-empty">{t('products_table_empty')}</div>
                     </td>
                   </tr>
@@ -586,7 +625,8 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
                         </td>
                         <td className="table-cell-category" title={categoryName}>{categoryName}</td>
                         <td>{p.stock}</td>
-                        <td>${p.precio}</td>
+                        <td className="table-cell-price">${Number(p.precio_consultora ?? p.precio ?? 0).toFixed(2)}</td>
+                        <td className="table-cell-price table-cell-price-public">${Number(p.precio_publico ?? p.precio ?? 0).toFixed(2)}</td>
                         <td>
                           <div className="products-table-actions">
                             <button type="button" className="products-action-button products-action-edit" onClick={() => openEditModal(p)}>
@@ -683,15 +723,22 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
                 </select>
               </label>
 
-              {/* Stock & Precio */}
+              {/* Stock & Precios */}
               <div className="products-modal-row">
                 <label className="products-modal-field">
                   <span>{t('products_stock_label')}</span>
                   <input type="number" name="stock" value={formData.stock} onChange={handleInputChange} placeholder={t('products_stock_placeholder')} min="0" required />
                 </label>
                 <label className="products-modal-field">
-                  <span>{t('products_price_label')}</span>
-                  <input type="number" name="precio" value={formData.precio} onChange={handleInputChange} placeholder={t('products_price_placeholder')} step="0.01" min="0" required />
+                  <span>{t('products_price_consultora_label')}</span>
+                  <input type="number" name="precio_consultora" value={formData.precio_consultora} onChange={handleInputChange} placeholder={t('products_price_consultora_placeholder')} step="0.01" min="0" required />
+                </label>
+              </div>
+
+              <div className="products-modal-row">
+                <label className="products-modal-field">
+                  <span>{t('products_price_publico_label')}</span>
+                  <input type="number" name="precio_publico" value={formData.precio_publico} onChange={handleInputChange} placeholder={t('products_price_publico_placeholder')} step="0.01" min="0" required />
                 </label>
               </div>
 
@@ -750,8 +797,12 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
                 <input name="stock" value={editForm.stock} onChange={handleEditInputChange} type="number" min="0" />
               </label>
               <label className="products-modal-field">
-                <span>{t('dashboard_edit_price')}</span>
-                <input name="precio" value={editForm.precio} onChange={handleEditInputChange} type="number" min="0" step="0.01" />
+                <span>{t('products_price_consultora_label')}</span>
+                <input name="precio_consultora" value={editForm.precio_consultora} onChange={handleEditInputChange} type="number" min="0" step="0.01" />
+              </label>
+              <label className="products-modal-field">
+                <span>{t('products_price_publico_label')}</span>
+                <input name="precio_publico" value={editForm.precio_publico} onChange={handleEditInputChange} type="number" min="0" step="0.01" />
               </label>
             </div>
             <div className="products-modal-actions">

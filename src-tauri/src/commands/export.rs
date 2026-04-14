@@ -12,7 +12,7 @@ use crate::database;
 /// y centrados, separadas por una columna vacía entre cada tabla.
 ///
 /// Layout de columnas:
-///   CATEGORIAS (2 cols) | gap | PRODUCTOS (7 cols) | gap | VENTAS (5 cols) | gap | PRODUCTOS_VENDIDOS (7 cols)
+///   CATEGORIAS (2 cols) | gap | PRODUCTOS (9 cols) | gap | VENTAS (6 cols) | gap | PRODUCTOS_VENDIDOS (7 cols)
 #[tauri::command]
 pub fn export_all_xlsx(
     db_path: State<'_, PathBuf>,
@@ -23,9 +23,9 @@ pub fn export_all_xlsx(
 
     // Número de columnas por tabla
     const CAT_COLS: u16 = 2;
-    const PROD_COLS: u16 = 8;
+    const PROD_COLS: u16 = 9;
     const VENT_COLS: u16 = 6;
-    const PV_COLS: u16 = 6;
+    const PV_COLS: u16 = 7;
 
     // Columnas de inicio de cada tabla (con 1 columna gap entre cada una)
     const CAT_START: u16 = 0;                                          // A
@@ -58,14 +58,14 @@ pub fn export_all_xlsx(
     // Productos (JOIN con categorias para mostrar nombre en vez de id)
     let prod_headers = [
         "id_producto", "nombre_producto", "categoria",
-        "stock", "precio", "creado_at", "actualizado_at", "estado",
+        "stock", "precio consultora", "precio publico", "creado_at", "actualizado_at", "estado",
     ];
     let mut prod_rows: Vec<Vec<String>> = Vec::new();
     {
         let mut stmt = conn
             .prepare(
                 "SELECT p.id_producto, p.nombre_producto, COALESCE(c.nombre, '') as categoria, \
-                        p.stock, p.precio, p.creado_at, p.actualizado_at, p.activo \
+                        p.stock, p.precio_consultora, p.precio_publico, p.creado_at, p.actualizado_at, p.activo \
                  FROM productos p \
                  LEFT JOIN categorias c ON p.id_categoria = c.id_categoria \
                  ORDER BY p.id_producto",
@@ -73,16 +73,18 @@ pub fn export_all_xlsx(
             .map_err(|e| e.to_string())?;
         let rows = stmt
             .query_map([], |row| {
-                let precio: f64 = row.get(4)?;
-                let activo: i64 = row.get(7)?;
+                let precio_consultora: f64 = row.get(4)?;
+                let precio_publico: f64 = row.get(5)?;
+                let activo: i64 = row.get(8)?;
                 Ok(vec![
                     row.get::<_, i64>(0)?.to_string(),
                     row.get::<_, String>(1)?,
                     row.get::<_, String>(2)?,
                     row.get::<_, i64>(3)?.to_string(),
-                    if precio.fract() == 0.0 { format!("{}", precio as i64) } else { format!("{}", precio) },
-                    row.get::<_, Option<String>>(5)?.unwrap_or_default(),
+                    if precio_consultora.fract() == 0.0 { format!("{}", precio_consultora as i64) } else { format!("{}", precio_consultora) },
+                    if precio_publico.fract() == 0.0 { format!("{}", precio_publico as i64) } else { format!("{}", precio_publico) },
                     row.get::<_, Option<String>>(6)?.unwrap_or_default(),
+                    row.get::<_, Option<String>>(7)?.unwrap_or_default(),
                     if activo == 1 { "Activo".to_string() } else { "Descontinuado".to_string() },
                 ])
             })
@@ -126,27 +128,30 @@ pub fn export_all_xlsx(
     // Productos vendidos (nombres legibles en vez de IDs)
     let pv_headers = [
         "nro", "nro_venta", "producto",
-        "cantidad", "precio_unitario", "subtotal",
+        "cantidad", "precio consultora ref", "precio publico aplicado", "subtotal",
     ];
     let mut pv_rows: Vec<Vec<String>> = Vec::new();
     {
         let mut stmt = conn
             .prepare(
                 "SELECT pv.id_producto_vendido, pv.id_venta, pv.nombre_producto_snapshot, \
-                        pv.cantidad, pv.precio_unitario, pv.subtotal \
+                        pv.cantidad, COALESCE(p.precio_consultora, 0), pv.precio_unitario, pv.subtotal \
                  FROM productos_vendidos pv \
+                 LEFT JOIN productos p ON p.id_producto = pv.id_producto \
                  ORDER BY pv.id_venta, pv.id_producto_vendido",
             )
             .map_err(|e| e.to_string())?;
         let rows = stmt
             .query_map([], |row| {
-                let pu: f64 = row.get(4)?;
-                let sub: f64 = row.get(5)?;
+                let pc: f64 = row.get(4)?;
+                let pu: f64 = row.get(5)?;
+                let sub: f64 = row.get(6)?;
                 Ok(vec![
                     row.get::<_, i64>(0)?.to_string(),
                     row.get::<_, i64>(1)?.to_string(),
                     row.get::<_, String>(2)?,
                     row.get::<_, i64>(3)?.to_string(),
+                    if pc.fract() == 0.0 { format!("{}", pc as i64) } else { format!("{:.2}", pc) },
                     if pu.fract() == 0.0 { format!("{}", pu as i64) } else { format!("{:.2}", pu) },
                     if sub.fract() == 0.0 { format!("{}", sub as i64) } else { format!("{:.2}", sub) },
                 ])
