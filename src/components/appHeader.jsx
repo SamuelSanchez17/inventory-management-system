@@ -1,5 +1,5 @@
 import { useContext, useEffect, useMemo, useState } from 'react';
-import { CalendarBlank, List, UserCircle } from 'phosphor-react';
+import { CalendarBlank, List, User } from 'phosphor-react';
 import { ThemeContext } from '../context/ThemeContext';
 import { LanguageContext } from '../context/LanguageContext';
 import logo from '../assets/logo.webp';
@@ -42,7 +42,7 @@ export default function AppHeader({ onProfileClick, onToggleSidebar }) {
             type="button"
             onClick={onToggleSidebar}
             aria-label={t('header_toggle_sidebar')}
-            className={`inline-flex h-11 w-11 items-center justify-center rounded-xl border transition-colors ${isDark ? 'border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800' : 'border-rose-200 bg-white text-rose-700 hover:bg-rose-50'}`}
+            className={`inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl border transition-colors ${isDark ? 'border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800' : 'border-rose-200 bg-white text-rose-700 hover:bg-rose-50'}`}
           >
             <List size={22} weight="bold" />
           </button>
@@ -75,9 +75,10 @@ export default function AppHeader({ onProfileClick, onToggleSidebar }) {
             type="button"
             onClick={onProfileClick}
             aria-label={t('header_profile_open')}
-            className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl border transition-all duration-200 focus:outline-none focus:ring-2 ${isDark ? 'border-white/10 bg-white/5 text-rose-200 hover:bg-white/10 focus:ring-rose-300/70' : 'border-rose-200 bg-white text-rose-600 hover:bg-rose-50 focus:ring-rose-300/70'}`}
+            title={t('header_profile_open')}
+            className={`inline-flex h-12 w-12 cursor-pointer items-center justify-center rounded-full border transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 ${isDark ? 'border-white/15 bg-gradient-to-br from-white/10 to-white/5 text-rose-300 hover:from-white/20 hover:to-white/10 focus:ring-rose-400/50 focus:ring-offset-slate-950' : 'border-rose-300 bg-gradient-to-br from-rose-50 to-white text-rose-500 hover:from-rose-100 hover:to-rose-50 focus:ring-rose-400/50 focus:ring-offset-white'}`}
           >
-            <UserCircle size={26} weight="duotone" />
+            <User size={24} weight="bold" />
           </button>
         </div>
       </div>

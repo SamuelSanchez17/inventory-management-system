@@ -201,7 +201,7 @@ export default function Configuration() {
                   <button
                     key={option.value}
                     onClick={() => setDraftTheme(option.value)}
-                    className={`p-4 rounded-xl border-2 transition-all duration-200 text-center ${
+                    className={`cursor-pointer p-4 rounded-xl border-2 transition-all duration-200 text-center ${
                       draftTheme === option.value
                         ? isDark ? 'border-pink-400 bg-gray-700 shadow-md' : 'border-rose-400 bg-rose-50 shadow-md'
                         : isDark ? 'border-gray-600 bg-gray-800 hover:border-gray-500' : 'border-gray-200 bg-white hover:border-rose-200'
@@ -234,7 +234,7 @@ export default function Configuration() {
                   <button
                     key={option.value}
                     onClick={() => setDraftLanguage(option.value)}
-                    className={`p-4 rounded-xl border-2 transition-all duration-200 text-center ${
+                    className={`cursor-pointer p-4 rounded-xl border-2 transition-all duration-200 text-center ${
                       draftLanguage === option.value
                         ? isDark ? 'border-pink-400 bg-gray-700 shadow-md' : 'border-rose-400 bg-rose-50 shadow-md'
                         : isDark ? 'border-gray-600 bg-gray-800 hover:border-gray-500' : 'border-gray-200 bg-white hover:border-rose-200'
@@ -267,7 +267,7 @@ export default function Configuration() {
                   <button
                     key={option.value}
                     onClick={() => setDraftTextSize(option.value)}
-                    className={`p-6 rounded-xl border-2 transition-all duration-200 text-center ${
+                    className={`cursor-pointer p-6 rounded-xl border-2 transition-all duration-200 text-center ${
                       draftTextSize === option.value
                         ? isDark ? 'border-pink-400 bg-gray-700 shadow-md' : 'border-rose-400 bg-rose-50 shadow-md'
                         : isDark ? 'border-gray-600 bg-gray-800 hover:border-gray-500' : 'border-gray-200 bg-white hover:border-rose-200'
@@ -318,7 +318,7 @@ export default function Configuration() {
               {hasChanges && (
                 <button
                   onClick={handleCancel}
-                  className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 border-2 ${
+                  className={`cursor-pointer px-6 py-3 rounded-xl font-semibold transition-all duration-300 border-2 ${
                     isDark
                       ? 'bg-gray-700 text-gray-300 border-gray-600 hover:bg-gray-600 hover:border-gray-500'
                       : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200 hover:border-gray-400'
@@ -381,14 +381,14 @@ export default function Configuration() {
               <button
                 type="button"
                 onClick={cancelImport}
-                className={`confirm-modal-btn confirm-modal-btn-cancel ${isDark ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                className={`confirm-modal-btn confirm-modal-btn-cancel cursor-pointer ${isDark ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
               >
                 {getDraftt('confirm_modal_cancel')}
               </button>
               <button
                 type="button"
                 onClick={confirmImport}
-                className="confirm-modal-btn confirm-modal-btn-confirm"
+                className="confirm-modal-btn confirm-modal-btn-confirm cursor-pointer"
               >
                 {getDraftt('confirm_modal_confirm')}
               </button>
