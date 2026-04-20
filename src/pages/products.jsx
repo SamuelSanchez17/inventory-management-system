@@ -2,13 +2,12 @@ import { useState, useEffect, useMemo, useContext } from 'react';
 import toast from 'react-hot-toast';
 import { invoke, isTauri, convertFileSrc } from '@tauri-apps/api/core';
 import '../styles/products.css';
-import Sidebar from '../components/sidebar';
 import Header from '../components/header';
 import { ThemeContext } from '../context/ThemeContext';
 import { LanguageContext } from '../context/LanguageContext';
 import { Image as ImageIcon, Tag, Trash, Warning, Plus } from 'phosphor-react';
 
-export default function Products({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar, profile }) {
+export default function Products() {
   const { getActiveTheme } = useContext(ThemeContext);
   const { t } = useContext(LanguageContext);
   const isDark = getActiveTheme() === 'oscuro';
@@ -509,11 +508,9 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
   // Render
   // ══════════════════════════════════════════
   return (
-    <div className={`min-h-screen flex ${isDark ? 'products-dark' : ''}`}>
-      <Sidebar onNavigate={onNavigate} activePage={currentPage} isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} profile={profile} />
-
-      <main className={`products-container ${isDark ? 'products-dark' : ''}`}>
-        <Header onNavigate={onNavigate} searchTerm={searchTerm} onSearchChange={setSearchTerm} title={t('sidebar_products')} subtitle={t('products_subtitle')} />
+    <>
+    <main className={`products-container ${isDark ? 'products-dark' : ''}`}>
+      <Header searchTerm={searchTerm} onSearchChange={setSearchTerm} title={t('sidebar_products')} subtitle={t('products_subtitle')} />
 
         <div className="products-layout">
           {/* ── Categorías (izquierda) ── */}
@@ -669,11 +666,10 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
             </div>
           </div>
         </div>
-      </main>
+        </main>
 
-      {/* ══════════════════════════════════════════ */}
-      {/* Modal: Crear Producto                     */}
-      {/* ══════════════════════════════════════════ */}
+        {/* ══════════════════════════════════════════ */}
+        {/* Modal: Crear Producto                     */}
       {isCreateModalOpen && (
         <div className="products-modal-overlay" onClick={closeCreateModal}>
           <div className={`products-modal ${isDark ? 'products-modal-dark' : ''}`} onClick={(e) => e.stopPropagation()}>
@@ -865,6 +861,6 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }

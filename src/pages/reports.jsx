@@ -3,12 +3,11 @@ import toast from 'react-hot-toast';
 import { invoke, isTauri } from '@tauri-apps/api/core';
 import { Archive, CaretLeft, CaretRight, ChartBar, FloppyDisk } from 'phosphor-react';
 import { save } from '@tauri-apps/plugin-dialog';
-import Sidebar from '../components/sidebar';
 import { ThemeContext } from '../context/ThemeContext';
 import { LanguageContext } from '../context/LanguageContext';
 import '../styles/reports.css';
 
-export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar, profile }) {
+export default function Reports() {
     const { getActiveTheme } = useContext(ThemeContext);
     const { t, language } = useContext(LanguageContext);
     const isDark = getActiveTheme() === 'oscuro';
@@ -621,16 +620,7 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                 : 'estado-pendiente';
 
     return (
-        <div className={`min-h-screen flex ${isDark ? 'reports-dark' : ''}`}>
-            <Sidebar
-                onNavigate={onNavigate}
-                activePage={currentPage}
-                isCollapsed={isSidebarCollapsed}
-                toggleSidebar={toggleSidebar}
-                profile={profile}
-            />
-
-            <main className="reports-page">
+        <main className={`reports-page ${isDark ? 'reports-dark' : ''}`}>
                 <header className="reports-header">
                     <div>
                         <h1>{t('reports_title')}</h1>
@@ -1059,8 +1049,7 @@ export default function Reports({ onNavigate, currentPage, isSidebarCollapsed, t
                         </div>
                     </div>
                 )}
-            </main>
-        </div>
+        </main>
     );
 }
 

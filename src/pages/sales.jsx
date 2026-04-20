@@ -10,12 +10,11 @@ import {
   ShoppingCartSimple,
   Trash,
 } from 'phosphor-react';
-import Sidebar from '../components/sidebar';
 import { ThemeContext } from '../context/ThemeContext';
 import { LanguageContext } from '../context/LanguageContext';
 import '../styles/sales.css';
 
-export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar, profile }) {
+export default function Sales() {
   const { getActiveTheme } = useContext(ThemeContext);
   const { t } = useContext(LanguageContext);
   const isDark = getActiveTheme() === 'oscuro';
@@ -212,6 +211,7 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
           return { ...item, cantidad: nextQty };
         });
       }
+
       return [
         ...prev,
         {
@@ -330,17 +330,8 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
   };
 
   return (
-    <div className={`min-h-screen flex ${isDark ? 'bg-gray-900' : 'bg-rose-50'}`}>
-      <Sidebar
-        onNavigate={onNavigate}
-        activePage={currentPage}
-        isCollapsed={isSidebarCollapsed}
-        toggleSidebar={toggleSidebar}
-        profile={profile}
-      />
-
-      <main className={`sales-page ${isDark ? 'sales-dark' : ''}`}>
-        <header className="sales-header">
+    <main className={`sales-page ${isDark ? 'sales-dark' : ''}`}>
+      <header className="sales-header">
           <div>
             <h1>{t('sales_title')}</h1>
             <span className="sales-subtitle">{t('sales_subtitle')}</span>
@@ -571,7 +562,6 @@ export default function Sales({ onNavigate, currentPage, isSidebarCollapsed, tog
             </div>
           </aside>
         </section>
-      </main>
-    </div>
+    </main>
   );
 }
