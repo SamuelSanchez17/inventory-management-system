@@ -23,6 +23,9 @@ export default function Configuration() {
   const initialThemeRef = useRef(theme);
   const initialLanguageRef = useRef(language);
   const initialTextSizeRef = useRef(textSize);
+  const currentDraftThemeRef = useRef(draftTheme);
+  const currentDraftLanguageRef = useRef(draftLanguage);
+  const currentDraftTextSizeRef = useRef(draftTextSize);
 
   // Detectar si hay cambios pendientes contra el estado inicial confirmado
   const hasChanges =
@@ -55,31 +58,29 @@ export default function Configuration() {
   const isDark = getActiveDraftTheme() === 'oscuro';
 
   useEffect(() => {
-    setTheme(draftTheme);
-  }, [draftTheme, setTheme]);
+    currentDraftThemeRef.current = draftTheme;
+    if (draftTheme !== theme) {
+      setTheme(draftTheme);
+    }
+  }, [draftTheme, theme, setTheme]);
 
   useEffect(() => {
-    setLanguage(draftLanguage);
-  }, [draftLanguage, setLanguage]);
+    currentDraftLanguageRef.current = draftLanguage;
+    if (draftLanguage !== language) {
+      setLanguage(draftLanguage);
+    }
+  }, [draftLanguage, language, setLanguage]);
 
   useEffect(() => {
-    setTextSize(draftTextSize);
-  }, [draftTextSize, setTextSize]);
+    currentDraftTextSizeRef.current = draftTextSize;
+    if (draftTextSize !== textSize) {
+      setTextSize(draftTextSize);
+    }
+  }, [draftTextSize, textSize, setTextSize]);
 
-  useEffect(() => {
-    return () => {
-      // Si el usuario sale sin guardar, restaura el estado confirmado.
-      if (
-        draftTheme !== initialThemeRef.current ||
-        draftLanguage !== initialLanguageRef.current ||
-        draftTextSize !== initialTextSizeRef.current
-      ) {
-        setTheme(initialThemeRef.current);
-        setLanguage(initialLanguageRef.current);
-        setTextSize(initialTextSizeRef.current);
-      }
-    };
-  }, [draftTheme, draftLanguage, draftTextSize, setTheme, setLanguage, setTextSize]);
+  // No restaurar en cleanup: en desarrollo (StrictMode) puede generar oscilaciones
+  // entre idiomas/tema durante previews rápidos. La restauración queda explícita
+  // en el botón "Descartar".
 
   const handleSave = () => {
     // Aplicar todos los cambios al contexto global
