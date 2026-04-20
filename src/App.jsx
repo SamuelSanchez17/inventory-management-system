@@ -214,10 +214,10 @@ function AppShell() {
   return (
     <>
       <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
-      <div className={`h-screen overflow-hidden ${isDark ? 'bg-slate-950' : 'bg-rose-50'}`}>
+      <div className={`h-screen overflow-hidden flex flex-col ${isDark ? 'bg-slate-950' : 'bg-rose-50'}`}>
         <AppHeader onProfileClick={openProfileModal} onToggleSidebar={toggleSidebar} />
 
-        <div className="relative flex h-[calc(100vh-88px)] overflow-hidden">
+        <div className="relative flex flex-1 min-h-0 overflow-hidden">
           <Sidebar
             onNavigate={setCurrentPage}
             activePage={currentPage}
@@ -225,7 +225,7 @@ function AppShell() {
             profile={profile}
           />
 
-          <div className="min-w-0 flex-1 h-full overflow-y-auto overscroll-contain">
+          <div className="min-w-0 flex-1 min-h-0 overflow-y-auto overscroll-contain">
             {currentPage === 'dashboard' && <Dashboard />}
             {currentPage === 'products' && <Products />}
             {currentPage === 'sales' && <Sales />}

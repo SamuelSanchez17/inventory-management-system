@@ -51,7 +51,7 @@ export default function Sidebar({ onNavigate, activePage, isCollapsed, profile }
     }, []);
 
     return(
-      <aside className={`h-[calc(100vh-88px)] overflow-y-auto transition-all duration-300 ease-in-out ${isCollapsed ? 'w-16' : 'w-64'} ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-rose-100/80 border-rose-200'} border-r flex flex-col relative`}>
+      <aside className={`h-full overflow-y-auto transition-all duration-300 ease-in-out ${isCollapsed ? 'w-16' : 'w-64'} ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-rose-100/80 border-rose-200'} border-r flex flex-col relative`}>
         <div className={`transition-all duration-300 overflow-hidden ${isCollapsed ? 'h-0 opacity-0' : 'h-auto opacity-100'}`}>
           <div className={`w-full h-24 bg-gradient-to-br ${isDark ? 'from-gray-700 to-gray-600' : 'from-rose-300 to-rose-400'} relative flex-shrink-0`}>
             <div className="absolute inset-0 opacity-30" style={{
