@@ -24,37 +24,36 @@ Originally developed as a solution for an enterprise client, this project repres
 ## 🏗️ Architecture Overview
 
 ```
-┌─────────────────────────────────────────────────────┐
-│       PRESENTATION LAYER (Frontend)                 │
-│  React + Vite | Dynamic Themes | Multi-language     │
-└────────────────────┬────────────────────────────────┘
-                     │
-          ┌──────────┴──────────┐
-          ▼                     ▼
-    ┌─────────────┐      ┌──────────────┐
-    │  Modular    │      │   Global     │
-    │  Components │      │   Context    │
-    └─────────────┘      └──────────────┘
-          │                     │
-          └──────────┬──────────┘
-                     │
-     ┌───────────────┴────────────────┐
-     │  IPC Communication (Tauri)     │
-     └───────────┬────────────────────┘
-                 │
-┌────────────────▼─────────────────────┐
-│       LOGIC LAYER (Backend)          │
-│       Rust + Tauri + SQLite          │
-├──────────────────────────────────────┤
-│ • Business Services                  │
-│ • Data Repositories                  │
-│ • Validations & Business Rules       │
-│ • Report Generation                  │
-└────────────────┬─────────────────────┘
-                 │
-     ┌───────────▼─────────────┐
-     │     SQLite Database     │
-     └─────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│                  PRESENTATION LAYER (Frontend)           │
+│     React 19 + Vite | Tailwind CSS | Multi-language    │
+│            Component-based | Context API                 │
+└─────────────────────────┬───────────────────────────────┘
+                          │
+         ┌────────────────┼────────────────┐
+         ▼                ▼                ▼
+   ┌──────────┐    ┌─────────────┐  ┌──────────────┐
+   │  Pages   │    │ Components/ │  │   Contexts   │
+   │  (views) │    │  (modular)  │  │  (global)    │
+   └──────────┘    └─────────────┘  └──────────────┘
+         │                │                │
+         └────────────────┼────────────────┘
+                          │
+            ┌─────────────▼──────────────┐
+            │    IPC (Tauri invoke)      │
+            └─────────────┬──────────────┘
+                          │
+┌─────────────────────────▼──────────────────────────────────┐
+│                    LOGIC LAYER (Backend)                    │
+│              Rust + Tauri 2.x + SQLite                     │
+├────────────────────────────────────────────────────────────┤
+│  Commands (IPC) → Services (Business Logic) → Repositories  │
+│  Validations | Business Rules | Report Generation | Export   │
+└──────────────────────────┬─────────────────────────────────┘
+                           │
+              ┌────────────▼────────────┐
+              │     SQLite Database     │
+              └─────────────────────────┘
 ```
 
 ---
@@ -62,17 +61,17 @@ Originally developed as a solution for an enterprise client, this project repres
 ## 🛠️ Technologies Used
 
 ### Frontend
-![React](https://img.shields.io/badge/React-18-blue?style=for-the-badge&logo=react)
+![React](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)
 ![Vite](https://img.shields.io/badge/Vite-Build%20Tool-brightgreen?style=for-the-badge)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?style=for-the-badge&logo=javascript)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-38-b38?style=for-the-badge&logo=tailwindcss)
 
 ### Backend
 ![Rust](https://img.shields.io/badge/Rust-Programming%20Language-orange?style=for-the-badge&logo=rust)
 ![Tauri](https://img.shields.io/badge/Tauri-Desktop%20App-teal?style=for-the-badge)
 ![SQLite](https://img.shields.io/badge/SQLite-Database-lightblue?style=for-the-badge&logo=sqlite)
 
-### Infraestructura
+### Infrastructure
 ![ESLint](https://img.shields.io/badge/ESLint-Linter-purple?style=for-the-badge)
 ![Git](https://img.shields.io/badge/Git-Version%20Control-red?style=for-the-badge&logo=git)
 
@@ -82,26 +81,33 @@ Originally developed as a solution for an enterprise client, this project repres
 
 ### Inventory Management
 - **Product Control**: Create, update, delete, and categorize products
+- **Dual Pricing**: Separate consultant and public prices
 - **Stock Levels**: Real-time inventory monitoring
+- **Image Management**: Product images with automatic thumbnails
 - **Categorization**: Hierarchical product organization by categories
-- **Advanced Search**: Fast and precise filtering
+- **Advanced Search**: Fast and precise filtering with fuzzy search
 
 ### Sales System
-- **Sales Processing**: User interface optimized for fast transactions
+- **Sales Processing**: Optimized UI for fast transactions
+- **Shopping Cart**: Dynamic cart with real-time stock validation
+- **Installment Sales**: Support for `Abono` (partial payments) mode
 - **Real-Time Validations**: Instant availability verification
 - **Transaction History**: Complete traceability of operations
-- **User Profile**: Users can customize the sidebar and visible tools based on their workflow
+- **User Profile**: Customizable sidebar and visible tools
 
 ### Reports & Analytics
 - **Executive Dashboard**: Key performance indicator visualization
-- **Sales Analysis**: Detailed and comparative reports
-- **Data Export**: Report generation in multiple formats
-- **Interactive Charts**: Visual and accessible information
+- **Sales Analysis**: Detailed reports with pagination
+- **Expandable Rows**: View sale details inline
+- **Payment Tracking**: Monitor installments and pending balances
+- **Data Export**: Excel (.xlsx) export functionality
+- **Database Backup**: Export/import database backups
 
 ### User Experience
 - **Responsive Interface**: Adaptation to different screen sizes
-- **Customizable Themes**: Light/dark mode based on preference
-- **Multi-language Support**: Support for multiple languages (i18n)
+- **Customizable Themes**: Light/dark mode with live preview
+- **Multi-language Support**: English and Spanish (i18n)
+- **Auto-Updates**: Tauri updater integration
 - **Intuitive Navigation**: UX optimized for productivity
 
 ---
@@ -129,44 +135,57 @@ Originally developed as a solution for an enterprise client, this project repres
 
 ```
 src/
-├── components/          # Reusable React components
-│   ├── header.jsx      # Main header
-│   ├── sidebar.jsx     # Side navigation
-│   └── updateModal.jsx # Update modal
-├── pages/              # Application main views
-│   ├── dashboard.jsx   # Control panel
-│   ├── products.jsx    # Product management
-│   ├── sales.jsx       # Sales processing
-│   ├── reports.jsx     # Analytics and reports
-│   └── configuration.jsx # Settings
-├── context/            # Context API for global state
+├── components/              # Modular React components
+│   ├── appHeader.jsx      # Top navigation bar
+│   ├── header.jsx         # Page headers
+│   ├── profileModal.jsx   # User profile management
+│   ├── sidebar.jsx        # Collapsible navigation
+│   ├── updateModal.jsx    # Auto-update dialogs
+│   ├── products/          # Product modals (extracted)
+│   │   ├── index.js
+│   │   ├── CreateProductModal.jsx
+│   │   ├── EditProductModal.jsx
+│   │   ├── DeleteProductModal.jsx
+│   │   └── DeleteCategoryModal.jsx
+│   ├── reports/           # Report components (extracted)
+│   │   ├── SaleRow.jsx
+│   │   ├── ReportsEditSaleModal.jsx
+│   │   ├── ReportsDeleteSaleModal.jsx
+│   │   ├── ReportsExportSection.jsx
+│   │   └── ReportsItemsModal.jsx
+│   ├── sales/            # Sales panels (extracted)
+│   │   ├── SalesCatalogPanel.jsx
+│   │   ├── SalesCartPanel.jsx
+│   │   └── SalesCheckoutPanel.jsx
+│   └── configuration/
+│       └── ImportConfirmModal.jsx
+├── pages/                 # Main application views
+│   ├── dashboard.jsx      # KPI dashboard with charts
+│   ├── products.jsx      # Product & category management
+│   ├── sales.jsx         # Point of sale interface
+│   ├── reports.jsx       # Sales reports & analytics
+│   └── configuration.jsx  # App settings & preferences
+├── context/               # Global state management
 │   ├── LanguageContext.jsx
 │   └── ThemeContext.jsx
-├── services/           # Services and business logic
-├── styles/             # CSS styles by module
-├── translations.js     # Multi-language configuration
-└── App.jsx            # Main component
+├── utils/                 # Utility functions
+│   ├── fuzzySearch.js     # Fuzzy search algorithm
+│   └── pricing.js         # Price calculations
+├── styles/                # CSS modules by page
+├── translations.js        # i18n strings (en/es)
+└── App.jsx               # Root component
 
 src-tauri/
 ├── src/
-│   ├── commands/       # IPC commands exposed to frontend
-│   │   ├── products.rs
-│   │   ├── sales.rs
-│   │   ├── categories.rs
-│   │   └── export.rs
-│   ├── services/       # Business logic
-│   │   ├── producto_service.rs
-│   │   ├── venta_service.rs
-│   │   └── categoria_service.rs
-│   ├── repos/          # Data access layer
-│   │   ├── producto_repo.rs
-│   │   ├── venta_repo.rs
-│   │   └── categoria_repo.rs
-│   ├── models.rs       # Data structures
-│   ├── database.rs     # DB connection & management
-│   └── main.rs         # Entry point
+│   ├── commands/         # IPC commands exposed to frontend
+│   ├── services/         # Business logic layer
+│   ├── repos/            # Data access layer
+│   ├── models.rs         # Data structures
+│   ├── database.rs       # DB connection & management
+│   └── main.rs           # Entry point
+└── tauri.conf.json       # Tauri configuration
 
-esquemaDB.sql          # Database schema
+esquemaDB.sql              # Database schema
 ```
 
 ---
@@ -176,50 +195,59 @@ esquemaDB.sql          # Database schema
 ### Main Modules
 
 **Dashboard**
-- Key Performance Indicators (KPIs)
-- Sales trend charts
-- Low inventory alerts
-- Quick access to common functions
+- Key Performance Indicators (KPIs): total stock, low stock alerts
+- Sales charts with top products visualization
+- Low inventory product list with pagination
+- Quick access to management functions
 
 **Product Management**
-- Interactive table with pagination
-- Advanced search and filters
-- Inline editing with validations
-- Data import/export
+- Interactive table with pagination and fuzzy search
+- Category CRUD with inline editing
+- Dual pricing: consultant and public prices
+- Image upload with automatic thumbnail generation
+- Product creation, editing, and deletion modals
 
 **Point of Sale**
-- Interface optimized for fast transactions
-- Dynamic shopping cart
-- Automatic calculations
-- Receipt generation
+- Three-panel layout: catalog, cart, checkout
+- Real-time stock validation
+- Support for `Abono` (installment) payments with initial payment
+- Automatic price calculations and totals
+- Client name/lastname capture for sales records
 
 **Reports**
-- Multiple analysis views
-- Filters by period, category, salesperson
-- Comparative charts
-- PDF/Excel export
+- Paginated sales table with expandable rows
+- Payment status tracking (Liquidada, Parcial, Pendiente)
+- Edit sale details inline from reports
+- Register additional payments for installment sales
+- Edit sale items (add, remove, update products)
+- Export to Excel (.xlsx) and database backup
 
 ---
 
-## 🔐 Highlighted Technical Features
+## 🔐 Technical Highlights
 
-### Robust Backend
-- Layered architecture: Commands → Services → Repositories
-- Multi-level data validation
-- Secure database operation handling
-- Efficient data serialization with Serde
+### Architecture & Patterns
+- **Modular Components**: UI extracted into reusable components with barrel exports
+- **Context API**: Global state for theme and language
+- **Service Pattern**: Backend organized in Commands → Services → Repositories
+- **Repository Pattern**: Clean separation of data access logic
 
-### Performance
-- Native desktop application (Tauri)
-- Compilation to machine code (Rust)
-- Low-overhead IPC
-- Optimized database queries
+### Frontend Quality
+- **React 19**: Latest React with hooks optimization
+- **Tailwind CSS**: Utility-first styling with CVA
+- **ESLint + Prettier**: Code quality and consistency
+- **Fuzzy Search**: Levenshtein-based product search
 
-### Maintainability
-- Modular and well-structured code
-- Clear separation of concerns
-- Established patterns (Service Pattern, Repository Pattern)
-- Easy extensibility for new features
+### Backend Robustness
+- **Rust Performance**: Native compilation, memory safety
+- **Tauri 2**: Secure IPC, native OS integration
+- **SQLite**: Reliable embedded database
+- **Serde**: Efficient serialization/deserialization
+
+### Desktop Features
+- **Auto-Updates**: Tauri updater with background download
+- **File Dialogs**: Natclearive file picker for import/export
+- **Window Management**: Custom window controls
 
 ---
 
@@ -227,17 +255,6 @@ esquemaDB.sql          # Database schema
 
 > [Screenshots will be added soon, showcasing the dashboard interface, product management, and reports]
 
----
-
-## 📝 Notes
-
-This project was originally developed as a customized enterprise solution. The decision to share this architecture aims to demonstrate:
-
-- Mastery of full-stack architectures
-- Implementation of professional design patterns
-- Ability to integrate complementary technologies
-- Attention to detail in UX/UI
-- Clean and scalable code writing
 
 ---
 
@@ -246,6 +263,7 @@ This project was originally developed as a customized enterprise solution. The d
 **Developer**: Samuel Sánchez Guzmán  
 **Type**: Desktop Application  
 **Status**: Production  
+**Version**: 1.4.0  
 **Last Updated**: April 2026  
 
 ---

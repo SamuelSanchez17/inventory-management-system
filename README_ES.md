@@ -9,7 +9,7 @@
 
 ---
 
-> Una solución empresarial completa y performante para la gestión integral de inventario, ventas y reportes. Desarrollada como aplicación de escritorio moderna con Tauri y Rust en el backend.
+> Una solución empresarial completa y de alto rendimiento para la gestión integral de inventario, procesamiento de ventas y reportes. Desarrollada como aplicación de escritorio moderna con Tauri y Rust en el backend.
 
 ---
 
@@ -24,37 +24,36 @@ Desarrollado inicialmente como solución para un cliente empresarial, este proye
 ## 🏗️ Arquitectura General
 
 ```
-┌─────────────────────────────────────────────────────┐
-│          CAPA DE PRESENTACIÓN (Frontend)            │
-│  React + Vite | Temas dinámicos | Multiidioma       │
-└────────────────────┬────────────────────────────────┘
-                     │
-          ┌──────────┴──────────┐
-          ▼                     ▼
-    ┌─────────────┐      ┌──────────────┐
-    │  Componentes│      │  Contextos   │
-    │  Modulares  │      │  Globales    │
-    └─────────────┘      └──────────────┘
-          │                     │
-          └──────────┬──────────┘
-                     │
-     ┌───────────────┴────────────────┐
-     │  IPC Communication (Tauri)     │
-     └───────────┬────────────────────┘
-                 │
-┌────────────────▼─────────────────────┐
-│      CAPA DE LÓGICA (Backend)        │
-│   Rust + Tauri + SQLite              │
-├──────────────────────────────────────┤
-│ • Servicios de Negocio               │
-│ • Repositorios de Datos              │
-│ • Validaciones y Reglas              │
-│ • Exportación de Reportes            │
-└────────────────┬─────────────────────┘
-                 │
-     ┌───────────▼─────────────┐
-     │   Base de Datos SQLite  │
-     └─────────────────────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                 CAPA DE PRESENTACIÓN (Frontend)             │
+│       React 19 + Vite | Tailwind CSS | Multiidioma          │
+│              Basado en componentes | Context API            │
+└─────────────────────────┬───────────────────────────────────┘
+                          │
+          ┌───────────────┼───────────────┐
+          ▼               ▼               ▼
+    ┌──────────┐   ┌─────────────┐  ┌──────────────┐
+    │ Páginas  │   │ Componentes │  │  Contextos   │
+    │ (vistas) │   │  Modulares  │  │   Globales   │
+    └──────────┘   └─────────────┘  └──────────────┘
+          │               │               │
+          └───────────────┼───────────────┘
+                          │
+            ┌─────────────▼──────────────┐
+            │    IPC (Tauri invoke)      │
+            └─────────────┬──────────────┘
+                          │
+┌─────────────────────────▼───────────────────────────────────┐
+│                    CAPA DE LÓGICA (Backend)                 │
+│                Rust + Tauri 2.x + SQLite                    │
+├─────────────────────────────────────────────────────────────┤
+│   Commands (IPC) → Services (Lógica) → Repositories         │
+│   Validaciones | Reglas de Negocio | Reportes | Exportación │
+└──────────────────────────┬──────────────────────────────────┘
+                           │
+              ┌────────────▼────────────┐
+              │   Base de Datos SQLite  │
+              └─────────────────────────┘
 ```
 
 ---
@@ -62,10 +61,10 @@ Desarrollado inicialmente como solución para un cliente empresarial, este proye
 ## 🛠️ Tecnologías Utilizadas
 
 ### Frontend
-![React](https://img.shields.io/badge/React-18-blue?style=for-the-badge&logo=react)
+![React](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)
 ![Vite](https://img.shields.io/badge/Vite-Build%20Tool-brightgreen?style=for-the-badge)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?style=for-the-badge&logo=javascript)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-38--b38?style=for-the-badge&logo=tailwindcss)
 
 ### Backend
 ![Rust](https://img.shields.io/badge/Rust-Programming%20Language-orange?style=for-the-badge&logo=rust)
@@ -82,26 +81,33 @@ Desarrollado inicialmente como solución para un cliente empresarial, este proye
 
 ### Gestión de Inventario
 - **Control de Productos**: Crear, actualizar, eliminar y categorizar productos
-- **Niveles de Stock**: Monitoreo en tiempo real de inventario
-- **Categorización**: Organización jerárquica de producto por categorías
-- **Búsqueda Avanzada**: Filtros rápidos y precisos
+- **Precios Dobles**: Precios separados para consultoras y público
+- **Niveles de Stock**: Monitoreo en tiempo real del inventario
+- **Gestión de Imágenes**: Imágenes de productos con miniaturas automáticas
+- **Categorización**: Organización jerárquica de productos por categorías
+- **Búsqueda Avanzada**: Filtros rápidos y precisos con búsqueda difusa
 
 ### Sistema de Ventas
 - **Procesamiento de Ventas**: Interfaz optimizada para transacciones rápidas
-- **Validaciones en Tiempo Real**: Verificación de disponibilidad instantánea
+- **Carrito de Compras**: Carrito dinámico con validación de stock en tiempo real
+- **Ventas con Abonos**: Soporte para pagos parciales (`Abono`)
+- **Validaciones en Tiempo Real**: Verificación instantánea de disponibilidad
 - **Historial de Transacciones**: Trazabilidad completa de operaciones
-- **Perfil de Usuario**: El usuario puede adaptar la barra lateral y las herramientas visibles según su flujo de trabajo.
+- **Perfil de Usuario**: Barra lateral personalizable según el flujo de trabajo
 
-### Reportes y Analytics
-- **Dashboard Ejecutivo**: Visualización de KPIs principales
-- **Análisis de Ventas**: Reportes detallados y comparativos
-- **Exportación de Datos**: Generación de reportes en múltiples formatos
-- **Gráficos Interactivos**: Información visual y accesible
+### Reportes y Análisis
+- **Dashboard Ejecutivo**: Visualización de indicadores clave de rendimiento
+- **Análisis de Ventas**: Reportes detallados con paginación
+- **Filas Expandibles**: Ver detalles de venta en línea
+- **Seguimiento de Pagos**: Monitoreo de abonos y saldos pendientes
+- **Exportación de Datos**: Funcionalidad de exportación a Excel (.xlsx)
+- **Respaldo de Base de Datos**: Exportar/importar respaldos de BD
 
 ### Experiencia de Usuario
 - **Interfaz Responsiva**: Adaptación a diferentes tamaños de pantalla
-- **Temas Personalizables**: Modo claro/oscuro según preferencia
-- **Multiidioma**: Soporte para múltiples lenguajes (i18n)
+- **Temas Personalizables**: Modo claro/oscuro con vista previa en vivo
+- **Multiidioma**: Soporte para inglés y español (i18n)
+- **Actualizaciones Automáticas**: Integración con Tauri updater
 - **Navegación Intuitiva**: UX optimizada para productividad
 
 ---
@@ -129,44 +135,57 @@ Desarrollado inicialmente como solución para un cliente empresarial, este proye
 
 ```
 src/
-├── components/          # Componentes React reutilizables
-│   ├── header.jsx      # Cabecera principal
-│   ├── sidebar.jsx     # Navegación lateral
-│   └── updateModal.jsx # Modal de actualizaciones
-├── pages/              # Vistas principales de la aplicación
-│   ├── dashboard.jsx   # Panel de control
-│   ├── products.jsx    # Gestión de productos
-│   ├── sales.jsx       # Procesamiento de ventas
-│   ├── reports.jsx     # Análisis y reportes
-│   └── configuration.jsx # Configuraciones
-├── context/            # Context API para estado global
+├── components/              # Componentes React modulares
+│   ├── appHeader.jsx      # Barra de navegación superior
+│   ├── header.jsx         # Encabezados de página
+│   ├── profileModal.jsx   # Gestión de perfil de usuario
+│   ├── sidebar.jsx        # Navegación colapsable
+│   ├── updateModal.jsx    # Diálogos de actualización
+│   ├── products/          # Modales de productos (extraídos)
+│   │   ├── index.js
+│   │   ├── CreateProductModal.jsx
+│   │   ├── EditProductModal.jsx
+│   │   ├── DeleteProductModal.jsx
+│   │   └── DeleteCategoryModal.jsx
+│   ├── reports/           # Componentes de reportes (extraídos)
+│   │   ├── SaleRow.jsx
+│   │   ├── ReportsEditSaleModal.jsx
+│   │   ├── ReportsDeleteSaleModal.jsx
+│   │   ├── ReportsExportSection.jsx
+│   │   └── ReportsItemsModal.jsx
+│   ├── sales/            # Paneles de ventas (extraídos)
+│   │   ├── SalesCatalogPanel.jsx
+│   │   ├── SalesCartPanel.jsx
+│   │   └── SalesCheckoutPanel.jsx
+│   └── configuration/
+│       └── ImportConfirmModal.jsx
+├── pages/                 # Vistas principales de la aplicación
+│   ├── dashboard.jsx      # Dashboard con KPIs y gráficos
+│   ├── products.jsx      # Gestión de productos y categorías
+│   ├── sales.jsx         # Interfaz de punto de venta
+│   ├── reports.jsx       # Reportes y análisis de ventas
+│   └── configuration.jsx  # Configuración de la app
+├── context/               # Gestión de estado global
 │   ├── LanguageContext.jsx
 │   └── ThemeContext.jsx
-├── services/           # Servicios y lógica
-├── styles/             # Estilos CSS por módulo
-├── translations.js     # Configuración multiidioma
-└── App.jsx            # Componente principal
+├── utils/                 # Funciones utilitarias
+│   ├── fuzzySearch.js     # Algoritmo de búsqueda difusa
+│   └── pricing.js         # Cálculos de precios
+├── styles/                # Módulos CSS por página
+├── translations.js         # Cadenas i18n (en/es)
+└── App.jsx               # Componente raíz
 
 src-tauri/
 ├── src/
-│   ├── commands/       # Comandos IPC expuestos al frontend
-│   │   ├── products.rs
-│   │   ├── sales.rs
-│   │   ├── categories.rs
-│   │   └── export.rs
-│   ├── services/       # Lógica de negocio
-│   │   ├── producto_service.rs
-│   │   ├── venta_service.rs
-│   │   └── categoria_service.rs
-│   ├── repos/          # Capa de acceso a datos
-│   │   ├── producto_repo.rs
-│   │   ├── venta_repo.rs
-│   │   └── categoria_repo.rs
-│   ├── models.rs       # Estructuras de datos
-│   ├── database.rs     # Conexión y gestión BD
-│   └── main.rs         # Punto de entrada
+│   ├── commands/         # Comandos IPC expuestos al frontend
+│   ├── services/         # Capa de lógica de negocio
+│   ├── repos/            # Capa de acceso a datos
+│   ├── models.rs         # Estructuras de datos
+│   ├── database.rs       # Conexión y gestión BD
+│   └── main.rs           # Punto de entrada
+└── tauri.conf.json       # Configuración de Tauri
 
-esquemaDB.sql          # Esquema de base de datos
+esquemaDB.sql              # Esquema de base de datos
 ```
 
 ---
@@ -176,50 +195,59 @@ esquemaDB.sql          # Esquema de base de datos
 ### Módulos Principales
 
 **Dashboard**
-- Indicadores clave de desempeño (KPIs)
-- Gráficos de tendencias de ventas
-- Alertas de bajo inventario
-- Accesos rápidos a funciones comunes
+- Indicadores clave de desempeño (KPIs): stock total, alertas de bajo inventario
+- Gráficos de ventas con visualización de productos top
+- Lista de productos con inventario bajo con paginación
+- Acceso rápido a funciones de gestión
 
 **Gestión de Productos**
-- Tabla interactiva con paginación
-- Búsqueda y filtros avanzados
-- Edición en línea con validaciones
-- Importación/Exportación de datos
+- Tabla interactiva con paginación y búsqueda difusa
+- CRUD de categorías con edición en línea
+- Precios dobles: consultoras y público
+- Carga de imágenes con generación automática de miniaturas
+- Modales de creación, edición y eliminación de productos
 
 **Punto de Venta**
-- Interfaz optimizada para transacciones rápidas
-- Carrito de compras dinámico
-- Cálculos automáticos
-- Generación de recibos
+- Diseño de tres paneles: catálogo, carrito, checkout
+- Validación de stock en tiempo real
+- Soporte para pagos `Abono` (abonos) con pago inicial
+- Cálculos automáticos de precios y totales
+- Captura de nombre/apellido del cliente para registros de venta
 
 **Reportes**
-- Múltiples vistas de análisis
-- Filtros por período, categoría, vendedor
-- Gráficos comparativos
-- Exportación en PDF/Excel
+- Tabla de ventas paginada con filas expandibles
+- Seguimiento de estado de pago (Liquidada, Parcial, Pendiente)
+- Edición de detalles de venta en línea desde reportes
+- Registro de abonos adicionales para ventas con pagos parciales
+- Edición de productos de venta (agregar, eliminar, actualizar)
+- Exportación a Excel (.xlsx) y respaldo de base de datos
 
 ---
 
 ## 🔐 Características Técnicas Destacadas
 
-### Backend Robusto
-- Arquitectura en capas: Commands → Services → Repositories
-- Validación de datos en múltiples niveles
-- Manejo seguro de operaciones de base de datos
-- Serialización eficiente de datos con Serde
+### Arquitectura y Patrones
+- **Componentes Modulares**: UI extraída en componentes reutilizables con exports de barril
+- **Context API**: Estado global para tema e idioma
+- **Patrón de Servicio**: Backend organizado en Commands → Services → Repositories
+- **Patrón Repository**: Separación clara de lógica de acceso a datos
 
-### Rendimiento
-- Aplicación de escritorio nativa (Tauri)
-- Compilación a código máquina (Rust)
-- IPC de bajo overhead
-- Consultas optimizadas a base de datos
+### Calidad Frontend
+- **React 19**: Última versión de React con optimización de hooks
+- **Tailwind CSS**: Estilos utility-first con CVA
+- **ESLint + Prettier**: Calidad y consistencia del código
+- **Búsqueda Difusa**: Búsqueda de productos basada en Levenshtein
 
-### Mantenibilidad
-- Código modular y bien estructurado
-- Separación clara de responsabilidades
-- Patrones establecidos (Service Pattern, Repository Pattern)
-- Fácil extensibilidad para nuevas funcionalidades
+### Robustez del Backend
+- **Rendimiento Rust**: Compilación nativa, seguridad de memoria
+- **Tauri 2**: IPC seguro, integración nativa con SO
+- **SQLite**: Base de datos embebida confiable
+- **Serde**: Serialización/deserialización eficiente
+
+### Características de Escritorio
+- **Actualizaciones Automáticas**: Tauri updater con descarga en segundo plano
+- **Diálogos de Archivo**: Selector nativo de archivos para importar/exportar
+- **Gestión de Ventanas**: Controles personalizados de ventana
 
 ---
 
@@ -227,27 +255,17 @@ esquemaDB.sql          # Esquema de base de datos
 
 > [Las capturas de pantalla serán añadidas próximamente, mostrando la interfaz del dashboard, gestión de productos y reportes]
 
----
-
-## 📝 Notas
-
-Este proyecto fue desarrollado originalmente como solución empresarial personalizada. La decisión de compartir esta arquitectura busca demostrar:
-
-- Dominio de arquitecturas full-stack
-- Implementación de patrones de diseño profesionales
-- Capacidad de integración entre tecnologías complementarias
-- Atención al detalle en UX/UI
-- Escritura de código limpio y escalable
 
 ---
 
 ## 👨‍💻 Acerca Del Proyecto
 
 **Desarrollador**: Samuel Sánchez Guzmán  
-**Tipo**: Aplicación Desktop  
+**Tipo**: Aplicación de Escritorio  
 **Estado**: Producción  
+**Versión**: 1.4.0  
 **Última Actualización**: Abril 2026  
 
 ---
 
-**© 2026 StockBeauty - Inventory Management System. Todos los derechos reservados.**
+**© 2026 StockBeauty - Sistema de Gestión de Inventario. Todos los derechos reservados.**
