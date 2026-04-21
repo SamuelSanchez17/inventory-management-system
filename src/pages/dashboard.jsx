@@ -1,7 +1,5 @@
-import Sidebar from '../components/sidebar';
 import Header from '../components/header';
 import { useContext, useState, useMemo, useEffect } from 'react';
-import toast from 'react-hot-toast';
 import { ThemeContext } from '../context/ThemeContext';
 import { LanguageContext } from '../context/LanguageContext';
 import { invoke, isTauri } from '@tauri-apps/api/core';
@@ -9,7 +7,7 @@ import { CurrencyDollar, Package, TrendUp, Warning, Storefront } from 'phosphor-
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import '../styles/dashboard.css';
 
-export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar, profile }) {
+export default function Dashboard() {
   const { getActiveTheme } = useContext(ThemeContext);
   const { t } = useContext(LanguageContext);
   const isDark = getActiveTheme() === 'oscuro';
@@ -79,12 +77,6 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
     [lowStockItems, lowStockStart, lowStockPageSize]
   );
 
-  useEffect(() => {
-    if (lowStockPage !== safeLowStockPage) {
-      setLowStockPage(safeLowStockPage);
-    }
-  }, [lowStockPage, safeLowStockPage]);
-
   const metrics = [
     {
       label: t('dashboard_metric_total'),
@@ -119,11 +111,8 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
   ];
 
   return (
-    <div className={`min-h-screen flex ${isDark ? 'dashboard-dark' : ''}`}>
-      <Sidebar onNavigate={onNavigate} activePage={currentPage} isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} profile={profile} />
-
-      <main className="dashboard-page">
-        <Header onNavigate={onNavigate} subtitle={t('dashboard_subtitle')} />
+    <main className={`dashboard-page ${isDark ? 'dashboard-dark' : ''}`}>
+      <Header subtitle={t('dashboard_subtitle')} />
 
         {/* Métricas */}
         <div className="dashboard-metrics">
@@ -264,7 +253,6 @@ export default function Dashboard({ onNavigate, currentPage, isSidebarCollapsed,
             )}
           </div>
         </div>
-      </main>
-    </div>
+    </main>
   );
 }

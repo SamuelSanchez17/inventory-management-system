@@ -41,6 +41,6 @@ jobs:
           tagName: app-v__VERSION__ #crea el tag automáticamente
           releaseName: "App v__VERSION__"
           includeUpdaterJson: true
-          releaseBody: "- Nuevo esquema de doble precio por producto: precio consultora (costo) y precio público (venta)\n- Migración de base de datos y normalización automática para mantener compatibilidad con datos legacy\n- Formularios de productos actualizados para crear y editar ambos precios sin romper el flujo existente\n- Tabla de productos mejorada para mostrar precio consultora y precio público con layout estable\n- Ventas actualizadas para tomar precio público en carrito, subtotal y payload de guardado\n- Reportes refinados: ingresos por precio público, valor de inventario por precio consultora y KPIs con formato de miles\n- Exportación Excel actualizada para mostrar ambos precios en productos y referencia de precios en productos vendidos\n- Mejoras de validación y robustez en backend para evitar inconsistencias de precios"
+          releaseBody: "- Nuevo diseño de navegación: barra superior (header) con acceso rápido al perfil\n- Perfil de usuario ahora se abre en ventana modal directamente desde el header\n- Interfaz más limpia y consistente en todas las pantallas\n- Navegación entre secciones más fluida y respuesta inmediata\n- Múltiples mejoras visuales y corrección de errores reportados\n- Optimizaciones de rendimiento para una experiencia más fluida\n- Implementación de componente de reloj dinámico en el encabezado global "
           releaseDraft: false
           prerelease: false

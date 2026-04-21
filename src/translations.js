@@ -1,5 +1,14 @@
 const translations = {
   es: {
+    // ── App shell ──
+    app_brand_eyebrow: 'Sistema de gestión',
+    app_name: 'StockBeauty',
+    app_subtitle: 'Inventario, ventas y configuración en un solo lugar.',
+    header_toggle_sidebar: 'Contraer o expandir menú lateral',
+    header_datetime_label: 'Día y hora',
+    header_profile_label: 'Usuario',
+    header_profile_open: 'Abrir perfil',
+
     // ── Sidebar ──
     sidebar_title: 'Sala de exposición digital',
     sidebar_profile: 'Mary - Consultora de Belleza',
@@ -374,6 +383,10 @@ const translations = {
     // ── Profile (Configuration) ──
     profile_title: 'Mi Perfil',
     profile_desc: 'Personaliza tu nombre, foto y cargo para que se muestren en la barra lateral.',
+    profile_modal_eyebrow: 'Perfil global',
+    profile_modal_title: 'Editar perfil',
+    profile_modal_summary: 'Tus cambios se guardarán y se reflejarán en todo el sistema.',
+    profile_modal_photo_hint: 'Toca la foto para cambiarla y ajustarla antes de guardar.',
     profile_name_label: 'Nombre',
     profile_name_placeholder: 'Ej. María García',
     profile_role_label: 'Cargo',
@@ -395,6 +408,15 @@ const translations = {
   },
 
   en: {
+    // ── App shell ──
+    app_brand_eyebrow: 'Management system',
+    app_name: 'StockBeauty',
+    app_subtitle: 'Inventory, sales and settings in one place.',
+    header_toggle_sidebar: 'Toggle sidebar menu',
+    header_datetime_label: 'Date & time',
+    header_profile_label: 'User',
+    header_profile_open: 'Open profile',
+
     // ── Sidebar ──
     sidebar_title: 'Showroom Digital',
     sidebar_profile: 'Mary - Beauty Consultant',
@@ -746,6 +768,10 @@ const translations = {
     // ── Profile (Configuration) ──
     profile_title: 'My Profile',
     profile_desc: 'Customize your name, photo and role to display in the sidebar.',
+    profile_modal_eyebrow: 'Global profile',
+    profile_modal_title: 'Edit profile',
+    profile_modal_summary: 'Your changes will be saved and reflected across the system.',
+    profile_modal_photo_hint: 'Tap the photo to change and adjust it before saving.',
     profile_name_label: 'Name',
     profile_name_placeholder: 'E.g. Maria Garcia',
     profile_role_label: 'Role',

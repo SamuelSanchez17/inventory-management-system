@@ -14,6 +14,9 @@ import { LanguageProvider } from './context/LanguageContext';
 import { ThemeContext } from './context/ThemeContext';
 import { LanguageContext } from './context/LanguageContext';
 import UpdateModal from './components/updateModal';
+import AppHeader from './components/appHeader';
+import ProfileModal from './components/profileModal';
+import Sidebar from './components/sidebar';
 import './app.css';
 
 const RECHECK_INTERVAL_MS = 8 * 60 * 60 * 1000; // 8 horas
@@ -24,6 +27,7 @@ function AppShell() {
   const isDark = getActiveTheme() === 'oscuro';
   const [currentPage, setCurrentPage]  = useState('dashboard');
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [profile, setProfile] = useState(null);
   const [currentVersion, setCurrentVersion] = useState('');
   const [availableVersion, setAvailableVersion] = useState('');
@@ -196,6 +200,10 @@ function AppShell() {
     setPatchNotesData(null);
   };
 
+  const openProfileModal = () => setIsProfileModalOpen(true);
+
+  const closeProfileModal = () => setIsProfileModalOpen(false);
+
   const updateSize = useMemo(() => {
     if (!updateInfo) return null;
     return updateInfo?.manifest?.size || updateInfo?.size || null;
@@ -206,20 +214,35 @@ function AppShell() {
   return (
     <>
       <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
-      {currentPage === 'dashboard' && <Dashboard onNavigate={setCurrentPage} currentPage={currentPage} isSidebarCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} profile={profile} />}
-      {currentPage === 'products' && <Products onNavigate={setCurrentPage} currentPage={currentPage} isSidebarCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} profile={profile} />}
-      {currentPage === 'sales' && <Sales onNavigate={setCurrentPage} currentPage={currentPage} isSidebarCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} profile={profile} />}
-      {currentPage === 'reports' && <Reports onNavigate={setCurrentPage} currentPage={currentPage} isSidebarCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} profile={profile} />}
-      {currentPage === 'settings' && (
-        <Configuration
-          onNavigate={setCurrentPage}
-          currentPage={currentPage}
-          isSidebarCollapsed={isSidebarCollapsed}
-          toggleSidebar={toggleSidebar}
-          profile={profile}
-          onProfileSaved={loadProfile}
-        />
-      )}
+      <div className={`h-screen overflow-hidden flex flex-col ${isDark ? 'bg-slate-950' : 'bg-rose-50'}`}>
+        <AppHeader onProfileClick={openProfileModal} onToggleSidebar={toggleSidebar} />
+
+        <div className="relative flex flex-1 min-h-0 overflow-hidden">
+          <Sidebar
+            onNavigate={setCurrentPage}
+            activePage={currentPage}
+            isCollapsed={isSidebarCollapsed}
+            profile={profile}
+          />
+
+          <div className="min-w-0 flex-1 min-h-0 overflow-y-auto overscroll-contain">
+            {currentPage === 'dashboard' && <Dashboard />}
+            {currentPage === 'products' && <Products />}
+            {currentPage === 'sales' && <Sales />}
+            {currentPage === 'reports' && <Reports />}
+            {currentPage === 'settings' && <Configuration />}
+          </div>
+        </div>
+      </div>
+
+      <ProfileModal
+        open={isProfileModalOpen}
+        profile={profile}
+        onClose={closeProfileModal}
+        onSaved={loadProfile}
+        isDark={isDark}
+        t={t}
+      />
 
       {/* Modal de actualización disponible */}
       <UpdateModal

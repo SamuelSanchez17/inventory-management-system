@@ -5,7 +5,7 @@
   flex: 1;
   padding: 32px 36px 48px;
   background: radial-gradient(circle at top left, #eef3ff 0%, #f7f8fb 50%, #fefefe 100%);
-  min-height: 100vh;
+  min-height: 100%;
   font-family: 'Manrope', 'Segoe UI', sans-serif;
   color: var(--products-text);
   /* Default products theme variables (light mode) */

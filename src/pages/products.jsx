@@ -2,13 +2,14 @@ import { useState, useEffect, useMemo, useContext } from 'react';
 import toast from 'react-hot-toast';
 import { invoke, isTauri, convertFileSrc } from '@tauri-apps/api/core';
 import '../styles/products.css';
-import Sidebar from '../components/sidebar';
 import Header from '../components/header';
 import { ThemeContext } from '../context/ThemeContext';
 import { LanguageContext } from '../context/LanguageContext';
-import { Image as ImageIcon, Tag, Trash, Warning, Plus } from 'phosphor-react';
+import { Plus } from 'phosphor-react';
+import { fuzzyFilterByName } from '../utils/fuzzySearch';
+import { CreateProductModal, EditProductModal, DeleteProductModal, DeleteCategoryModal } from '../components/products';
 
-export default function Products({ onNavigate, currentPage, isSidebarCollapsed, toggleSidebar, profile }) {
+export default function Products() {
   const { getActiveTheme } = useContext(ThemeContext);
   const { t } = useContext(LanguageContext);
   const isDark = getActiveTheme() === 'oscuro';
@@ -35,23 +36,14 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
   const [imageFile, setImageFile] = useState(null);
   const [miniaturaBase64, setMiniaturaBase64] = useState(null);
   const [formData, setFormData] = useState({
-    nombre_producto: '',
-    id_categoria: '',
-    stock: '',
-    precio_consultora: '',
-    precio_publico: '',
-    ruta_imagen: null
+    nombre_producto: '', id_categoria: '', stock: '', precio_consultora: '', precio_publico: '', ruta_imagen: null
   });
 
   // ── Edit product modal ──
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editForm, setEditForm] = useState({
-    nombre_producto: '',
-    id_categoria: '',
-    stock: '',
-    precio_consultora: '',
-    precio_publico: ''
+    nombre_producto: '', id_categoria: '', stock: '', precio_consultora: '', precio_publico: ''
   });
   const [editImageFile, setEditImageFile] = useState(null);
   const [editImagePreview, setEditImagePreview] = useState(null);
@@ -68,8 +60,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
       if (!isTauri()) return;
       try {
         const [productsData, categoriesData] = await Promise.all([
-          invoke('list_productos'),
-          invoke('list_categorias')
+          invoke('list_productos'), invoke('list_categorias')
         ]);
         setProducts(productsData);
         setCategories(categoriesData);
@@ -85,94 +76,27 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
   // ══════════════════════════════════════════
   const categoryMap = useMemo(() => {
     const map = new Map();
-    categories.forEach((cat) => {
-      map.set(cat.id_categoria, cat.nombre);
-    });
+    categories.forEach((cat) => map.set(cat.id_categoria, cat.nombre));
     return map;
   }, [categories]);
 
   // ══════════════════════════════════════════
-  // Search (Levenshtein fuzzy search)
+  // Search & Pagination
   // ══════════════════════════════════════════
-  const toSingular = (word) => {
-    if (word.length <= 3) return word;
-    if (word.endsWith('ces')) return `${word.slice(0, -3)}z`;
-    if (word.endsWith('es')) return word.slice(0, -2);
-    if (word.endsWith('s')) return word.slice(0, -1);
-    return word;
-  };
-
-  const normalizeText = (text) => {
-    if (!text) return '';
-    return text
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9\s]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .split(' ')
-      .map(toSingular)
-      .join(' ');
-  };
-
-  const levenshteinDistance = (source, target) => {
-    if (source === target) return 0;
-    if (!source) return target.length;
-    if (!target) return source.length;
-    const sourceLength = source.length;
-    const targetLength = target.length;
-    let prev = Array.from({ length: targetLength + 1 }, (_, idx) => idx);
-    for (let i = 1; i <= sourceLength; i += 1) {
-      const current = [i];
-      for (let j = 1; j <= targetLength; j += 1) {
-        const cost = source[i - 1] === target[j - 1] ? 0 : 1;
-        current[j] = Math.min(prev[j] + 1, current[j - 1] + 1, prev[j - 1] + cost);
-      }
-      prev = current;
-    }
-    return prev[targetLength];
-  };
-
-  const normalizedQuery = useMemo(() => normalizeText(searchTerm), [searchTerm]);
-
   const filteredProducts = useMemo(() => {
-    if (!normalizedQuery) return products;
-    const scored = products.map((product) => {
-      const name = normalizeText(product.nombre_producto || '');
-      const distance = name.includes(normalizedQuery) ? 0 : levenshteinDistance(normalizedQuery, name);
-      return { product, name, distance };
-    });
-    const threshold = Math.max(1, Math.floor(normalizedQuery.length * 0.4));
-    const matches = scored.filter((item) => item.name.includes(normalizedQuery) || item.distance <= threshold);
-    const sorted = (matches.length ? matches : scored)
-      .slice()
-      .sort((a, b) => {
-        if (a.distance !== b.distance) return a.distance - b.distance;
-        return (a.product.nombre_producto || '').localeCompare(b.product.nombre_producto || '');
-      });
-    const finalResults = matches.length ? sorted : sorted.slice(0, 3);
-    return finalResults.map((item) => item.product);
-  }, [products, normalizedQuery]);
+    return fuzzyFilterByName(products, searchTerm, (product) => product.nombre_producto);
+  }, [products, searchTerm]);
 
-  useEffect(() => { setPageIndex(1); }, [normalizedQuery]);
+  useEffect(() => { setPageIndex(1); }, [searchTerm]);
 
-  // ══════════════════════════════════════════
-  // Pagination
-  // ══════════════════════════════════════════
   const totalItems = filteredProducts.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
   const safePageIndex = Math.min(pageIndex, totalPages);
   const startIndex = (safePageIndex - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
-  const pagedProducts = useMemo(
-    () => filteredProducts.slice(startIndex, endIndex),
-    [filteredProducts, startIndex, endIndex]
-  );
+  const pagedProducts = useMemo(() => filteredProducts.slice(startIndex, endIndex), [filteredProducts, startIndex, endIndex]);
 
-  useEffect(() => {
-    if (pageIndex !== safePageIndex) setPageIndex(safePageIndex);
-  }, [pageIndex, safePageIndex]);
+  useEffect(() => { if (pageIndex !== safePageIndex) setPageIndex(safePageIndex); }, [pageIndex, safePageIndex]);
 
   // ══════════════════════════════════════════
   // Thumbnail helper
@@ -272,7 +196,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
   };
 
   // ══════════════════════════════════════════
-  // Create Product (modal)
+  // Create Product
   // ══════════════════════════════════════════
   const openCreateModal = () => {
     setFormData({ nombre_producto: '', id_categoria: '', stock: '', precio_consultora: '', precio_publico: '', ruta_imagen: null });
@@ -296,13 +220,9 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
     const file = e.target.files[0];
     if (file) {
       setImageFile(file);
-      makeThumbnail(file)
-        .then((base64) => setMiniaturaBase64(base64))
-        .catch(() => setMiniaturaBase64(null));
+      makeThumbnail(file).then((base64) => setMiniaturaBase64(base64)).catch(() => setMiniaturaBase64(null));
       const reader = new FileReader();
-      reader.onload = (event) => {
-        setFormData({ ...formData, ruta_imagen: event.target.result });
-      };
+      reader.onload = (event) => { setFormData({ ...formData, ruta_imagen: event.target.result }); };
       reader.readAsDataURL(file);
     }
   };
@@ -310,8 +230,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
   const handleSubmitProduct = async (e) => {
     e.preventDefault();
     if (!formData.nombre_producto || !formData.id_categoria || !formData.stock || !formData.precio_consultora || !formData.precio_publico) {
-      toast.error(t('products_fields_required'));
-      return;
+      toast.error(t('products_fields_required')); return;
     }
     if (!isTauri()) { toast.error('Backend Tauri no disponible.'); return; }
 
@@ -321,17 +240,13 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
     const precioPublico = Number(formData.precio_publico);
 
     if (Number.isNaN(precioConsultora) || Number.isNaN(precioPublico)) {
-      toast.error(t('products_fields_required'));
-      return;
+      toast.error(t('products_fields_required')); return;
     }
-
     if (precioPublico < precioConsultora) {
-      toast.error('El precio público debe ser mayor o igual al precio consultora.');
-      return;
+      toast.error('El precio público debe ser mayor o igual al precio consultora.'); return;
     }
 
-    let imageBytes = null;
-    let imageExt = null;
+    let imageBytes = null, imageExt = null;
     if (imageFile) {
       const arrayBuffer = await imageFile.arrayBuffer();
       imageBytes = Array.from(new Uint8Array(arrayBuffer));
@@ -340,29 +255,14 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
 
     try {
       const idProducto = await invoke('create_producto', {
-        nombreProducto: formData.nombre_producto,
-        idCategoria,
-        imageBytes,
-        imageExt,
-        miniaturaBase64,
-        stock,
-        precio: precioPublico,
-        precioConsultora,
-        precioPublico
+        nombreProducto: formData.nombre_producto, idCategoria, imageBytes, imageExt, miniaturaBase64,
+        stock, precio: precioPublico, precioConsultora, precioPublico
       });
-
       const newProduct = {
-        id_producto: idProducto,
-        nombre_producto: formData.nombre_producto,
-        id_categoria: idCategoria,
-        ruta_imagen: formData.ruta_imagen,
-        miniatura_base64: miniaturaBase64,
-        stock,
-        precio: precioPublico,
-        precio_consultora: precioConsultora,
-        precio_publico: precioPublico
+        id_producto: idProducto, nombre_producto: formData.nombre_producto, id_categoria: idCategoria,
+        ruta_imagen: formData.ruta_imagen, miniatura_base64: miniaturaBase64, stock,
+        precio: precioPublico, precio_consultora: precioConsultora, precio_publico: precioPublico
       };
-
       setProducts([...products, newProduct]);
       closeCreateModal();
       toast.success(t('toast_product_registered'));
@@ -386,9 +286,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
     });
     const initialPreview = product.miniatura_base64
       ? `data:image/jpeg;base64,${product.miniatura_base64}`
-      : product.ruta_imagen
-      ? convertFileSrc(product.ruta_imagen)
-      : null;
+      : product.ruta_imagen ? convertFileSrc(product.ruta_imagen) : null;
     setEditImagePreview(initialPreview);
     setEditImageFile(null);
     setEditMiniaturaBase64(null);
@@ -415,9 +313,7 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
     const reader = new FileReader();
     reader.onload = (e) => setEditImagePreview(e.target.result);
     reader.readAsDataURL(file);
-    makeThumbnail(file)
-      .then((base64) => setEditMiniaturaBase64(base64))
-      .catch(() => setEditMiniaturaBase64(null));
+    makeThumbnail(file).then((base64) => setEditMiniaturaBase64(base64)).catch(() => setEditMiniaturaBase64(null));
   };
 
   const handleConfirmUpdate = async () => {
@@ -432,28 +328,19 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
     const precio_publico = Number(editForm.precio_publico);
 
     if (Number.isNaN(stock) || Number.isNaN(precio_consultora) || Number.isNaN(precio_publico)) {
-      toast.error(t('products_fields_required'));
-      return;
+      toast.error(t('products_fields_required')); return;
     }
-
     if (precio_publico < precio_consultora) {
-      toast.error('El precio publico debe ser mayor o igual al precio consultora.');
-      return;
+      toast.error('El precio publico debe ser mayor o igual al precio consultora.'); return;
     }
 
     const updatedProduct = {
-      ...selectedProduct,
-      nombre_producto,
-      id_categoria,
-      stock,
-      precio: precio_publico,
-      precio_consultora,
-      precio_publico,
+      ...selectedProduct, nombre_producto, id_categoria, stock,
+      precio: precio_publico, precio_consultora, precio_publico,
       miniatura_base64: editMiniaturaBase64 ?? selectedProduct.miniatura_base64
     };
 
-    let imageBytes = null;
-    let imageExt = null;
+    let imageBytes = null, imageExt = null;
     if (editImageFile) {
       const arrayBuffer = await editImageFile.arrayBuffer();
       imageBytes = Array.from(new Uint8Array(arrayBuffer));
@@ -462,12 +349,8 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
 
     try {
       await invoke('update_producto', {
-        producto: updatedProduct,
-        imageBytes,
-        imageExt,
-        miniaturaBase64: editMiniaturaBase64,
-        precioConsultora: precio_consultora,
-        precioPublico: precio_publico
+        producto: updatedProduct, imageBytes, imageExt,
+        miniaturaBase64: editMiniaturaBase64, precioConsultora: precio_consultora, precioPublico: precio_publico
       });
       setProducts((prev) => prev.map((p) => p.id_producto === updatedProduct.id_producto ? updatedProduct : p));
       closeEditModal();
@@ -509,53 +392,34 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
   // Render
   // ══════════════════════════════════════════
   return (
-    <div className={`min-h-screen flex ${isDark ? 'products-dark' : ''}`}>
-      <Sidebar onNavigate={onNavigate} activePage={currentPage} isCollapsed={isSidebarCollapsed} toggleSidebar={toggleSidebar} profile={profile} />
-
+    <>
       <main className={`products-container ${isDark ? 'products-dark' : ''}`}>
-        <Header onNavigate={onNavigate} searchTerm={searchTerm} onSearchChange={setSearchTerm} title={t('sidebar_products')} subtitle={t('products_subtitle')} />
+        <Header searchTerm={searchTerm} onSearchChange={setSearchTerm} title={t('sidebar_products')} subtitle={t('products_subtitle')} />
 
         <div className="products-layout">
-          {/* ── Categorías (izquierda) ── */}
+          {/* ── Categorías ── */}
           <div className="section-categoria">
             <div className="crear-categoria">
               <h3>{t('products_new_category')}</h3>
               <div className="input-group">
-                <input
-                  type="text"
-                  placeholder={t('products_category_placeholder')}
-                  value={newCategory}
-                  onChange={(e) => setNewCategory(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()}
-                />
+                <input type="text" placeholder={t('products_category_placeholder')} value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleAddCategory()} />
                 <button onClick={handleAddCategory} className="btn-add">{t('products_btn_add')}</button>
               </div>
             </div>
 
-            {selectedCategory && (
-              <div className="categoria-seleccionada">
-                <p><strong>{selectedCategory}</strong></p>
-              </div>
-            )}
+            {selectedCategory && (<div className="categoria-seleccionada"><p><strong>{selectedCategory}</strong></p></div>)}
 
             <div className="lista-categorias">
               {categories.map((cat) => (
-                <div
-                  key={cat.id_categoria}
+                <div key={cat.id_categoria}
                   className={`categoria-item ${selectedCategory === cat.nombre ? 'active' : ''}`}
-                  onClick={() => setSelectedCategory(cat.nombre)}
-                >
+                  onClick={() => setSelectedCategory(cat.nombre)}>
                   <div className="categoria-info">
                     {editingCategoryId === cat.id_categoria ? (
-                      <input
-                        className="categoria-edit-input"
-                        value={editingCategoryName}
-                        onChange={(e) => setEditingCategoryName(e.target.value)}
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    ) : (
-                      <span className="categoria-name">{cat.nombre}</span>
-                    )}
+                      <input className="categoria-edit-input" value={editingCategoryName}
+                        onChange={(e) => setEditingCategoryName(e.target.value)} onClick={(e) => e.stopPropagation()} />
+                    ) : (<span className="categoria-name">{cat.nombre}</span>)}
                   </div>
                   <div className="categoria-actions" onClick={(e) => e.stopPropagation()}>
                     {editingCategoryId === cat.id_categoria ? (
@@ -575,13 +439,12 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
             </div>
           </div>
 
-          {/* ── Tabla de productos (derecha) ── */}
+          {/* ── Tabla de productos ── */}
           <div className="products-table-container">
             <div className="products-table-header">
               <h2 className="products-section-title">{t('dashboard_section_products')}</h2>
               <button type="button" className="products-btn-add-product" onClick={openCreateModal}>
-                <Plus size={18} weight="bold" />
-                <span>{t('products_btn_add_product')}</span>
+                <Plus size={18} weight="bold" /><span>{t('products_btn_add_product')}</span>
               </button>
             </div>
 
@@ -598,30 +461,18 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
               </thead>
               <tbody>
                 {pagedProducts.length === 0 ? (
-                  <tr>
-                    <td colSpan="6">
-                      <div className="products-table-empty">{t('products_table_empty')}</div>
-                    </td>
-                  </tr>
+                  <tr><td colSpan="6"><div className="products-table-empty">{t('products_table_empty')}</div></td></tr>
                 ) : (
                   pagedProducts.map((p) => {
                     const categoryName = categoryMap.get(p.id_categoria) || t('dashboard_no_category');
                     const imageSrc = p.miniatura_base64
                       ? `data:image/jpeg;base64,${p.miniatura_base64}`
-                      : p.ruta_imagen
-                      ? convertFileSrc(p.ruta_imagen)
-                      : null;
+                      : p.ruta_imagen ? convertFileSrc(p.ruta_imagen) : null;
                     return (
                       <tr key={p.id_producto ?? p.nombre_producto}>
                         <td className="table-cell-product">
-                          {imageSrc ? (
-                            <img src={imageSrc} alt="" className="product-thumbnail" />
-                          ) : (
-                            <div className="product-thumbnail-placeholder" />
-                          )}
-                          <div className="product-info">
-                            <div className="product-name">{p.nombre_producto}</div>
-                          </div>
+                          {imageSrc ? (<img src={imageSrc} alt="" className="product-thumbnail" />) : (<div className="product-thumbnail-placeholder" />)}
+                          <div className="product-info"><div className="product-name">{p.nombre_producto}</div></div>
                         </td>
                         <td className="table-cell-category" title={categoryName}>{categoryName}</td>
                         <td>{p.stock}</td>
@@ -629,12 +480,8 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
                         <td className="table-cell-price table-cell-price-public">${Number(p.precio_publico ?? p.precio ?? 0).toFixed(2)}</td>
                         <td>
                           <div className="products-table-actions">
-                            <button type="button" className="products-action-button products-action-edit" onClick={() => openEditModal(p)}>
-                              {t('dashboard_btn_edit')}
-                            </button>
-                            <button type="button" className="products-action-button products-action-delete" onClick={() => openDeleteModal(p)}>
-                              {t('dashboard_btn_delete')}
-                            </button>
+                            <button type="button" className="products-action-button products-action-edit" onClick={() => openEditModal(p)}>{t('dashboard_btn_edit')}</button>
+                            <button type="button" className="products-action-button products-action-delete" onClick={() => openDeleteModal(p)}>{t('dashboard_btn_delete')}</button>
                           </div>
                         </td>
                       </tr>
@@ -646,19 +493,12 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
 
             {/* Paginación */}
             <div className="products-pagination">
-              <span>
-                {totalItems === 0 ? `0 – 0 ${t('dashboard_of')} 0` : `${startIndex + 1} – ${endIndex} ${t('dashboard_of')} ${totalItems}`}
-              </span>
+              <span>{totalItems === 0 ? `0 – 0 ${t('dashboard_of')} 0` : `${startIndex + 1} – ${endIndex} ${t('dashboard_of')} ${totalItems}`}</span>
               <div className="pagination-controls">
                 <label className="items-per-page">
                   <span>{t('dashboard_pagination_show')}</span>
-                  <select
-                    value={itemsPerPage}
-                    onChange={(event) => { setItemsPerPage(Number(event.target.value)); setPageIndex(1); }}
-                  >
-                    {[10, 20, 30].map((size) => (
-                      <option key={size} value={size}>{size}</option>
-                    ))}
+                  <select value={itemsPerPage} onChange={(event) => { setItemsPerPage(Number(event.target.value)); setPageIndex(1); }}>
+                    {[10, 20, 30].map((size) => (<option key={size} value={size}>{size}</option>))}
                   </select>
                 </label>
                 <span className="pagination-buttons">
@@ -672,199 +512,51 @@ export default function Products({ onNavigate, currentPage, isSidebarCollapsed, 
       </main>
 
       {/* ══════════════════════════════════════════ */}
-      {/* Modal: Crear Producto                     */}
+      {/* Modals (extracted components) */}
       {/* ══════════════════════════════════════════ */}
-      {isCreateModalOpen && (
-        <div className="products-modal-overlay" onClick={closeCreateModal}>
-          <div className={`products-modal ${isDark ? 'products-modal-dark' : ''}`} onClick={(e) => e.stopPropagation()}>
-            <div className="products-modal-header">
-              <h3>{t('products_register_title')}</h3>
-            </div>
-            <form onSubmit={handleSubmitProduct} className="products-modal-body">
-              {/* Imagen */}
-              <div className="products-modal-image-field">
-                <div className="products-modal-image-preview">
-                  {formData.ruta_imagen ? (
-                    <img src={formData.ruta_imagen} alt="Producto" />
-                  ) : (
-                    <div className="products-modal-image-placeholder">
-                      <ImageIcon size={36} weight="duotone" />
-                      <span>{t('products_image_load')}</span>
-                    </div>
-                  )}
-                </div>
-                <label className="products-modal-image-upload">
-                  <input type="file" accept="image/*" onChange={handleImageUpload} />
-                  {formData.ruta_imagen ? t('products_image_change') : t('products_image_upload')}
-                </label>
-              </div>
+      <CreateProductModal
+        open={isCreateModalOpen}
+        onClose={closeCreateModal}
+        formData={formData}
+        onInputChange={handleInputChange}
+        onImageUpload={handleImageUpload}
+        onSubmit={handleSubmitProduct}
+        categories={categories}
+        t={t}
+        isDark={isDark}
+      />
 
-              {/* Nombre */}
-              <label className="products-modal-field">
-                <span>{t('products_name_label')}</span>
-                <input
-                  type="text"
-                  name="nombre_producto"
-                  value={formData.nombre_producto}
-                  onChange={handleInputChange}
-                  placeholder={t('products_name_placeholder')}
-                  required
-                />
-              </label>
+      <EditProductModal
+        open={isEditModalOpen}
+        product={selectedProduct}
+        formData={editForm}
+        onFormChange={handleEditInputChange}
+        onImageChange={handleEditImageChange}
+        onSave={handleConfirmUpdate}
+        onCancel={closeEditModal}
+        categories={categories}
+        t={t}
+        isDark={isDark}
+        editImagePreview={editImagePreview}
+      />
 
-              {/* Categoría */}
-              <label className="products-modal-field">
-                <span>{t('products_category_label')}</span>
-                <select name="id_categoria" value={formData.id_categoria} onChange={handleInputChange} required>
-                  <option value="">{t('products_select_category')}</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id_categoria} value={cat.id_categoria}>{cat.nombre}</option>
-                  ))}
-                </select>
-              </label>
+      <DeleteProductModal
+        open={isDeleteModalOpen}
+        product={selectedProduct}
+        onConfirm={handleConfirmDelete}
+        onCancel={closeDeleteModal}
+        t={t}
+        isDark={isDark}
+      />
 
-              {/* Stock & Precios */}
-              <div className="products-modal-row">
-                <label className="products-modal-field">
-                  <span>{t('products_stock_label')}</span>
-                  <input type="number" name="stock" value={formData.stock} onChange={handleInputChange} placeholder={t('products_stock_placeholder')} min="0" required />
-                </label>
-                <label className="products-modal-field">
-                  <span>{t('products_price_consultora_label')}</span>
-                  <input type="number" name="precio_consultora" value={formData.precio_consultora} onChange={handleInputChange} placeholder={t('products_price_consultora_placeholder')} step="0.01" min="0" required />
-                </label>
-              </div>
-
-              <div className="products-modal-row">
-                <label className="products-modal-field">
-                  <span>{t('products_price_publico_label')}</span>
-                  <input type="number" name="precio_publico" value={formData.precio_publico} onChange={handleInputChange} placeholder={t('products_price_publico_placeholder')} step="0.01" min="0" required />
-                </label>
-              </div>
-
-              <div className="products-modal-actions">
-                <button type="button" className="products-modal-button products-modal-secondary" onClick={closeCreateModal}>
-                  {t('dashboard_edit_cancel')}
-                </button>
-                <button type="submit" className="products-modal-button products-modal-primary">
-                  {t('products_btn_save')}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ══════════════════════════════════════════ */}
-      {/* Modal: Editar Producto                    */}
-      {/* ══════════════════════════════════════════ */}
-      {isEditModalOpen && selectedProduct && (
-        <div className="products-modal-overlay" role="dialog" aria-modal="true">
-          <div className={`products-modal ${isDark ? 'products-modal-dark' : ''}`}>
-            <div className="products-modal-header">
-              <h3>{t('dashboard_edit_title')}</h3>
-              <p>{selectedProduct.nombre_producto}</p>
-            </div>
-            <div className="products-modal-body">
-              <div className="products-modal-image-field">
-                <div className="products-modal-image-preview">
-                  {editImagePreview ? (
-                    <img src={editImagePreview} alt="Vista previa" />
-                  ) : (
-                    <div className="products-modal-image-placeholder">{t('dashboard_edit_no_image')}</div>
-                  )}
-                </div>
-                <label className="products-modal-image-upload">
-                  <input type="file" accept="image/*" onChange={handleEditImageChange} />
-                  {editImagePreview ? t('dashboard_edit_change_image') : t('dashboard_edit_add_image')}
-                </label>
-              </div>
-              <label className="products-modal-field">
-                <span>{t('dashboard_edit_name')}</span>
-                <input name="nombre_producto" value={editForm.nombre_producto} onChange={handleEditInputChange} type="text" />
-              </label>
-              <label className="products-modal-field">
-                <span>{t('dashboard_edit_category')}</span>
-                <select name="id_categoria" value={editForm.id_categoria} onChange={handleEditInputChange}>
-                  <option value="">{t('dashboard_edit_no_category')}</option>
-                  {categories.map((cat) => (
-                    <option key={cat.id_categoria} value={cat.id_categoria}>{cat.nombre}</option>
-                  ))}
-                </select>
-              </label>
-              <label className="products-modal-field">
-                <span>{t('dashboard_edit_stock')}</span>
-                <input name="stock" value={editForm.stock} onChange={handleEditInputChange} type="number" min="0" />
-              </label>
-              <label className="products-modal-field">
-                <span>{t('products_price_consultora_label')}</span>
-                <input name="precio_consultora" value={editForm.precio_consultora} onChange={handleEditInputChange} type="number" min="0" step="0.01" />
-              </label>
-              <label className="products-modal-field">
-                <span>{t('products_price_publico_label')}</span>
-                <input name="precio_publico" value={editForm.precio_publico} onChange={handleEditInputChange} type="number" min="0" step="0.01" />
-              </label>
-            </div>
-            <div className="products-modal-actions">
-              <button type="button" className="products-modal-button products-modal-secondary" onClick={closeEditModal}>{t('dashboard_edit_cancel')}</button>
-              <button type="button" className="products-modal-button products-modal-primary" onClick={handleConfirmUpdate}>{t('dashboard_edit_save')}</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ══════════════════════════════════════════ */}
-      {/* Modal: Eliminar Producto                  */}
-      {/* ══════════════════════════════════════════ */}
-      {isDeleteModalOpen && selectedProduct && (
-        <div className="products-modal-overlay" role="dialog" aria-modal="true">
-          <div className={`products-modal products-modal-compact ${isDark ? 'products-modal-dark' : ''}`}>
-            <div className="products-modal-header">
-              <h3>{t('dashboard_delete_title')}</h3>
-              <p>{t('dashboard_delete_warning')}</p>
-            </div>
-            <div className="products-modal-body">
-              <p className="products-modal-text">
-                {t('dashboard_delete_confirm')} <strong>{selectedProduct.nombre_producto}</strong>?
-              </p>
-            </div>
-            <div className="products-modal-actions">
-              <button type="button" className="products-modal-button products-modal-secondary" onClick={closeDeleteModal}>{t('dashboard_delete_cancel')}</button>
-              <button type="button" className="products-modal-button products-modal-danger" onClick={handleConfirmDelete}>{t('dashboard_delete_btn')}</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ══════════════════════════════════════════ */}
-      {/* Modal: Eliminar Categoría                 */}
-      {/* ══════════════════════════════════════════ */}
-      {showDeleteCatModal && (
-        <div className="confirm-modal-overlay" onClick={cancelDeleteCategory}>
-          <div className={`confirm-modal-content ${isDark ? 'confirm-modal-dark' : 'confirm-modal-light'}`} onClick={(e) => e.stopPropagation()}>
-            <div className={`confirm-modal-icon-wrapper ${isDark ? 'confirm-modal-icon-dark' : 'confirm-modal-icon-light'}`}>
-              <Warning size={32} weight="duotone" />
-            </div>
-            <h3 className={`confirm-modal-title ${isDark ? 'text-gray-100' : 'text-gray-900'}`}>{t('delete_cat_modal_title')}</h3>
-            <p className={`confirm-modal-body ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('delete_cat_modal_body')}</p>
-            <div className={`confirm-modal-file ${isDark ? 'bg-gray-700/50 text-gray-300' : 'bg-gray-100 text-gray-700'}`}>
-              <span className="confirm-modal-file-icon"><Tag size={16} weight="duotone" /></span>
-              <span className="confirm-modal-file-name">{pendingDeleteCat?.nombre}</span>
-            </div>
-            <div className={`confirm-modal-note ${isDark ? 'bg-amber-900/30 text-amber-300 border-amber-700' : 'bg-amber-50 text-amber-800 border-amber-200'}`}>
-              <Warning size={16} weight="duotone" /> {t('delete_cat_modal_warning')}
-            </div>
-            <div className="confirm-modal-actions">
-              <button type="button" onClick={cancelDeleteCategory} className={`confirm-modal-btn confirm-modal-btn-cancel ${isDark ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
-                {t('confirm_modal_cancel')}
-              </button>
-              <button type="button" onClick={confirmDeleteCategory} className="confirm-modal-btn confirm-modal-btn-confirm">
-                {t('delete_cat_modal_confirm')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+      <DeleteCategoryModal
+        open={showDeleteCatModal}
+        category={pendingDeleteCat}
+        onConfirm={confirmDeleteCategory}
+        onCancel={cancelDeleteCategory}
+        t={t}
+        isDark={isDark}
+      />
+    </>
   );
 }

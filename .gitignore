@@ -28,3 +28,6 @@ dist-ssr
 
 openspec/
 openspec/**
+
+# Agent files
+AGENTS.md
