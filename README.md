@@ -263,7 +263,7 @@ esquemaDB.sql              # Database schema
 **Developer**: Samuel Sánchez Guzmán  
 **Type**: Desktop Application  
 **Status**: Production  
-**Version**: 1.4.0  
+**Version**: 1.5.0  
 **Last Updated**: April 2026  
 
 ---
