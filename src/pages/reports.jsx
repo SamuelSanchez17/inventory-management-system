@@ -1,10 +1,14 @@
 import { useContext, useEffect, useMemo, useState, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import { invoke, isTauri } from '@tauri-apps/api/core';
-import { Archive, CaretLeft, CaretRight, ChartBar, FloppyDisk } from 'phosphor-react';
+import { CaretLeft, CaretRight } from 'phosphor-react';
 import { save } from '@tauri-apps/plugin-dialog';
 import { ThemeContext } from '../context/ThemeContext';
 import { LanguageContext } from '../context/LanguageContext';
+import ReportsExportSection from '../components/reports/ReportsExportSection';
+import ReportsEditSaleModal from '../components/reports/ReportsEditSaleModal';
+import ReportsDeleteSaleModal from '../components/reports/ReportsDeleteSaleModal';
+import ReportsItemsModal from '../components/reports/ReportsItemsModal';
 import SaleRow from '../components/reports/SaleRow';
 import { getConsultoraPrice, getPublicPrice } from '../utils/pricing';
 import '../styles/reports.css';
@@ -731,303 +735,61 @@ export default function Reports() {
                     </div>
                 </section>
 
-                {/* Sección de Exportación y Respaldo */}
-                <section className="reports-section">
-                    <div className="reports-card reports-card-full reports-export-card">
-                        <div className="reports-export-header">
-                            <div className="reports-export-icon">
-                                <Archive size={22} weight="duotone" />
-                            </div>
-                            <div>
-                                <h2>{t('reports_export_title')}</h2>
-                                <p>{t('reports_export_desc')}</p>
-                            </div>
-                        </div>
+                <ReportsExportSection
+                    t={t}
+                    isExporting={isExporting}
+                    isBackingUp={isBackingUp}
+                    onExportXLSX={handleExportXLSX}
+                    onBackupDB={handleBackupDB}
+                />
 
-                        <div className="reports-export-actions">
-                            <button
-                                type="button"
-                                className="reports-export-btn reports-export-csv"
-                                onClick={handleExportXLSX}
-                                disabled={isExporting}
-                            >
-                                <span className="export-btn-icon">
-                                    <ChartBar size={26} weight="duotone" />
-                                </span>
-                                <div className="export-btn-text">
-                                    <strong>{isExporting ? '...' : t('reports_export_csv_btn')}</strong>
-                                    <span>{t('reports_export_csv_desc')}</span>
-                                </div>
-                            </button>
+                <ReportsEditSaleModal
+                    open={isEditModalOpen}
+                    t={t}
+                    onClose={handleCloseEditSale}
+                    editForm={editForm}
+                    setEditForm={setEditForm}
+                    formatMoney={formatMoney}
+                    modalIsAbono={modalIsAbono}
+                    modalTotalAbonado={modalTotalAbonado}
+                    modalSaldoPendiente={modalSaldoPendiente}
+                    modalEstadoClass={modalEstadoClass}
+                    modalEstadoPago={modalEstadoPago}
+                    nuevoAbonoEdit={nuevoAbonoEdit}
+                    setNuevoAbonoEdit={setNuevoAbonoEdit}
+                    onRegistrarAbono={handleRegistrarAbonoDesdeModal}
+                    isSavingEditAbono={isSavingEditAbono}
+                    isLoadingEditAbonos={isLoadingEditAbonos}
+                    editAbonos={editAbonos}
+                    formatDate={formatDate}
+                    onSave={handleSaveSale}
+                    isUpdatingSale={isUpdatingSale}
+                />
 
-                            <button
-                                type="button"
-                                className="reports-export-btn reports-export-backup"
-                                onClick={handleBackupDB}
-                                disabled={isBackingUp}
-                            >
-                                <span className="export-btn-icon">
-                                    <FloppyDisk size={26} weight="duotone" />
-                                </span>
-                                <div className="export-btn-text">
-                                    <strong>{isBackingUp ? '...' : t('reports_backup_btn')}</strong>
-                                    <span>{t('reports_backup_desc')}</span>
-                                </div>
-                            </button>
-                        </div>
-                    </div>
-                </section>
+                <ReportsDeleteSaleModal
+                    open={isDeleteModalOpen}
+                    t={t}
+                    onClose={handleCloseDeleteSale}
+                    onConfirmDelete={handleConfirmDeleteSale}
+                    isDeletingSale={isDeletingSale}
+                />
 
-                {isEditModalOpen && (
-                    <div className="reports-modal-overlay" onClick={handleCloseEditSale}>
-                        <div className="reports-modal" onClick={(event) => event.stopPropagation()}>
-                            <div className="reports-modal-header">
-                                <h3>{t('reports_edit_title')}</h3>
-                                <p>{t('reports_edit_desc')}</p>
-                            </div>
-                            <div className="reports-modal-body">
-                                <label className="reports-modal-field">
-                                    {t('reports_edit_date')}
-                                    <input
-                                        type="datetime-local"
-                                        value={editForm.fecha}
-                                        onChange={(event) => setEditForm((prev) => ({ ...prev, fecha: event.target.value }))}
-                                    />
-                                </label>
-                                <label className="reports-modal-field">
-                                    {t('reports_edit_client')}
-                                    <input
-                                        type="text"
-                                        value={editForm.nombre_clienta}
-                                        onChange={(event) => setEditForm((prev) => ({ ...prev, nombre_clienta: event.target.value }))}
-                                    />
-                                </label>
-                                <label className="reports-modal-field">
-                                    {t('reports_edit_lastname')}
-                                    <input
-                                        type="text"
-                                        value={editForm.apellido_clienta}
-                                        onChange={(event) => setEditForm((prev) => ({ ...prev, apellido_clienta: event.target.value }))}
-                                    />
-                                </label>
-                                <label className="reports-modal-field">
-                                    {t('reports_edit_payment')}
-                                    <select
-                                        value={editForm.tipo_pago}
-                                        onChange={(event) => setEditForm((prev) => ({ ...prev, tipo_pago: event.target.value }))}
-                                    >
-                                        <option value="Contado">{t('reports_edit_payment_contado')}</option>
-                                        <option value="Abono">{t('reports_edit_payment_abono')}</option>
-                                    </select>
-                                </label>
-                                <div className="reports-modal-field">
-                                    {t('reports_edit_total')}
-                                    <div className="reports-modal-readonly">{formatMoney(editForm.total_venta)}</div>
-                                </div>
-
-                                {modalIsAbono && (
-                                    <div className="reports-modal-abonos">
-                                        <div className="reports-modal-abonos-header">
-                                            <h4>{t('reports_abono_modal_title')}</h4>
-                                            <p>{t('reports_abono_modal_desc')}</p>
-                                        </div>
-
-                                        <div className="reports-detail-summary reports-cobranza-summary reports-modal-cobranza-summary">
-                                            <div className="reports-summary-pill">
-                                                <span className="reports-summary-label">{t('reports_abono_total_paid')}</span>
-                                                <span className="reports-summary-value">{formatMoney(modalTotalAbonado)}</span>
-                                            </div>
-                                            <div className="reports-summary-pill">
-                                                <span className="reports-summary-label">{t('reports_abono_pending')}</span>
-                                                <span className="reports-summary-value">{formatMoney(modalSaldoPendiente)}</span>
-                                            </div>
-                                            <div className="reports-summary-pill">
-                                                <span className="reports-summary-label">{t('reports_abono_status')}</span>
-                                                <span className="reports-summary-value">
-                                                    <span className={`reports-status-badge ${modalEstadoClass}`}>{modalEstadoPago}</span>
-                                                </span>
-                                            </div>
-                                        </div>
-
-                                        <div className="reports-modal-abonos-add">
-                                            <label className="reports-modal-field">
-                                                {t('reports_abono_add_label')}
-                                                <input
-                                                    type="number"
-                                                    min="0.01"
-                                                    step="0.01"
-                                                    placeholder={t('reports_abono_add_placeholder')}
-                                                    value={nuevoAbonoEdit}
-                                                    onChange={(event) => setNuevoAbonoEdit(event.target.value)}
-                                                />
-                                            </label>
-                                            <button
-                                                type="button"
-                                                className="reports-abono-add-btn"
-                                                onClick={handleRegistrarAbonoDesdeModal}
-                                                disabled={isSavingEditAbono || modalEstadoPago === 'Liquidada'}
-                                            >
-                                                {isSavingEditAbono ? t('reports_abono_add_saving') : t('reports_abono_add_btn')}
-                                            </button>
-                                        </div>
-
-                                        <div className="reports-modal-abonos-history">
-                                            <div className="reports-abonos-history-head">{t('reports_abono_history_title')}</div>
-                                            {isLoadingEditAbonos ? (
-                                                <div className="reports-abonos-empty">{t('reports_abono_loading')}</div>
-                                            ) : editAbonos.length === 0 ? (
-                                                <div className="reports-abonos-empty">{t('reports_abono_history_empty')}</div>
-                                            ) : (
-                                                <ul className="reports-abonos-list">
-                                                    {editAbonos.map((abono) => (
-                                                        <li key={abono.id_abono} className="reports-abono-row">
-                                                            <span className="reports-abono-date">{formatDate(abono.fecha_abono)}</span>
-                                                            <span className="reports-abono-amount">{formatMoney(abono.monto_abono)}</span>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            )}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="reports-modal-actions">
-                                <button type="button" className="reports-modal-button reports-modal-secondary" onClick={handleCloseEditSale}>
-                                    {t('reports_edit_cancel')}
-                                </button>
-                                <button
-                                    type="button"
-                                    className="reports-modal-button reports-modal-primary"
-                                    onClick={handleSaveSale}
-                                    disabled={isUpdatingSale}
-                                >
-                                    {isUpdatingSale ? '...' : t('reports_edit_save')}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {isDeleteModalOpen && (
-                    <div className="reports-modal-overlay" onClick={handleCloseDeleteSale}>
-                        <div className="reports-modal reports-modal-compact" onClick={(event) => event.stopPropagation()}>
-                            <div className="reports-modal-header">
-                                <h3>{t('reports_delete_title')}</h3>
-                                <p>{t('reports_delete_desc')}</p>
-                            </div>
-                            <div className="reports-modal-body">
-                                <p className="reports-modal-text">{t('reports_delete_warning')}</p>
-                            </div>
-                            <div className="reports-modal-actions">
-                                <button type="button" className="reports-modal-button reports-modal-secondary" onClick={handleCloseDeleteSale}>
-                                    {t('reports_delete_cancel')}
-                                </button>
-                                <button
-                                    type="button"
-                                    className="reports-modal-button reports-modal-danger"
-                                    onClick={handleConfirmDeleteSale}
-                                    disabled={isDeletingSale}
-                                >
-                                    {isDeletingSale ? '...' : t('reports_delete_confirm')}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {isItemsModalOpen && (
-                    <div className="reports-modal-overlay" onClick={handleCloseItemsEdit}>
-                        <div className="reports-modal reports-modal-wide" onClick={(event) => event.stopPropagation()}>
-                            <div className="reports-modal-header">
-                                <h3>{t('reports_items_title')}</h3>
-                                <p>{t('reports_items_desc')}</p>
-                            </div>
-                            <div className="reports-items-list">
-                                {editItems.length === 0 ? (
-                                    <p className="reports-modal-text">{t('reports_items_empty')}</p>
-                                ) : (
-                                    editItems.map((item, index) => (
-                                        <div
-                                            key={item.id_producto_vendido ?? item.temp_id ?? index}
-                                            className="reports-items-row"
-                                        >
-                                            <select
-                                                value={item.id_producto ?? ''}
-                                                onChange={(event) => handleItemProductChange(index, event.target.value)}
-                                            >
-                                                {!productsById.has(item.id_producto) && item.id_producto && (
-                                                    <option value={item.id_producto}>
-                                                        {item.nombre_producto_snapshot || `ID ${item.id_producto}`}
-                                                    </option>
-                                                )}
-                                                {products
-                                                    .filter((p) => p.id_producto === item.id_producto || !usedProductIds.has(p.id_producto))
-                                                    .map((product) => (
-                                                        <option key={product.id_producto} value={product.id_producto}>
-                                                            {product.nombre_producto}
-                                                        </option>
-                                                    ))}
-                                            </select>
-                                            <select
-                                                value={item.cantidad}
-                                                onChange={(event) => handleItemQtyChange(index, event.target.value)}
-                                            >
-                                                {(() => {
-                                                    const prod = productsById.get(item.id_producto);
-                                                    const currentStock = prod?.stock ?? 0;
-                                                    const sameProduct = item.id_producto === item.original_id_producto;
-                                                    const alreadySold = (item.id_producto_vendido && sameProduct) ? (item.original_cantidad ?? 0) : 0;
-                                                    const maxQty = Math.max(1, currentStock + alreadySold);
-                                                    return Array.from({ length: maxQty }, (_, i) => i + 1).map((n) => (
-                                                        <option key={n} value={n}>{n}</option>
-                                                    ));
-                                                })()}
-                                            </select>
-                                            <div className="reports-items-price">{formatMoney(item.precio_unitario)}</div>
-                                            <div className="reports-items-subtotal">{formatMoney(item.subtotal)}</div>
-                                            <button
-                                                type="button"
-                                                className="reports-items-remove"
-                                                onClick={() => handleRemoveItem(item)}
-                                            >
-                                                {t('reports_items_remove')}
-                                            </button>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                            <div className="reports-items-footer">
-                                <button
-                                    type="button"
-                                    className="reports-items-add"
-                                    onClick={handleAddItem}
-                                    disabled={products.filter((p) => !usedProductIds.has(p.id_producto)).length === 0}
-                                >
-                                    + {t('reports_items_add')}
-                                </button>
-                                <div className="reports-items-total">
-                                    <span>{t('reports_items_total')}</span>
-                                    <strong>
-                                        {formatMoney(editItems.reduce((sum, item) => sum + Number(item.subtotal || 0), 0))}
-                                    </strong>
-                                </div>
-                            </div>
-                            <div className="reports-modal-actions">
-                                <button type="button" className="reports-modal-button reports-modal-secondary" onClick={handleCloseItemsEdit}>
-                                    {t('reports_items_cancel')}
-                                </button>
-                                <button
-                                    type="button"
-                                    className="reports-modal-button reports-modal-primary"
-                                    onClick={handleSaveItems}
-                                    disabled={isSavingItems}
-                                >
-                                    {isSavingItems ? '...' : t('reports_items_save')}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                <ReportsItemsModal
+                    open={isItemsModalOpen}
+                    t={t}
+                    onClose={handleCloseItemsEdit}
+                    editItems={editItems}
+                    productsById={productsById}
+                    products={products}
+                    usedProductIds={usedProductIds}
+                    onItemProductChange={handleItemProductChange}
+                    onItemQtyChange={handleItemQtyChange}
+                    formatMoney={formatMoney}
+                    onRemoveItem={handleRemoveItem}
+                    onAddItem={handleAddItem}
+                    onSaveItems={handleSaveItems}
+                    isSavingItems={isSavingItems}
+                />
         </main>
     );
 }
