@@ -263,7 +263,7 @@ esquemaDB.sql              # Esquema de base de datos
 **Desarrollador**: Samuel Sánchez Guzmán  
 **Tipo**: Aplicación de Escritorio  
 **Estado**: Producción  
-**Versión**: 1.5.0  
+**Versión**: 1.5.1  
 **Última Actualización**: Abril 2026  
 
 ---

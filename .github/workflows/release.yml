@@ -38,8 +38,8 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_PRIVATE_KEY_PASSWORD }}
         with:
-          tagName: app-v__VERSION__ #crea el tag automáticamente
-          releaseName: "App v__VERSION__"
+          tagName: ${{ github.ref_name }} #crea el tag automáticamente
+          releaseName: "App ${{ github.ref_name }}"
           includeUpdaterJson: true
           releaseBody: "- Nuevo diseño de navegación: barra superior (header) con acceso rápido al perfil\n- Perfil de usuario ahora se abre en ventana modal directamente desde el header\n- Interfaz más limpia y consistente en todas las pantallas\n- Navegación entre secciones más fluida y respuesta inmediata\n- Múltiples mejoras visuales y corrección de errores reportados\n- Optimizaciones de rendimiento para una experiencia más fluida\n- Implementación de componente de reloj dinámico en el encabezado global "
           releaseDraft: false
