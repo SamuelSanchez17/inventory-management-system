@@ -25,9 +25,9 @@ Originally developed as a solution for an enterprise client, this project repres
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                  PRESENTATION LAYER (Frontend)           │
-│     React 19 + Vite | Tailwind CSS | Multi-language    │
-│            Component-based | Context API                 │
+│                  PRESENTATION LAYER (Frontend)          │
+│     React 19 + Vite | Tailwind CSS | Multi-language     │
+│            Component-based | Context API                │
 └─────────────────────────┬───────────────────────────────┘
                           │
          ┌────────────────┼────────────────┐
@@ -44,11 +44,11 @@ Originally developed as a solution for an enterprise client, this project repres
             └─────────────┬──────────────┘
                           │
 ┌─────────────────────────▼──────────────────────────────────┐
-│                    LOGIC LAYER (Backend)                    │
+│                    LOGIC LAYER (Backend)                   │
 │              Rust + Tauri 2.x + SQLite                     │
 ├────────────────────────────────────────────────────────────┤
-│  Commands (IPC) → Services (Business Logic) → Repositories  │
-│  Validations | Business Rules | Report Generation | Export   │
+│  Commands (IPC) → Services (Business Logic) → Repositories │
+│  Validations | Business Rules | Report Generation | Export │
 └──────────────────────────┬─────────────────────────────────┘
                            │
               ┌────────────▼────────────┐
